@@ -6,6 +6,7 @@
 ## System diagram
 
 TODO: insert architecture diagram (PNG / SVG) showing:
+
 - Mobile clients (iOS + Android)
 - Admin web client
 - Public web client
@@ -22,19 +23,23 @@ TODO: insert architecture diagram (PNG / SVG) showing:
 ## Components
 
 ### Client layer
+
 - **Mobile** (Flutter, iOS + Android) — user-facing app
 - **Admin** (Next.js) — internal operations
 - **Web** (Next.js) — public marketing + SEO
 
 ### Application layer
+
 - **NestJS API** (Node.js + TypeScript) — single source of truth for business logic, exposed over HTTPS REST + Socket.IO
 
 ### Data layer
+
 - **PostgreSQL 16** (Azure Database for PostgreSQL Flexible Server) with pgvector extension
 - **Redis** (Azure Cache for Redis) — sessions, rate limits, idempotency, BullMQ job queue
 - **Azure Blob Storage** — user uploads, completion proof photos, generated PDFs
 
 ### Integration layer
+
 - **Stripe** — payments, Connect Express (tasker payouts), Identity (KYC)
 - **Google Gemini** — task extraction, chat policing, support agent, budget nudge
 - **Anthropic Claude** — dispute mediator, admin co-pilot
@@ -45,6 +50,7 @@ TODO: insert architecture diagram (PNG / SVG) showing:
 - **Azure Content Safety** — image moderation
 
 ### Observability layer
+
 - **Sentry** — error tracking
 - **Azure Application Insights** — application logs, performance, request tracing
 
@@ -81,15 +87,15 @@ See `data-flow-diagram.md` for payment + KYC detail.
 
 See `docs/audit/edge-security.md` for the full WAF policy, custom rules, and exception process. Summary:
 
-| Control | What it does |
-| --- | --- |
-| **Azure WAF managed rules** (Microsoft Default Rule Set 2.1) | Blocks OWASP Top 10 attacks at the edge before they hit NestJS |
-| **Bot Manager rule set** | Catches scrapers, vulnerability scanners |
-| **Custom rule: admin geo-restriction** | `/admin/*` only accessible from AU IPs |
-| **Custom rule: auth rate limit** | 30 req/min per IP on `/auth/*` (brute-force protection) |
-| **Custom rule: payment rate limit** | 60 req/min per IP on `/payment/*` |
-| **VNet + private endpoints** | Postgres / Redis / Blob have no public IPs, only reachable via App Service in the VNet |
-| **App Service inbound restriction** | Accepts traffic only from Front Door service tag (`AzureFrontDoor.Backend`) |
+| Control                                                      | What it does                                                                           |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| **Azure WAF managed rules** (Microsoft Default Rule Set 2.1) | Blocks OWASP Top 10 attacks at the edge before they hit NestJS                         |
+| **Bot Manager rule set**                                     | Catches scrapers, vulnerability scanners                                               |
+| **Custom rule: admin geo-restriction**                       | `/admin/*` only accessible from AU IPs                                                 |
+| **Custom rule: auth rate limit**                             | 30 req/min per IP on `/auth/*` (brute-force protection)                                |
+| **Custom rule: payment rate limit**                          | 60 req/min per IP on `/payment/*`                                                      |
+| **VNet + private endpoints**                                 | Postgres / Redis / Blob have no public IPs, only reachable via App Service in the VNet |
+| **App Service inbound restriction**                          | Accepts traffic only from Front Door service tag (`AzureFrontDoor.Backend`)            |
 
 ## See also
 

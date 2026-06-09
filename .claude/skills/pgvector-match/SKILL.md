@@ -12,16 +12,19 @@ Any of: matching, ranked feed, semantic search, embeddings, vector, pgvector, co
 ## Architecture facts (locked)
 
 ### Embedding model
+
 - **OpenAI `text-embedding-3-small`** (1536 dimensions)
 - Chosen because: small (fast), cheap ($0.02/1M tokens), good quality, ubiquitous tooling
 - Do NOT swap to a different model without re-embedding everything (vector spaces are not compatible across models)
 
 ### What we embed
+
 - **Task:** `title + "\n\n" + description + "\nCategory: " + category.name + "\nSkills: " + skillsList.join(", ")` → 1 embedding per task
 - **Tasker profile:** `bio + "\nSkills: " + skills.join(", ") + "\nCompleted: " + recentJobTitles.join(", ")` → 1 embedding per tasker
 - **Recomputed on edit** of any included field (task description change → re-embed task)
 
 ### Storage
+
 - `Task.embedding` column with `Unsupported("vector(1536)")` in Prisma schema
 - `TaskerProfile.embedding` same
 - **HNSW index** on each (not IVFFlat — HNSW is faster for our scale, no re-train needed as data grows):
@@ -74,6 +77,7 @@ finalScore =
 Weights are **config-driven** — admin can adjust in `/admin/config/ranking-weights`. Hand-tuned at MVP; LightGBM ranker is POST.
 
 ### Top-K return
+
 - Mobile home feed: return top 20 after re-rank
 - Auto-invite trigger: notify top 10 matched taskers on every task publish
 - Search bar: full pgvector index, no rerank, return top 50
@@ -102,17 +106,20 @@ Weights are **config-driven** — admin can adjust in `/admin/config/ranking-wei
 ## Common tasks
 
 ### Adding a new feature to the embedding input
+
 1. Update `formatTaskForEmbedding()` in `embedding.service.ts`
 2. Bump the embedding version (e.g., `embeddingVersion: 2`)
 3. Run a backfill job to re-embed all existing tasks at the new version
 4. Old + new versions coexist during migration; query by latest version
 
 ### Tuning ranking weights
+
 1. Edit `ranking-weights.config.ts` defaults
 2. Override in admin UI for production tuning
 3. Log every ranked feed query with the weights used (for A/B analysis later)
 
 ### Adding a new ranking signal
+
 1. Compute the signal in `match.service.ts`
 2. Add weight to the config + admin UI
 3. Document the signal in `docs/adrs/<next>-ranking-signal.md`

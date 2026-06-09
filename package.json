@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "description": "JOBBees — Australian peer-to-peer task marketplace monorepo",
-  "packageManager": "pnpm@9.12.0",
+  "packageManager": "pnpm@9.15.4",
   "engines": {
     "node": ">=22.11.0",
-    "pnpm": ">=9.12.0"
+    "pnpm": ">=9.15.0"
   },
   "scripts": {
     "dev": "turbo run dev",
@@ -29,9 +29,15 @@
   "devDependencies": {
     "@jobbees/eslint-config": "workspace:*",
     "@jobbees/tsconfig": "workspace:*",
-    "lefthook": "^1.7.0",
-    "prettier": "^3.3.3",
-    "turbo": "^2.1.0",
-    "typescript": "^5.6.0"
+    "lefthook": "^2.1.9",
+    "prettier": "^3.8.3",
+    "turbo": "^2.9.16",
+    "typescript": "^6.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "eslint": "^9.18.0"
+    },
+    "comment": "Pinned to ESLint v9 because eslint-plugin-react (used by Next.js's eslint-config-next) calls the legacy context.getFilename() API, which ESLint v10 removed. Revisit when the React plugin and the wider ecosystem catch up. Until then, do NOT bump eslint past ^9 — it will break apps/admin and apps/web lint."
   }
 }

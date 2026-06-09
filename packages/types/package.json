@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.6.0",
-    "@jobbees/tsconfig": "workspace:*"
+    "@jobbees/tsconfig": "workspace:*",
+    "typescript": "^6.0.3"
   }
 }

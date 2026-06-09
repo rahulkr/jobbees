@@ -43,6 +43,7 @@ apps/api/src/
 ```
 
 One module per domain. Module file structure:
+
 ```
 modules/<name>/
 ├── <name>.module.ts

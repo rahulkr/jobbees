@@ -13,14 +13,15 @@ Any of: multimodal, vision, image extraction, camera task, photo-to-task, vision
 
 ### Model selection (tier-driven, not name-locked)
 
-| Use | Primary model | Fallback model | Why |
-| --- | --- | --- | --- |
-| Image extraction | **Flash tier** (currently Gemini 2.5 Flash; whichever fast multimodal is current) | **Pro tier** (Gemini 2.5 Pro / Claude Sonnet vision) | 90%+ accuracy on common AU marketplace tasks at <$0.001/image |
-| Edge cases (very ambiguous scene, fallback trigger) | **Pro tier** | None — escalate to text-only extraction | Cost-justified only when Flash returns low confidence |
+| Use                                                 | Primary model                                                                     | Fallback model                                       | Why                                                           |
+| --------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
+| Image extraction                                    | **Flash tier** (currently Gemini 2.5 Flash; whichever fast multimodal is current) | **Pro tier** (Gemini 2.5 Pro / Claude Sonnet vision) | 90%+ accuracy on common AU marketplace tasks at <$0.001/image |
+| Edge cases (very ambiguous scene, fallback trigger) | **Pro tier**                                                                      | None — escalate to text-only extraction              | Cost-justified only when Flash returns low confidence         |
 
 **Never use Opus / GPT-4 Turbo for this task.** Cost is 30–100× higher; accuracy gain on this domain is marginal. Reserved for nuanced dispute reasoning, not visual classification.
 
 Model names are config-driven, not hardcoded:
+
 ```
 VISION_PRIMARY_MODEL=gemini-2.5-flash
 VISION_FALLBACK_MODEL=gemini-2.5-pro
@@ -59,7 +60,7 @@ Return to mobile for poster confirmation
 2. **EXIF**:
    - For **task-creation photos** (the poster's "here's what I want done"): **strip EXIF before sending to vision API**. Privacy-protective — don't leak GPS/timestamp/device to the LLM provider.
    - For **completion-proof photos** (the tasker's "here's what I did"): keep EXIF for the tampering check (separate concern, see Trust & Safety §2.12). Vision extraction doesn't run on completion proof — that's the EXIF check, not vision.
-3. **Hash**: SHA-256 of the *preprocessed* bytes. Used as the cache key. Re-uploading the same image returns cached extraction with no new API call.
+3. **Hash**: SHA-256 of the _preprocessed_ bytes. Used as the cache key. Re-uploading the same image returns cached extraction with no new API call.
 4. **Max 4 images per task**: hard limit. More images don't improve extraction quality and balloon cost. Mobile UI enforces.
 
 ### Output schema (Zod-validated)
@@ -75,15 +76,15 @@ const VisionExtractionSchema = z.object({
     'errands',
     'tech-help',
     'pet-care',
-    'unknown',  // explicit "I can't tell" signal — triggers fallback or admin flag
+    'unknown', // explicit "I can't tell" signal — triggers fallback or admin flag
   ]),
   scope: z.string().min(10).max(500),
   materials: z.array(z.string()).max(20),
   durationHours: z.number().min(0.5).max(24),
   riskClass: z.enum(['low', 'medium', 'high']),
-  riskFactors: z.array(z.string()).max(5).optional(),  // e.g. ['working at height', 'electrical', 'asbestos suspected']
+  riskFactors: z.array(z.string()).max(5).optional(), // e.g. ['working at height', 'electrical', 'asbestos suspected']
   confidence: z.number().min(0).max(1),
-  notes: z.string().max(300).optional(),  // anything ambiguous worth flagging to poster
+  notes: z.string().max(300).optional(), // anything ambiguous worth flagging to poster
 });
 ```
 
@@ -120,17 +121,17 @@ User prompt: just the images, attached via the provider's vision API.
 
 When the poster uploads photos AND types a description, run both extractions independently, then merge:
 
-| Field | Source of truth | Rationale |
-| --- | --- | --- |
-| `title` | Text extraction | Posters phrase their own titles better than vision can infer |
-| `description` | Text extraction | Same |
-| `category` | Vision (override text only if vision confidence ≥ 0.85) | Vision is better at recognising what's actually in the photo |
-| `scope` | Vision augments text — concatenate as "Poster says: [text]. Photos suggest: [vision]" | Both useful for the tasker |
-| `materials` | Union of both, deduplicated | Vision catches things posters forget to mention |
-| `durationHours` | Average of both, weighted by confidence | Posters underestimate; vision is more realistic |
-| `riskClass` | Max of both (more conservative wins) | Safety bias |
-| `riskFactors` | Union | |
-| `budget` | Poster only (never AI-derived without explicit nudge UI) | Tax/legal implications |
+| Field           | Source of truth                                                                       | Rationale                                                    |
+| --------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `title`         | Text extraction                                                                       | Posters phrase their own titles better than vision can infer |
+| `description`   | Text extraction                                                                       | Same                                                         |
+| `category`      | Vision (override text only if vision confidence ≥ 0.85)                               | Vision is better at recognising what's actually in the photo |
+| `scope`         | Vision augments text — concatenate as "Poster says: [text]. Photos suggest: [vision]" | Both useful for the tasker                                   |
+| `materials`     | Union of both, deduplicated                                                           | Vision catches things posters forget to mention              |
+| `durationHours` | Average of both, weighted by confidence                                               | Posters underestimate; vision is more realistic              |
+| `riskClass`     | Max of both (more conservative wins)                                                  | Safety bias                                                  |
+| `riskFactors`   | Union                                                                                 |                                                              |
+| `budget`        | Poster only (never AI-derived without explicit nudge UI)                              | Tax/legal implications                                       |
 
 When poster provides only photos: vision result is the canonical extraction. Mobile UI shows fields pre-filled, poster confirms or edits before publish.
 
@@ -192,16 +193,17 @@ When poster provides only text: vision pipeline doesn't run. Text extraction han
 
 ## Cost guardrails
 
-| Control | Threshold | Action |
-| --- | --- | --- |
-| Per-task vision call cap | 2 | Hard limit — primary + 1 fallback |
-| Per-user daily vision calls | 50 | Throttle; suggest user contacts support if hit |
-| Daily LLM spend anomaly | 1.5× rolling 14-day median | Alert; investigate |
-| Cache hit rate | >40% expected at scale | If <20%, suspect cache key bug or excessive retries |
+| Control                     | Threshold                  | Action                                              |
+| --------------------------- | -------------------------- | --------------------------------------------------- |
+| Per-task vision call cap    | 2                          | Hard limit — primary + 1 fallback                   |
+| Per-user daily vision calls | 50                         | Throttle; suggest user contacts support if hit      |
+| Daily LLM spend anomaly     | 1.5× rolling 14-day median | Alert; investigate                                  |
+| Cache hit rate              | >40% expected at scale     | If <20%, suspect cache key bug or excessive retries |
 
 ## Acceptance metrics
 
 Track for product analytics:
+
 - **Extraction accuracy** — % of vision extractions that the poster accepts without editing critical fields (category, durationHours)
 - **Fallback rate** — % of extractions that escalate to Pro tier
 - **Schema-fail rate** — % of LLM outputs that fail Zod validation (target: <2%)
@@ -212,6 +214,7 @@ Track for product analytics:
 ## Eval harness (when you build it)
 
 For each major prompt or model change, run against a hand-labelled set of ~50 task images covering:
+
 - All 8 categories (6+ examples each)
 - High / medium / low risk
 - Indoor / outdoor / mixed
@@ -223,6 +226,7 @@ Compare extraction outputs to ground-truth labels. Precision/recall per field. A
 ## Mobile UI contract
 
 After backend extraction completes, mobile shows the prefilled task form with:
+
 - Photo carousel at top
 - Category dropdown (prefilled, editable)
 - Scope text (prefilled, editable)

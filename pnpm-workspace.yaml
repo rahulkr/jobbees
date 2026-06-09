@@ -1,7 +1,15 @@
 packages:
-  - "apps/api"
-  - "apps/admin"
-  - "apps/web"
-  - "packages/*"
+  - 'apps/api'
+  - 'apps/admin'
+  - 'apps/web'
+  - 'packages/*'
 
 # apps/mobile is Flutter — managed via pubspec.yaml, not pnpm workspaces.
+
+# Native deps whose postinstall scripts are auto-approved.
+# Moved here from apps/admin/pnpm-workspace.yaml and apps/web/pnpm-workspace.yaml
+# (Next.js 16's create-next-app puts these in app dirs which confuses pnpm
+# inside a monorepo — root is the correct location).
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver

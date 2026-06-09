@@ -7,8 +7,6 @@ Keep PRs small (< 400 LOC changed). One feature per branch. Conventional Commits
 
 <!-- 1–3 sentences. What does this PR do, and why is it needed? -->
 
-
-
 ## Linked work item
 
 <!-- Ticket / issue / inventory row this PR closes. -->
@@ -151,8 +149,6 @@ none
 ## Notes for reviewer
 
 <!-- Anything the reviewer should know up front. Tricky bits, deferred work, follow-ups. -->
-
-
 
 ---
 

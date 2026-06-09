@@ -1,0 +1,85 @@
+# Dependabot configuration — JOBBees
+#
+# Philosophy: low noise, no surprise major bumps.
+#
+# Security advisories (CVEs) are ALWAYS handled separately by GitHub's
+# native Dependabot security alerts, regardless of this file. Those should
+# be merged promptly.
+#
+# This file controls VERSION-update PRs (non-security). We're conservative:
+#   - Monthly cadence (not weekly — too noisy)
+#   - Minor + patch only (major bumps require manual review + ADR if breaking)
+#   - Grouped into one PR per ecosystem per month
+#
+# Rationale: bleeding-edge majors (ESLint 10, TS 6, Prisma 7, etc.) have
+# broken the project repeatedly during MVP build. Compliance is satisfied
+# by security alerts + monthly batched patches; chasing every latest major
+# is a net negative until launch.
+#
+# To revisit cadence: change `interval: monthly` to weekly after launch.
+
+version: 2
+updates:
+  # npm packages — root + all workspaces are covered by directory: /
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+      day: monday
+      time: '04:00'
+      timezone: 'Australia/Sydney'
+    open-pull-requests-limit: 3
+    target-branch: main
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore(deps)
+      include: scope
+    # Major-version bumps are explicitly skipped — they break things and
+    # need a deliberate decision. To bump a major, do it manually in a
+    # focused PR with a description of breaking changes.
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-major
+    # Group minor + patch into a single PR per cadence to reduce review load.
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - '*'
+
+  # GitHub Actions — workflow files in .github/workflows/
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      day: monday
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: chore(ci)
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-major
+
+  # Docker base images (ops/docker/) — local dev infra
+  - package-ecosystem: docker
+    directory: /ops/docker
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 1
+    labels:
+      - dependencies
+      - infra
+    commit-message:
+      prefix: chore(docker)
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - version-update:semver-major

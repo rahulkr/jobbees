@@ -14,6 +14,7 @@ Any of: dispute, mediator, Tier-0, resolution, escalation, admin co-pilot, case 
 ### Two LLM agents working in tandem
 
 **Agent 1: Tier-0 Mediator (auto-resolution)**
+
 - Triggers on every new dispute where `disputedAmountCents ≤ TIER0_THRESHOLD_CENTS` (default AUD $200 = 20,000 cents — config-driven)
 - Reads the full evidence package: thread messages, completion proof photos (image descriptions, not pixels), task details, cancellation history, payment state
 - Proposes one of three resolutions: `FULL_RELEASE_TO_TASKER`, `PARTIAL_RELEASE` (with split %), `REFUND_TO_POSTER`
@@ -21,16 +22,19 @@ Any of: dispute, mediator, Tier-0, resolution, escalation, admin co-pilot, case 
 - Both parties see the proposal in the dispute thread; either can `ACCEPT` (auto-resolve) or `ESCALATE` (human admin)
 
 **Agent 2: Admin Co-pilot (escalation brief)**
+
 - Triggers when dispute is `ESCALATED` (either party rejected Tier-0, or amount > threshold)
 - Generates a case brief for the admin reviewing the dispute
 - Output: timeline summary, key messages highlighted, evidence summary, precedent from similar past disputes, recommended action with confidence score
 - Admin reads, decides, acts — agent does NOT auto-execute the action
 
 ### Model selection
+
 - **Claude Sonnet** for both agents (long context, structured reasoning, lower hallucination on legal/financial output than Gemini)
 - Fallback to Claude Haiku if cost telemetry alerts on Sonnet spend
 
 ### Evidence pipeline
+
 ```
 disputeId → fetchEvidence() returns:
   - task: { title, description, budgetCents, status, scheduledAt, completedAt }
@@ -42,6 +46,7 @@ disputeId → fetchEvidence() returns:
 ```
 
 **PII redaction** happens BEFORE the evidence is sent to the LLM:
+
 - User names → `Poster` / `Tasker`
 - Phone numbers / emails → `[REDACTED]`
 - Bank details / payment methods → `[REDACTED]`
@@ -72,35 +77,47 @@ Constraints:
 User prompt: structured evidence JSON.
 
 ### Output schema (Zod-validated)
+
 ```ts
 const Tier0ProposalSchema = z.object({
   resolution: z.enum(['FULL_RELEASE_TO_TASKER', 'PARTIAL_RELEASE', 'REFUND_TO_POSTER', 'ESCALATE']),
-  partialReleasePercent: z.number().min(0).max(100).optional(),  // required if PARTIAL_RELEASE
+  partialReleasePercent: z.number().min(0).max(100).optional(), // required if PARTIAL_RELEASE
   rationale: z.string().min(40).max(800),
-  evidenceReferences: z.array(z.string()),  // e.g. ['thread.msg.124', 'completionProof.photo.2']
+  evidenceReferences: z.array(z.string()), // e.g. ['thread.msg.124', 'completionProof.photo.2']
   confidence: z.enum(['HIGH', 'MEDIUM', 'LOW']),
-  redFlags: z.array(z.string()).optional(),  // e.g. ['Tasker provided no completion proof']
+  redFlags: z.array(z.string()).optional(), // e.g. ['Tasker provided no completion proof']
 });
 ```
 
 LLM must produce valid JSON. We validate; if invalid, retry once; if still invalid, ESCALATE.
 
 ### Admin co-pilot brief schema
+
 ```ts
 const CaseBriefSchema = z.object({
   timelineSummary: z.string(),
-  keyMessages: z.array(z.object({
-    messageId: z.string(),
-    quote: z.string(),
-    significance: z.string(),
-  })),
+  keyMessages: z.array(
+    z.object({
+      messageId: z.string(),
+      quote: z.string(),
+      significance: z.string(),
+    }),
+  ),
   evidenceSummary: z.string(),
-  precedents: z.array(z.object({
-    disputeId: z.string(),
-    similarity: z.string(),
-    resolution: z.string(),
-  })),
-  recommendedAction: z.enum(['FULL_RELEASE_TO_TASKER', 'PARTIAL_RELEASE', 'REFUND_TO_POSTER', 'REQUEST_MORE_INFO', 'SUSPEND_USER']),
+  precedents: z.array(
+    z.object({
+      disputeId: z.string(),
+      similarity: z.string(),
+      resolution: z.string(),
+    }),
+  ),
+  recommendedAction: z.enum([
+    'FULL_RELEASE_TO_TASKER',
+    'PARTIAL_RELEASE',
+    'REFUND_TO_POSTER',
+    'REQUEST_MORE_INFO',
+    'SUSPEND_USER',
+  ]),
   partialReleasePercent: z.number().optional(),
   confidence: z.enum(['HIGH', 'MEDIUM', 'LOW']),
   rationale: z.string(),
@@ -108,6 +125,7 @@ const CaseBriefSchema = z.object({
 ```
 
 ### Precedent retrieval
+
 - Embed the current dispute summary
 - Cosine search against past **escalated, admin-resolved** disputes from the same category
 - Return top 3 with their resolutions for the co-pilot to consider
@@ -138,6 +156,7 @@ const CaseBriefSchema = z.object({
 ## Common tasks
 
 ### Tuning the Tier-0 prompt
+
 1. Edit `prompts/tier0.system.v<N+1>.md` (new version)
 2. Update `tier0.service.ts` to use the new version
 3. Add an ADR documenting the change rationale
@@ -145,12 +164,14 @@ const CaseBriefSchema = z.object({
 5. Don't switch versions in production without an eval comparison
 
 ### Adding evidence types
+
 1. Update `evidence.service.ts` `fetchEvidence()` to include the new data
 2. Update the PII redaction list for the new fields
 3. Update the prompts to mention the new evidence type
 4. Update the schema if the LLM needs to reference it
 
 ### Adjusting Tier-0 threshold
+
 1. Change `TIER0_THRESHOLD_CENTS` env var
 2. Override in admin UI `/admin/config/dispute-threshold`
 3. Audit log the change with actor + old value + new value
@@ -158,6 +179,7 @@ const CaseBriefSchema = z.object({
 ## Acceptance metrics
 
 Track for product analytics:
+
 - **Tier-0 acceptance rate** — % of proposals where both parties accept (target: 50-70%)
 - **Escalation rate** — % of disputes that reach human admin (target: 30-50%)
 - **Time-to-resolution** — median wall-clock time from dispute open to resolved

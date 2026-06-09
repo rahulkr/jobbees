@@ -9,6 +9,7 @@
 Client direction: launch AU-only at MVP, but design the system to expand to New Zealand and potentially other markets later. Currency, tax model, locale, regulations all differ by country.
 
 Two extremes:
+
 - Build full multi-country support now → significantly increases MVP scope without business validation
 - Hardcode AU everywhere → expensive retrofit later
 
@@ -82,24 +83,26 @@ No schema migration on existing tables. Just one INSERT into Country and one new
 ## Consequences
 
 **Positive:**
+
 - Adding NZ later is a contained ~2–3 weeks of work, not a 2-month rewrite
 - Schema is forward-compatible without bloating the MVP
 - Currency display already country-aware (free for multi-currency stripe payouts)
 - Tax module isolation prevents AU rules from leaking into NZ logic
 
 **Negative:**
+
 - Slight schema bloat (every relevant table has `countryCode` even though all rows are "AU")
 - Tax dispatch switch is overkill for a single country at MVP
 - Country relation in queries means an extra join or eager load on every operation involving country-aware data (mitigated by indexed FK)
 
 ## Alternatives considered
 
-| Option | Why rejected |
-| --- | --- |
-| Hardcode "AU" everywhere | Brutal retrofit cost when adding NZ; client direction was explicit |
-| Build full multi-country support at MVP | YAGNI for the second country until launch + traction validate it |
+| Option                                      | Why rejected                                                             |
+| ------------------------------------------- | ------------------------------------------------------------------------ |
+| Hardcode "AU" everywhere                    | Brutal retrofit cost when adding NZ; client direction was explicit       |
+| Build full multi-country support at MVP     | YAGNI for the second country until launch + traction validate it         |
 | Single Currency table without Country table | Country is broader than currency (locale, tax model, phone, regulations) |
-| String-typed `countryCode` without FK | No referential integrity; would allow typos |
+| String-typed `countryCode` without FK       | No referential integrity; would allow typos                              |
 
 ## References
 

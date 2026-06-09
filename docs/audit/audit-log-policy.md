@@ -7,33 +7,33 @@
 
 Every sensitive write produces an `AuditLog` row:
 
-| Action | Resource | Notes |
-| --- | --- | --- |
-| `user.suspend` | User | Includes reason, actor, IP |
-| `user.unsuspend` | User | |
-| `user.delete` | User | Triggered by DSR |
-| `user.anonymise` | User | Anonymisation pipeline completion |
-| `kyc.override` | User | Manual KYC approval/reject by admin |
-| `payment.refund` | Payment | Amount, reason |
-| `payment.partial_refund` | Payment | Amount, reason |
-| `payment.manual_capture` | Payment | Admin manually capturing held funds |
-| `payment.void` | Payment | |
-| `dispute.resolve` | Dispute | Resolution type, admin who decided |
-| `dispute.tier0.proposal` | Dispute | What Tier-0 proposed |
-| `dispute.tier0.accept` | Dispute | Who accepted (poster/tasker/both) |
-| `dispute.escalate` | Dispute | Reason for escalation |
-| `task.force_cancel` | Task | Admin force-cancellation |
-| `category.change_type` | Category | TRANSACTIONAL ↔ LEAD swap (post-MVP) |
-| `category.commission_change` | Category | Platform fee change |
-| `config.change` | Config | Any platform-level config change |
-| `dsr.request` | User | DSR request received |
-| `dsr.complete` | User | DSR completed |
-| `admin.login` | Admin | Successful login + 2FA |
-| `admin.login_failed` | Admin | Failed login attempt (with reason) |
-| `admin.role_change` | Admin | Role escalation/de-escalation |
-| `consent.grant` | User | New consent record |
-| `consent.revoke` | User | Withdrawn consent |
-| `feature_flag.toggle` | FeatureFlag | Production flag toggle |
+| Action                       | Resource    | Notes                                |
+| ---------------------------- | ----------- | ------------------------------------ |
+| `user.suspend`               | User        | Includes reason, actor, IP           |
+| `user.unsuspend`             | User        |                                      |
+| `user.delete`                | User        | Triggered by DSR                     |
+| `user.anonymise`             | User        | Anonymisation pipeline completion    |
+| `kyc.override`               | User        | Manual KYC approval/reject by admin  |
+| `payment.refund`             | Payment     | Amount, reason                       |
+| `payment.partial_refund`     | Payment     | Amount, reason                       |
+| `payment.manual_capture`     | Payment     | Admin manually capturing held funds  |
+| `payment.void`               | Payment     |                                      |
+| `dispute.resolve`            | Dispute     | Resolution type, admin who decided   |
+| `dispute.tier0.proposal`     | Dispute     | What Tier-0 proposed                 |
+| `dispute.tier0.accept`       | Dispute     | Who accepted (poster/tasker/both)    |
+| `dispute.escalate`           | Dispute     | Reason for escalation                |
+| `task.force_cancel`          | Task        | Admin force-cancellation             |
+| `category.change_type`       | Category    | TRANSACTIONAL ↔ LEAD swap (post-MVP) |
+| `category.commission_change` | Category    | Platform fee change                  |
+| `config.change`              | Config      | Any platform-level config change     |
+| `dsr.request`                | User        | DSR request received                 |
+| `dsr.complete`               | User        | DSR completed                        |
+| `admin.login`                | Admin       | Successful login + 2FA               |
+| `admin.login_failed`         | Admin       | Failed login attempt (with reason)   |
+| `admin.role_change`          | Admin       | Role escalation/de-escalation        |
+| `consent.grant`              | User        | New consent record                   |
+| `consent.revoke`             | User        | Withdrawn consent                    |
+| `feature_flag.toggle`        | FeatureFlag | Production flag toggle               |
 
 ## Schema
 

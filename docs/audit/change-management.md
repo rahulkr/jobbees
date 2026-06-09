@@ -22,6 +22,7 @@ All changes flow through git + GitHub PR. No direct production access; no manual
 ## Branch protection on `main`
 
 TODO: enforce in GitHub repo settings:
+
 - Require PR before merge
 - Require status checks: lint, typecheck, test, codeql, trivy, gitleaks
 - Require linear history (squash merge)
@@ -30,11 +31,11 @@ TODO: enforce in GitHub repo settings:
 
 ## Deploy approval gates
 
-| Environment | Approval | Trigger |
-| --- | --- | --- |
-| Dev (local) | n/a | `pnpm dev` on developer machine |
-| Staging | Auto on merge to `main` | GitHub Actions |
-| Production | Manual approval in CI | GitHub Actions environment protection rule |
+| Environment | Approval                | Trigger                                    |
+| ----------- | ----------------------- | ------------------------------------------ |
+| Dev (local) | n/a                     | `pnpm dev` on developer machine            |
+| Staging     | Auto on merge to `main` | GitHub Actions                             |
+| Production  | Manual approval in CI   | GitHub Actions environment protection rule |
 
 ## Database migration handling
 
@@ -46,13 +47,13 @@ TODO: enforce in GitHub repo settings:
 
 ## Rollback procedure
 
-| Type | Rollback method |
-| --- | --- |
-| Code only | Revert PR, re-deploy via standard CI/CD |
-| Schema additive (new table/column) | Code revert sufficient — old code ignores new columns |
-| Schema destructive | Restore from backup OR roll forward with new migration |
-| Stripe configuration | Manual via Stripe dashboard; document in audit log |
-| Azure infrastructure | `terraform apply` with previous state |
+| Type                               | Rollback method                                        |
+| ---------------------------------- | ------------------------------------------------------ |
+| Code only                          | Revert PR, re-deploy via standard CI/CD                |
+| Schema additive (new table/column) | Code revert sufficient — old code ignores new columns  |
+| Schema destructive                 | Restore from backup OR roll forward with new migration |
+| Stripe configuration               | Manual via Stripe dashboard; document in audit log     |
+| Azure infrastructure               | `terraform apply` with previous state                  |
 
 ## Audit trail
 

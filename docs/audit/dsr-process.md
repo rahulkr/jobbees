@@ -6,6 +6,7 @@
 ## Types of DSR
 
 Under the Australian Privacy Act, users can request:
+
 1. **Access** — copy of their personal information held
 2. **Correction** — fix inaccurate information
 3. **Deletion** — anonymisation pipeline (financial records retained 7 years)
@@ -13,20 +14,20 @@ Under the Australian Privacy Act, users can request:
 
 ## Receiving a request
 
-| Channel | Where it lands |
-| --- | --- |
-| In-app (settings → privacy) | `DsrRequest` table — triggers admin notification |
-| Email to privacy@jobbees.com.au | Shared inbox → admin manually creates `DsrRequest` entry |
-| OAIC / regulator request | Admin manually creates `DsrRequest` entry, flagged HIGH priority |
+| Channel                         | Where it lands                                                   |
+| ------------------------------- | ---------------------------------------------------------------- |
+| In-app (settings → privacy)     | `DsrRequest` table — triggers admin notification                 |
+| Email to privacy@jobbees.com.au | Shared inbox → admin manually creates `DsrRequest` entry         |
+| OAIC / regulator request        | Admin manually creates `DsrRequest` entry, flagged HIGH priority |
 
 ## SLA
 
-| Request type | Response within |
-| --- | --- |
-| Access | 30 days |
-| Correction | 30 days |
-| Deletion | 30 days (anonymisation), 90 days (full per-policy review) |
-| Consent withdrawal | Immediate (system-level) |
+| Request type       | Response within                                           |
+| ------------------ | --------------------------------------------------------- |
+| Access             | 30 days                                                   |
+| Correction         | 30 days                                                   |
+| Deletion           | 30 days (anonymisation), 90 days (full per-policy review) |
+| Consent withdrawal | Immediate (system-level)                                  |
 
 ## Workflow
 
@@ -41,19 +42,19 @@ Under the Australian Privacy Act, users can request:
 
 ## Data included in an Access request
 
-| Source | What's included |
-| --- | --- |
-| User profile | Name, email, phone, address, KYC status, role |
-| Tasker profile | Bio, skills, hourly rate, completion stats |
-| Tasks posted | Title, description, status, budget, photos |
-| Bids submitted | Amount, message, status |
-| Messages | Threads, message content (own messages only) |
-| Reviews | Reviews authored, reviews received |
-| Disputes | Disputes involved in (anonymised counterparty if they've also deleted) |
-| Payments | Payment history (amount, date, status, NOT card number) |
-| Tax records | Tax invoices + RCTIs |
-| Consent log | All ConsentRecord entries |
-| Audit log | Sensitive actions on this user (suspension events, etc.) |
+| Source         | What's included                                                        |
+| -------------- | ---------------------------------------------------------------------- |
+| User profile   | Name, email, phone, address, KYC status, role                          |
+| Tasker profile | Bio, skills, hourly rate, completion stats                             |
+| Tasks posted   | Title, description, status, budget, photos                             |
+| Bids submitted | Amount, message, status                                                |
+| Messages       | Threads, message content (own messages only)                           |
+| Reviews        | Reviews authored, reviews received                                     |
+| Disputes       | Disputes involved in (anonymised counterparty if they've also deleted) |
+| Payments       | Payment history (amount, date, status, NOT card number)                |
+| Tax records    | Tax invoices + RCTIs                                                   |
+| Consent log    | All ConsentRecord entries                                              |
+| Audit log      | Sensitive actions on this user (suspension events, etc.)               |
 
 ## Data NOT included
 
@@ -71,6 +72,7 @@ For non-authenticated requests (e.g., the user's account was deleted but they wa
 ## Audit log
 
 Every DSR action is logged:
+
 - Request received (who, when, type)
 - Admin who processed it
 - What data was returned / edited / deleted

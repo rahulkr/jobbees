@@ -12,6 +12,7 @@ Any of: GST, ABN, ABR, RCTI, ATO, sharing-economy, tax invoice, tax advisor, wit
 ## ⚠️ CRITICAL: review every line you generate against this skill
 
 This is the highest-risk area in the codebase for AI hallucination. Specific things AI gets subtly wrong:
+
 - Whether GST applies to the full task amount or just the platform fee
 - Whether RCTI is required for non-ABN taskers (it is) or non-GST-registered taskers (different concept)
 - ATO sharing-economy reporting field schema (it's specific and mandatory)
@@ -23,6 +24,7 @@ This is the highest-risk area in the codebase for AI hallucination. Specific thi
 ## Architecture facts (locked)
 
 ### GST calculation
+
 - GST rate: 10% (current Australian rate, single-bracket)
 - **Applied to the platform fee only**, not the full task amount
 - Formula: `gstCents = round(platformFeeCents * 0.10)`. **Round half-up**, never banker's rounding (ATO requires).
@@ -37,6 +39,7 @@ This is the highest-risk area in the codebase for AI hallucination. Specific thi
   ```
 
 ### ABN + ABR
+
 - ABN = 11-digit Australian Business Number
 - ABR = Australian Business Register (free public lookup API)
 - Validation: ABN checksum algorithm (weighted digits, mod 89 must equal 0). Implement in `AbnValidator.validate()`.
@@ -44,6 +47,7 @@ This is the highest-risk area in the codebase for AI hallucination. Specific thi
 - Re-check ABN status quarterly via cron — taskers can lose their ABN registration.
 
 ### RCTI (Recipient-Created Tax Invoice)
+
 - Required when the platform pays a tasker who **does NOT have an ABN**
 - Platform issues the RCTI **on behalf of the tasker** (we are the "recipient" creating the invoice)
 - Requires a signed RCTI agreement from the tasker (one-time, at signup)
@@ -51,11 +55,13 @@ This is the highest-risk area in the codebase for AI hallucination. Specific thi
 - RCTI PDF must include: invoice number, date, platform ABN, tasker name + address + bank, line items, GST breakdown, "Recipient-created tax invoice" header
 
 ### Tax invoice (poster side)
+
 - Issued to the poster on every captured payment
 - Format: invoice number, date, platform ABN, poster name + email, line items (task description + platform fee + GST), total
 - PDF stored in Azure Blob, signed URL on download
 
 ### ATO sharing-economy reporting
+
 - Mandatory monthly export — Sharing Economy Reporting Regime (effective from 1 July 2023)
 - Fields required (verify with tax advisor; these are the typical fields, do NOT trust without confirmation):
   - Tasker name, ABN/TFN (or notation if neither), date of birth, address
@@ -70,7 +76,7 @@ This is the highest-risk area in the codebase for AI hallucination. Specific thi
 ```
 On payment captured:
   Generate tax invoice (poster side) — always
-  
+
   If tasker.abn is null OR !abrLookup(tasker.abn).gstRegistered:
     Require RCTI agreement on file (else block payout)
     Generate RCTI (tasker side)
@@ -103,17 +109,20 @@ On payment captured:
 ## Common tasks
 
 ### Adding a new tax invoice line item type
+
 1. Update the line item interface in `invoice.service.ts`
 2. Update the PDF template (bump version)
 3. Add a unit test with the new line item
 4. Have the tax advisor confirm wording
 
 ### Changing the GST rate (e.g., future ATO change)
+
 1. Single config entry: `TAX_GST_RATE` env var, default 0.10
 2. New rate only applies to invoices issued after the effective date — never retro-apply
 3. Add a migration documenting the change date
 
 ### Adding a new country's tax model (e.g., NZ GST)
+
 1. Add a new tax module per the AU template: `apps/api/src/modules/tax/nz/`
 2. Service interface implements `TaxModelService`
 3. Route by `country.taxModel` field on the Task
@@ -122,6 +131,7 @@ On payment captured:
 ## Tax advisor handoff
 
 When code is ready for tax advisor review, include in the PR description:
+
 - Link to the relevant tax service files
 - Test output showing example calculations
 - Sample generated PDFs (RCTI + tax invoice)

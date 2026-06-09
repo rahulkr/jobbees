@@ -26,13 +26,13 @@ services:
       POSTGRES_DB: jobbees
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # Init SQL — only runs on first container start (when data dir is empty)
       - ./postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U jobbees -d jobbees"]
+      test: ['CMD-SHELL', 'pg_isready -U jobbees -d jobbees']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -43,11 +43,11 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes --save 60 1
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 10

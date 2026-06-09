@@ -26,10 +26,6 @@
       "Grep",
       "Glob"
     ],
-    "deny": [
-      "Bash(rm -rf:*)",
-      "Bash(curl:*)",
-      "Bash(wget:*)"
-    ]
+    "deny": ["Bash(rm -rf:*)", "Bash(curl:*)", "Bash(wget:*)"]
   }
 }

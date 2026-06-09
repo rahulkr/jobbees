@@ -8,6 +8,7 @@ Shows where PII, financial data, and AI-bound content flows. Used by the IT audi
 ## PII data flow
 
 TODO: insert PII data flow diagram showing:
+
 - Where PII enters the system (signup, profile edit, KYC, payment methods)
 - Where it's stored (User table, Stripe Identity, Stripe Connect)
 - Where it crosses external boundaries (Stripe, Gemini, Anthropic, OpenAI, Twilio, SendGrid)
@@ -17,6 +18,7 @@ TODO: insert PII data flow diagram showing:
 ## Payment data flow
 
 TODO: insert payment data flow diagram showing:
+
 - Card capture in Stripe Elements (Stripe's hosted iframe, never touches our servers)
 - PaymentIntent creation via NestJS API
 - Authorisation hold → capture → payout to tasker's Connect account
@@ -27,6 +29,7 @@ TODO: insert payment data flow diagram showing:
 ## AI / LLM data flow
 
 TODO: insert AI data flow showing:
+
 - User content (task description, messages, dispute evidence)
 - PII redaction step
 - LLM provider (Gemini Flash, Claude Sonnet)
@@ -35,17 +38,17 @@ TODO: insert AI data flow showing:
 
 ## Cross-border data
 
-| Data type | Provider | Location |
-| --- | --- | --- |
-| TODO: Card data | Stripe | US (PCI-compliant; data never touches our servers) |
-| TODO: KYC documents | Stripe Identity | TODO confirm region |
-| TODO: User PII (post-redaction) | Gemini API | US/global |
-| TODO: User PII (post-redaction) | Anthropic API | US |
-| TODO: User PII (post-redaction) | OpenAI API | US |
-| TODO: SMS content | Twilio | US/global |
-| TODO: Email content | SendGrid | US/global |
-| TODO: Image content | Azure Content Safety | TODO confirm AU region |
-| TODO: Application data | Azure (Postgres, Redis, Blob, App Service) | Australia East |
+| Data type                       | Provider                                   | Location                                           |
+| ------------------------------- | ------------------------------------------ | -------------------------------------------------- |
+| TODO: Card data                 | Stripe                                     | US (PCI-compliant; data never touches our servers) |
+| TODO: KYC documents             | Stripe Identity                            | TODO confirm region                                |
+| TODO: User PII (post-redaction) | Gemini API                                 | US/global                                          |
+| TODO: User PII (post-redaction) | Anthropic API                              | US                                                 |
+| TODO: User PII (post-redaction) | OpenAI API                                 | US                                                 |
+| TODO: SMS content               | Twilio                                     | US/global                                          |
+| TODO: Email content             | SendGrid                                   | US/global                                          |
+| TODO: Image content             | Azure Content Safety                       | TODO confirm AU region                             |
+| TODO: Application data          | Azure (Postgres, Redis, Blob, App Service) | Australia East                                     |
 
 ## See also
 

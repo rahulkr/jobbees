@@ -12,6 +12,7 @@ Any of these terms appearing in the user's request: payment, Stripe, PaymentInte
 ## Architecture facts (locked, do not re-derive)
 
 ### Stripe products used
+
 - **PaymentIntent** with manual capture for tasks ≤ 7 days
 - **SetupIntent** + saved PaymentMethod for tasks > 7 days or scheduled-future
 - **Refund** (full + partial — partial refund is supported; partial capture is NOT)
@@ -19,7 +20,9 @@ Any of these terms appearing in the user's request: payment, Stripe, PaymentInte
 - **Stripe Identity** for KYC (separate from Connect; bidding gated on Identity, payout gated on Connect)
 
 ### Capture window rule
+
 Stripe authorisations expire after 7 days. The `transactionType` snapshot on `Task` and the `scheduledAt` field determine the flow:
+
 - Task `scheduledAt` within 7 days AND duration ≤ 7 days → **PaymentIntent + manual capture**
 - Task `scheduledAt` > 7 days in future OR duration > 7 days → **SetupIntent + saved PaymentMethod**, charged at completion
 - If a PaymentIntent task drifts past 7 days mid-flight → **re-authorisation flow**: prompt poster to re-authorise, fall back to SetupIntent path if poster opts in
@@ -38,6 +41,7 @@ partial-refunded        (partial refund after capture)
 ```
 
 Allowed transitions:
+
 - `authorised → captured | re-auth-required | voided | failed`
 - `re-auth-required → authorised | voided | setup-only`
 - `setup-only → captured | voided`
@@ -55,6 +59,7 @@ Any other transition throws a state machine error.
 ### Held funds
 
 Tasker can bid after Identity KYC passes. **First payout is gated on Connect Express onboarding completion.** Until then, captured funds are "held" — visible in:
+
 - Mobile: persistent banner "Held funds: $X — complete payout setup to receive"
 - Admin: `/payments/held-funds` dashboard listing all taskers with held amounts
 - Reminder cadence: in-app + email + SMS at 24h, 72h, 7d after first held payout trigger
@@ -97,6 +102,7 @@ Tasker can bid after Identity KYC passes. **First payout is gated on Connect Exp
 ## Common tasks
 
 ### Adding a new payment endpoint
+
 1. Define DTO with class-validator
 2. Add to `payment.controller.ts` with `@UseInterceptors(IdempotencyInterceptor)`
 3. Call `StripeService` method — never SDK directly
@@ -104,12 +110,14 @@ Tasker can bid after Identity KYC passes. **First payout is gated on Connect Exp
 5. Add unit + e2e tests using Stripe test mode
 
 ### Handling a new Stripe webhook event
+
 1. Add the event type to the switch in `webhooks.controller.ts`
 2. Resolve to a domain action (e.g., `payment.intent.succeeded` → `paymentService.markCaptured()`)
 3. Idempotent by design — Stripe retries; use `eventId` to dedupe
 4. Always return 200 within 5 seconds — push slow work to BullMQ
 
 ### Adding a Connect Express step
+
 1. Talk to `StripeConnectService` (separate from main `StripeService`)
 2. Update the Connect onboarding status tracker on the User model
 3. Trigger held-funds reminder if needed

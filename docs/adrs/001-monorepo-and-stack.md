@@ -15,6 +15,7 @@ Need to lock the stack and structure on day one so the codebase doesn't drift as
 ### Monorepo (pnpm workspaces + Turborepo)
 
 One git repository containing:
+
 - `apps/api` — NestJS backend (single source of truth for business logic)
 - `apps/mobile` — Flutter (managed outside pnpm; uses pubspec.yaml)
 - `apps/admin` — Next.js admin console
@@ -26,6 +27,7 @@ One git repository containing:
 ### Backend: Node.js + NestJS + TypeScript
 
 Chose NestJS over Express/Fastify/Hono because:
+
 - Opinionated structure prevents drift as the codebase grows
 - Module pattern maps 1:1 to product domains (auth, tasks, bids, payments...)
 - Decorators + DI generate dense, consistent AI code with low hallucination
@@ -55,7 +57,7 @@ Chose NestJS over Express/Fastify/Hono because:
 - One framework, two apps — share patterns and components
 - App Router for Server Components by default (fast, less JS to ship)
 - shadcn/ui + Tailwind for owned UI components (AI can modify freely)
-- Both apps are *clients* of the NestJS API — no business logic, no direct DB access
+- Both apps are _clients_ of the NestJS API — no business logic, no direct DB access
 
 ### Auth: Custom JWT (no Auth0/Clerk)
 
@@ -89,30 +91,32 @@ Portability planned via Terraform IaC + abstracted storage/queue/log layers. Mig
 
 ## Alternatives considered
 
-| Choice | Alternative | Why rejected |
-| --- | --- | --- |
-| NestJS | Express | Too unstructured at scale; AI codegen drifts without opinionated conventions |
-| NestJS | Fastify | Better perf but less structure; perf irrelevant at MVP scale |
-| Prisma | Drizzle | Less AI training data; manual migrations |
-| Prisma | TypeORM | Worse TypeScript ergonomics; decorator collision with NestJS |
-| Prisma | Raw SQL + Knex | More verbose, less type safety, manual migrations |
-| pgvector | Pinecone / Weaviate | Separate vendor, more infra; pgvector is sufficient at our scale |
-| Flutter | React Native | Flutter has better single-codebase story for both stores |
-| Riverpod | Bloc | More boilerplate; Riverpod async pattern is cleaner |
-| Next.js | Remix / SvelteKit | Next.js has the deepest ecosystem and shadcn/ui support |
-| Custom auth | Auth0 / Clerk | Vendor lock + AU data residency complexity |
-| Azure | AWS / GCP | Client preference; switching would burn 60–100 hours of migration |
-| GitHub Actions | Azure DevOps Pipelines | Less portable, weaker Flutter/Docker story |
+| Choice         | Alternative            | Why rejected                                                                 |
+| -------------- | ---------------------- | ---------------------------------------------------------------------------- |
+| NestJS         | Express                | Too unstructured at scale; AI codegen drifts without opinionated conventions |
+| NestJS         | Fastify                | Better perf but less structure; perf irrelevant at MVP scale                 |
+| Prisma         | Drizzle                | Less AI training data; manual migrations                                     |
+| Prisma         | TypeORM                | Worse TypeScript ergonomics; decorator collision with NestJS                 |
+| Prisma         | Raw SQL + Knex         | More verbose, less type safety, manual migrations                            |
+| pgvector       | Pinecone / Weaviate    | Separate vendor, more infra; pgvector is sufficient at our scale             |
+| Flutter        | React Native           | Flutter has better single-codebase story for both stores                     |
+| Riverpod       | Bloc                   | More boilerplate; Riverpod async pattern is cleaner                          |
+| Next.js        | Remix / SvelteKit      | Next.js has the deepest ecosystem and shadcn/ui support                      |
+| Custom auth    | Auth0 / Clerk          | Vendor lock + AU data residency complexity                                   |
+| Azure          | AWS / GCP              | Client preference; switching would burn 60–100 hours of migration            |
+| GitHub Actions | Azure DevOps Pipelines | Less portable, weaker Flutter/Docker story                                   |
 
 ## Consequences
 
 **Positive:**
+
 - Single repo means cross-surface refactors are atomic
 - Strict types end-to-end (Prisma → NestJS → packages/types → admin/web)
 - AI codegen quality high due to opinionated frameworks
 - Standard production patterns the auditor will recognise
 
 **Negative:**
+
 - Monorepo tooling has its own learning curve (Turborepo cache, pnpm workspace protocol)
 - Cross-app dependency cycles are a real risk (mitigate via lint rules)
 - Flutter sits outside pnpm; means two dependency systems

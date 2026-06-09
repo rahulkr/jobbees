@@ -5,6 +5,7 @@
 ## Why Terraform (not Bicep)
 
 ADR-001 chose Terraform over Bicep because:
+
 - Multi-cloud capable (path to AWS/GCP if needed)
 - Larger community + module ecosystem
 - HCL syntax is widely understood
@@ -53,5 +54,6 @@ terraform apply
 ## CI integration (post-MVP)
 
 GitHub Actions workflow:
+
 - On PR touching `ops/terraform/**`: `terraform plan` against staging, post results to PR
 - On merge to main: `terraform apply` against staging automatically; production requires manual approval

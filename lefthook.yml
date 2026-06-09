@@ -5,13 +5,13 @@ pre-commit:
       tags: security
       run: gitleaks protect --staged --redact --no-banner
     lint:
-      glob: "*.{ts,tsx,js,jsx}"
+      glob: '*.{ts,tsx,js,jsx}'
       run: pnpm exec eslint {staged_files} --max-warnings=0
     format:
-      glob: "*.{ts,tsx,js,jsx,json,md,yml,yaml}"
+      glob: '*.{ts,tsx,js,jsx,json,md,yml,yaml}'
       run: pnpm exec prettier --check {staged_files}
     typecheck:
-      glob: "*.{ts,tsx}"
+      glob: '*.{ts,tsx}'
       run: pnpm typecheck
 
 pre-push:

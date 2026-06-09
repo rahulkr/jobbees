@@ -17,6 +17,7 @@ Locking database conventions early. These are painful to retrofit and impact eve
 - Set explicitly with `id: createId()` in service code
 
 **Rationale:**
+
 - cuid2 is URL-safe, sortable enough for time-ordered display, collision-resistant
 - No row-count leakage (vs auto-increment integers exposing how many rows exist)
 - Single ID format across all tables; no mixing types
@@ -28,6 +29,7 @@ Locking database conventions early. These are painful to retrofit and impact eve
 - Format for display in app code (`Intl.NumberFormat`)
 
 **Rationale:**
+
 - Floating-point arithmetic produces rounding bugs that surface in production at the worst time
 - Stripe accepts and returns cents — keeps boundary conversions to zero
 - ATO requires whole-cent precision
@@ -40,6 +42,7 @@ Locking database conventions early. These are painful to retrofit and impact eve
 - Never store local time
 
 **Rationale:**
+
 - Multi-state Australia has AEDT/AEST shifts; storing local time creates DST bugs
 - Future expansion to NZ has its own timezone
 - UTC + render-time conversion is industry standard
@@ -56,6 +59,7 @@ Locking database conventions early. These are painful to retrofit and impact eve
 - Hard delete only on ephemeral tables: OTPs, sessions, idempotency keys, drafts never published
 
 **Rationale:**
+
 - DSR (data subject request) deletion is anonymisation + soft-delete for user-facing entities
 - Financial records (Payment, TaxInvoice, RCTI) are retained 7 years per ATO — never hard-deleted at user level
 - Audit log is append-only — never deleted
@@ -63,6 +67,7 @@ Locking database conventions early. These are painful to retrofit and impact eve
 ### Anonymisation pipeline (for DSR deletion)
 
 When a user requests deletion:
+
 1. Replace `firstName`, `lastName`, `email`, `phone`, `defaultAddress` with `[deleted-user-{uuid}]` or `NULL`
 2. Set `deletedAt` and `anonymisedAt` on User
 3. Keep Payment, TaxInvoice, RCTI records intact (financial retention)
@@ -74,6 +79,7 @@ When a user requests deletion:
 - Always add `@@index([fkField])` for every FK column. **Prisma does not auto-index foreign keys.**
 
 **Rationale:**
+
 - Implicit FK behaviour bites in surprising places (deleting a User cascading to Payments is bad)
 - Without FK indexes, joins become sequential scans as data grows
 
@@ -109,12 +115,14 @@ When a user requests deletion:
 ## Consequences
 
 **Positive:**
+
 - One ID format across all tables — no mixing types in joins or APIs
 - No floating-point money bugs
 - DSR / Privacy Act compliance scaffolded from day one
 - Adding new countries doesn't require schema migration on every table
 
 **Negative:**
+
 - More verbose model definitions (cuid2 set in app code, not auto-default)
 - FK index discipline requires constant attention (lint rule TBD)
 - Vector queries require raw SQL — no Prisma type safety on those

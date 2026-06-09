@@ -4,8 +4,8 @@ This directory holds project-specific security configuration that runs in CI and
 
 ## Files
 
-| File | Purpose |
-| --- | --- |
+| File                | Purpose                                                                            |
+| ------------------- | ---------------------------------------------------------------------------------- |
 | `semgrep-rules.yml` | JOBBees-specific Semgrep rules (~20 rules) — enforces conventions from `CLAUDE.md` |
 
 ### What's enforced by Semgrep vs by the skill / PR template
@@ -14,16 +14,16 @@ Semgrep is great at **syntactic patterns that can be expressed as a complete fra
 
 So we split:
 
-| Check type | Enforced by |
-| --- | --- |
-| Money type in Prisma (`Decimal` / `Float`) | **Semgrep** — schema patterns are exact |
-| Hardcoded API keys, raw queries, audit-log mutation | **Semgrep** |
-| cuid1 / autoincrement IDs, currency-field-presence | **Semgrep** |
-| Inline GST math, soft-delete filter, LLM redaction | **Semgrep** |
+| Check type                                            | Enforced by                                                                               |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Money type in Prisma (`Decimal` / `Float`)            | **Semgrep** — schema patterns are exact                                                   |
+| Hardcoded API keys, raw queries, audit-log mutation   | **Semgrep**                                                                               |
+| cuid1 / autoincrement IDs, currency-field-presence    | **Semgrep**                                                                               |
+| Inline GST math, soft-delete filter, LLM redaction    | **Semgrep**                                                                               |
 | `@UseGuards(JwtAuthGuard)` on every controller method | **Skill + PR template + human review** (decorator-presence checks are brittle in Semgrep) |
-| `@UseInterceptors(IdempotencyInterceptor)` presence | **Skill + PR template** |
-| `@RateLimit(...)` on auth endpoints | **Skill + PR template** |
-| Webhook body contains `constructEvent(...)` | **Skill + PR template** |
+| `@UseInterceptors(IdempotencyInterceptor)` presence   | **Skill + PR template**                                                                   |
+| `@RateLimit(...)` on auth endpoints                   | **Skill + PR template**                                                                   |
+| Webhook body contains `constructEvent(...)`           | **Skill + PR template**                                                                   |
 
 ## Running Semgrep locally
 
@@ -51,14 +51,14 @@ semgrep --config ops/security/semgrep-rules.yml --json apps packages
 
 ## How it relates to the other layers
 
-| Layer | What it catches | Where |
-| --- | --- | --- |
-| **`security-review` Claude skill** | JOBBees rules, AT AI EDIT TIME | `.claude/skills/security-review/SKILL.md` |
-| **Semgrep (this directory)** | JOBBees rules, on every PR + local — works even when no AI is involved | `ops/security/semgrep-rules.yml` |
-| **CodeQL** | Generic SAST (planned Sprint 6) | `.github/workflows/codeql.yml` |
-| **Trivy** | Dependency CVEs + container scans (planned Sprint 6) | `.github/workflows/trivy.yml` |
-| **gitleaks** | Hardcoded secrets, pre-commit + CI | `lefthook.yml` |
-| **Cloudflare WAF** | Runtime — OWASP attacks (Sprint 9) | `docs/audit/edge-security.md` |
+| Layer                              | What it catches                                                        | Where                                     |
+| ---------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------- |
+| **`security-review` Claude skill** | JOBBees rules, AT AI EDIT TIME                                         | `.claude/skills/security-review/SKILL.md` |
+| **Semgrep (this directory)**       | JOBBees rules, on every PR + local — works even when no AI is involved | `ops/security/semgrep-rules.yml`          |
+| **CodeQL**                         | Generic SAST (planned Sprint 6)                                        | `.github/workflows/codeql.yml`            |
+| **Trivy**                          | Dependency CVEs + container scans (planned Sprint 6)                   | `.github/workflows/trivy.yml`             |
+| **gitleaks**                       | Hardcoded secrets, pre-commit + CI                                     | `lefthook.yml`                            |
+| **Cloudflare WAF**                 | Runtime — OWASP attacks (Sprint 9)                                     | `docs/audit/edge-security.md`             |
 
 The Semgrep file here is the **non-AI mirror** of the skill — anyone editing code (with or without Claude) gets the same checks on their PR.
 

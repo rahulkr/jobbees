@@ -5,8 +5,10 @@ JOBBees: Australian peer-to-peer task marketplace. Mobile-first, Node/NestJS bac
 ## Read these before doing any real work
 
 1. **`PROJECT_CONTEXT.md`** — full architecture, conventions, compliance, AI usage, decisions. Load this first in every session.
-2. The **scope tracker** (local `inventory/` folder, gitignored) or your team's work-tracking system — every coding session starts from a defined work item there.
-3. The `apps/<surface>/CLAUDE.md` for whichever app you're touching.
+2. **`docs/sprints/PLAN.md`** — master 13-sprint plan (Sprint 0 + 12 build sprints). Tells you which sprint is current and what's in scope.
+3. **`docs/sprints/sprint-NN-<theme>.md`** — the current sprint's detail doc. Inventory rows, day-by-day plan, DoD, demo script, risks. **Every coding session starts from a feature row listed in the current sprint.**
+4. The **scope tracker** (local `inventory/` folder, gitignored) — the 522-row inventory CSV referenced by ID throughout sprint docs. May not be present in fresh clones; the sprint docs are the authoritative-enough scope per sprint.
+5. The `apps/<surface>/CLAUDE.md` for whichever app you're touching.
 
 ## Tech stack (locked, do not re-litigate)
 
@@ -33,6 +35,7 @@ JOBBees: Australian peer-to-peer task marketplace. Mobile-first, Node/NestJS bac
 10. **Soft delete on user-facing entities** (`deletedAt`). Filter `where: { deletedAt: null }` by default — use the Prisma extension we have for this.
 11. **Australia (`AU`) hardcoded as default country.** Schema is multi-country-ready (see `Country` model) but logic is AU-only at MVP.
 12. **Auto-migration off in prod.** Only CI runs `prisma migrate deploy`. App startup does not migrate.
+13. **Do not bump major versions of dependencies.** Patch + minor versions only, batched monthly via Dependabot. Major bumps (e.g., ESLint v9 → v10, TS v5 → v6, Prisma v5 → v6, NestJS v10 → v11) require: (a) explicit human decision, (b) ADR documenting breaking changes + migration steps, (c) testing in isolation in a feature branch. Applies to humans AND any AI assistant editing this repo. Do not run `pnpm update --latest` during MVP build. See `.github/dependabot.yml` for the policy.
 
 ## Workflow
 
@@ -53,7 +56,10 @@ JOBBees: Australian peer-to-peer task marketplace. Mobile-first, Node/NestJS bac
 ## Pointers
 
 - Full context: `PROJECT_CONTEXT.md`
+- Sprint plan + per-sprint scope: `docs/sprints/` (start with `PLAN.md`, then the current sprint's detail doc)
 - Architecture decisions: `docs/adrs/`
 - IT audit docs: `docs/audit/`
+- Coverage tracker: `./scripts/coverage.sh` (reads gitignored inventory CSV)
 - Local Postgres + Redis: `pnpm docker:up` (reads `ops/docker/dev.yml`)
 - Database schema: `packages/prisma/schema.prisma`
+- Security tooling: `ops/security/semgrep-rules.yml`, `.claude/skills/security-review/SKILL.md`

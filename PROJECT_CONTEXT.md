@@ -27,39 +27,39 @@ Differentiating bets for v1: vector-based matching, ranked discovery feed, auton
 
 Every choice locked in. Do not re-litigate without an ADR.
 
-| Layer | Choice | Why |
-| --- | --- | --- |
-| **Backend language** | Node.js + TypeScript | Strong AI codegen support, mature ecosystem, shared types with web clients |
-| **Backend framework** | NestJS | Opinionated structure prevents drift over time; modules map 1:1 to product domains; strong AI-codegen patterns |
-| **ORM** | Prisma | Schema-as-code, type safety, free migrations, less AI hallucination than raw SQL |
-| **Database** | PostgreSQL 16 + pgvector | Single DB for relational + vector; no separate vector store |
-| **Cache / queue** | Redis | Sessions, rate limits, idempotency, BullMQ jobs |
-| **Job queue** | BullMQ on Redis | Native Node, no separate Azure Service Bus needed at MVP |
-| **Real-time** | Socket.IO (single-node at MVP) | Sufficient for <3k concurrent; Redis adapter post-launch |
-| **Mobile** | Flutter (iOS + Android) | Single codebase, both stores |
-| **Mobile state mgmt** | Riverpod | Cleanest async story, great AI codegen support |
-| **Mobile navigation** | go_router | Standard for Flutter |
-| **Mobile HTTP** | dio | Standard for Flutter |
-| **Admin + Public web** | Next.js 14 (App Router) | One framework for both UIs, share components |
-| **UI components (web)** | shadcn/ui + Tailwind | We own the component code, AI can modify freely |
-| **Auth** | Custom JWT + Postgres (no Auth0/Clerk) | AU data residency simpler, no vendor lock |
-| **Phone OTP** | Firebase Phone Auth OR Twilio Verify (TBD by branded-sender requirement) | Firebase is cheaper; Twilio supports a branded "JOBBEES" alpha sender |
-| **Payments** | Stripe + Stripe Connect Express + Stripe Identity | One vendor for the whole flow |
-| **LLM (high-volume)** | Google Gemini 2.0 Flash | Cheapest at scale; primary model |
-| **LLM (nuanced)** | Anthropic Claude Sonnet | Disputes, admin co-pilot |
-| **Embeddings** | OpenAI text-embedding-3-small | 1536 dims; small, fast, cheap |
-| **Push notifications** | FCM (Android) + APNS (iOS) | Free, standard |
-| **SMS** | Twilio (alternative: Telnyx) | Pending Azure Communication Services check |
-| **Email** | SendGrid (alternative: AWS SES) | Pending Azure Communication Services check |
-| **Image moderation** | Azure Content Safety | AU region available |
-| **Geocoding** | Mapbox or Google Maps | TBD by cost |
-| **Error tracking** | Sentry | Portable across clouds |
-| **Logs + APM** | Azure Application Insights | May swap to OpenTelemetry-based later |
-| **Hosting** | Azure (full stack) | Client preference; portability planned via Terraform |
-| **CI/CD** | GitHub Actions | Portable, not Azure DevOps |
-| **IaC** | Terraform (chosen over Bicep) | Multi-cloud future |
-| **Monorepo tooling** | pnpm workspaces + Turborepo | Standard for TS monorepos |
-| **Analytics** | PostHog or Mixpanel | TBD; THIN scope at MVP |
+| Layer                   | Choice                                                                   | Why                                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| **Backend language**    | Node.js + TypeScript                                                     | Strong AI codegen support, mature ecosystem, shared types with web clients                                     |
+| **Backend framework**   | NestJS                                                                   | Opinionated structure prevents drift over time; modules map 1:1 to product domains; strong AI-codegen patterns |
+| **ORM**                 | Prisma                                                                   | Schema-as-code, type safety, free migrations, less AI hallucination than raw SQL                               |
+| **Database**            | PostgreSQL 16 + pgvector                                                 | Single DB for relational + vector; no separate vector store                                                    |
+| **Cache / queue**       | Redis                                                                    | Sessions, rate limits, idempotency, BullMQ jobs                                                                |
+| **Job queue**           | BullMQ on Redis                                                          | Native Node, no separate Azure Service Bus needed at MVP                                                       |
+| **Real-time**           | Socket.IO (single-node at MVP)                                           | Sufficient for <3k concurrent; Redis adapter post-launch                                                       |
+| **Mobile**              | Flutter (iOS + Android)                                                  | Single codebase, both stores                                                                                   |
+| **Mobile state mgmt**   | Riverpod                                                                 | Cleanest async story, great AI codegen support                                                                 |
+| **Mobile navigation**   | go_router                                                                | Standard for Flutter                                                                                           |
+| **Mobile HTTP**         | dio                                                                      | Standard for Flutter                                                                                           |
+| **Admin + Public web**  | Next.js 14 (App Router)                                                  | One framework for both UIs, share components                                                                   |
+| **UI components (web)** | shadcn/ui + Tailwind                                                     | We own the component code, AI can modify freely                                                                |
+| **Auth**                | Custom JWT + Postgres (no Auth0/Clerk)                                   | AU data residency simpler, no vendor lock                                                                      |
+| **Phone OTP**           | Firebase Phone Auth OR Twilio Verify (TBD by branded-sender requirement) | Firebase is cheaper; Twilio supports a branded "JOBBEES" alpha sender                                          |
+| **Payments**            | Stripe + Stripe Connect Express + Stripe Identity                        | One vendor for the whole flow                                                                                  |
+| **LLM (high-volume)**   | Google Gemini 2.0 Flash                                                  | Cheapest at scale; primary model                                                                               |
+| **LLM (nuanced)**       | Anthropic Claude Sonnet                                                  | Disputes, admin co-pilot                                                                                       |
+| **Embeddings**          | OpenAI text-embedding-3-small                                            | 1536 dims; small, fast, cheap                                                                                  |
+| **Push notifications**  | FCM (Android) + APNS (iOS)                                               | Free, standard                                                                                                 |
+| **SMS**                 | Twilio (alternative: Telnyx)                                             | Pending Azure Communication Services check                                                                     |
+| **Email**               | SendGrid (alternative: AWS SES)                                          | Pending Azure Communication Services check                                                                     |
+| **Image moderation**    | Azure Content Safety                                                     | AU region available                                                                                            |
+| **Geocoding**           | Mapbox or Google Maps                                                    | TBD by cost                                                                                                    |
+| **Error tracking**      | Sentry                                                                   | Portable across clouds                                                                                         |
+| **Logs + APM**          | Azure Application Insights                                               | May swap to OpenTelemetry-based later                                                                          |
+| **Hosting**             | Azure (full stack)                                                       | Client preference; portability planned via Terraform                                                           |
+| **CI/CD**               | GitHub Actions                                                           | Portable, not Azure DevOps                                                                                     |
+| **IaC**                 | Terraform (chosen over Bicep)                                            | Multi-cloud future                                                                                             |
+| **Monorepo tooling**    | pnpm workspaces + Turborepo                                              | Standard for TS monorepos                                                                                      |
+| **Analytics**           | PostHog or Mixpanel                                                      | TBD; THIN scope at MVP                                                                                         |
 
 ---
 
@@ -105,7 +105,7 @@ Note: an `inventory/` folder may exist locally (gitignored) — it holds the int
 
 ## 5. The Four Surfaces
 
-Three clients, one backend. Next.js (admin + web) and Flutter (mobile) are all *clients* of the NestJS API — they do not contain business logic.
+Three clients, one backend. Next.js (admin + web) and Flutter (mobile) are all _clients_ of the NestJS API — they do not contain business logic.
 
 **`apps/api/` (NestJS) — the real backend.**
 All business logic, Stripe, Prisma/Postgres, BullMQ, Socket.IO, LLM calls, embeddings. Exposes REST endpoints + WebSocket for messaging and live location. NestJS feature-module pattern: one module per domain (auth, users, tasks, bids, payments, tax, cancellation, reviews, disputes, notifications, trust-safety, privacy, ai, admin).
@@ -162,6 +162,7 @@ Poster taps mic, speaks task description ("Need someone to mow my lawn this Satu
 These cannot be skipped or deferred without legal exposure. All `IN` in the inventory.
 
 **Tax:**
+
 - ABN collection at tasker signup with ABR (Australian Business Register) lookup
 - GST calculation on the platform fee (confirm with tax advisor; not on full task amount)
 - RCTI (Recipient-Created Tax Invoice) generation for taskers without ABN, with consent workflow
@@ -170,6 +171,7 @@ These cannot be skipped or deferred without legal exposure. All `IN` in the inve
 - Engage tax advisor in week 1, sign-off before payment code merges
 
 **Stripe payments:**
+
 - Stripe Connect Express onboarding as a separate flow from KYC. Bidding allowed after KYC; first payout gated on Connect completion.
 - Held funds banner + reminder cadence (24h / 72h / 7d) until Connect complete
 - Manual capture for tasks ≤7 days
@@ -181,6 +183,7 @@ These cannot be skipped or deferred without legal exposure. All `IN` in the inve
 - Full payment state machine: `authorised`, `captured`, `re-auth-required`, `setup-only`, `failed`, `voided`, `refunded`, `partial-refunded`
 
 **Privacy Act:**
+
 - Data inventory + retention schema per table
 - DSR (Data Subject Request) endpoints: access, delete, correct
 - Anonymisation pipeline: replace PII with `[deleted-user-{uuid}]`, retain financial records 7 years per ATO
@@ -189,6 +192,7 @@ These cannot be skipped or deferred without legal exposure. All `IN` in the inve
 - Privacy policy authored by Australian counsel matches system behaviour
 
 **Trust safety:**
+
 - Mandatory tasker completion proof (2 photos + checklist) before auto-confirm
 - 48-hour dispute window after completion proof submitted
 - Escalating notification cadence: at submission, 24h, 36h, 12h pre-expiry
@@ -197,6 +201,7 @@ These cannot be skipped or deferred without legal exposure. All `IN` in the inve
 - EXIF tampering check on completion-proof and task photos
 
 **Spam Act:**
+
 - Granular per-channel opt-out (push / email / SMS)
 - Unsubscribe token endpoint on every marketing email
 - SMS STOP keyword honoured
@@ -281,6 +286,7 @@ model Task {
 ```
 
 In MVP code:
+
 - Payment, dispute, RCTI, cancellation services assert `task.transactionType === 'TRANSACTIONAL'` and throw if not
 - LEAD flow doesn't exist yet — it's documented as post-MVP work
 
@@ -291,6 +297,7 @@ When LEAD categories arrive: new payment flow (tasker pays lead fee to unlock co
 ## 12. Payment Architecture Summary
 
 **Stripe products used:**
+
 - PaymentIntent (manual capture for ≤7d tasks)
 - SetupIntent (saved PaymentMethod for >7d / scheduled-future tasks)
 - Refund (full + partial supported)
@@ -298,6 +305,7 @@ When LEAD categories arrive: new payment flow (tasker pays lead fee to unlock co
 - Stripe Identity (separate KYC for posters and bidders)
 
 **State machine:**
+
 ```
 authorised → captured        // happy path, ≤7d task
 authorised → re-auth-required → authorised  // long task crossing 7d
@@ -323,19 +331,19 @@ Platform fee config per category, GST calculated on the platform fee (not the fu
 
 **Where AI is used per task lifecycle:**
 
-| Touchpoint | Model |
-| --- | --- |
-| Task extraction (text → structured fields) | Gemini Flash |
-| Multi-turn clarifying questions (when confidence is low) | Gemini Flash |
-| Multimodal image extraction (when poster uploads photos) | Gemini 1.5 Pro vision |
-| Voice transcription | Gemini audio / Whisper |
-| Budget AI nudge | Gemini Flash |
-| Task + tasker profile embeddings | OpenAI text-embedding-3-small (1536 dims) |
-| Real-time per-message chat policing | Gemini Flash |
-| EXIF tampering check (deterministic, no LLM) | n/a |
-| Tier-0 dispute mediator | Claude Sonnet |
-| Admin co-pilot brief | Claude Sonnet |
-| RAG support agent | Gemini Flash |
+| Touchpoint                                               | Model                                     |
+| -------------------------------------------------------- | ----------------------------------------- |
+| Task extraction (text → structured fields)               | Gemini Flash                              |
+| Multi-turn clarifying questions (when confidence is low) | Gemini Flash                              |
+| Multimodal image extraction (when poster uploads photos) | Gemini 1.5 Pro vision                     |
+| Voice transcription                                      | Gemini audio / Whisper                    |
+| Budget AI nudge                                          | Gemini Flash                              |
+| Task + tasker profile embeddings                         | OpenAI text-embedding-3-small (1536 dims) |
+| Real-time per-message chat policing                      | Gemini Flash                              |
+| EXIF tampering check (deterministic, no LLM)             | n/a                                       |
+| Tier-0 dispute mediator                                  | Claude Sonnet                             |
+| Admin co-pilot brief                                     | Claude Sonnet                             |
+| RAG support agent                                        | Gemini Flash                              |
 
 **Cost controls in code:**
 
@@ -352,6 +360,7 @@ Platform fee config per category, GST calculated on the platform fee (not the fu
 Claude Code auto-loads CLAUDE.md from the working directory upward. Place context where it's relevant. Keep each file short (~80 lines).
 
 **Root `CLAUDE.md`:**
+
 - One-line project description
 - Tech stack list (one line each)
 - Hard rules: never commit secrets, all payment code requires manual review, GST/RCTI/ATO is non-negotiable
@@ -359,6 +368,7 @@ Claude Code auto-loads CLAUDE.md from the working directory upward. Place contex
 - Pointer to your scope tracker / issue board as the source of work items
 
 **`apps/api/CLAUDE.md`:**
+
 - "NestJS feature-module pattern, one module per domain"
 - "Every mutating endpoint requires idempotency middleware"
 - "All Stripe calls go through `StripeService` wrapper, never SDK directly from controllers"
@@ -366,6 +376,7 @@ Claude Code auto-loads CLAUDE.md from the working directory upward. Place contex
 - "Structured JSON logs to App Insights, never `console.log`"
 
 **`apps/mobile/CLAUDE.md`:**
+
 - "Riverpod for state, go_router for navigation, dio for HTTP"
 - "Feature-first folders: `features/<name>/{screens, widgets, providers, models}`"
 - "Every screen has: loading state, error state, empty state, content"
@@ -373,11 +384,13 @@ Claude Code auto-loads CLAUDE.md from the working directory upward. Place contex
 - "Payment UI uses official Stripe Flutter SDK, not custom Elements"
 
 **`apps/admin/CLAUDE.md`:**
+
 - "Next.js 14 App Router, shadcn/ui + Tailwind"
 - "Server Components by default; `'use client'` only when interactivity needed"
 - "Admin actions call NestJS API via fetch; never touch DB directly"
 
 **`apps/web/CLAUDE.md`:**
+
 - "Same Next.js stack as admin"
 - "Public read-only; no auth-gated content"
 - "Server-render task detail pages for SEO"
@@ -399,6 +412,7 @@ Install in `.claude/skills/`. Each is a folder with a `SKILL.md`.
 **5. `multimodal-extraction`** — invoked for image-to-task vision extraction. Contains: model tier selection (Flash primary, Pro fallback — never Opus), image preprocessing pipeline (resize/EXIF/hash), Zod schema, prompt structure, merging with text extraction, cost guardrails.
 
 **Built-in skills also enabled:**
+
 - `security-review` — run against every PR touching auth/payments/PII
 - `review` — general code review
 - `skill-creator` — for adding new skills later
@@ -408,6 +422,7 @@ Install in `.claude/skills/`. Each is a folder with a `SKILL.md`.
 ## 17. Workflow with Claude Code (or any AI)
 
 **Daily flow:**
+
 1. Pick 1–3 work items from your scope tracker / issue board. Mark them in-progress.
 2. Open Claude Code in the repo. CLAUDE.md files auto-load.
 3. Paste the work item summary as the spec (e.g. "Mobile · Task Discovery · Home feed (ranked) · MVP-IN").
@@ -419,6 +434,7 @@ Install in `.claude/skills/`. Each is a folder with a `SKILL.md`.
 9. Mark the work item DONE when merged.
 
 **End of week:**
+
 - Review what shipped versus what's still in progress.
 - Triage any items that grew in scope into their own follow-up tickets.
 
@@ -431,12 +447,14 @@ Install in `.claude/skills/`. Each is a folder with a `SKILL.md`.
 Layered. Each gate catches different things.
 
 **Pre-commit (local, <5 sec):**
+
 - `lefthook` — hooks runner (configured in `lefthook.yml`)
 - `gitleaks` — blocks commits containing secrets
 - `eslint` + `eslint-plugin-security` — catches common JS/TS security smells
 - `prettier` — consistent formatting
 
 **Every PR (GitHub Actions, 2–5 min):**
+
 - CodeQL — SAST scanner (free with GH Advanced Security)
 - Dependabot — auto-PRs for vulnerable dependencies
 - Semgrep — rule-based SAST with NestJS/Flutter rule packs
@@ -444,6 +462,7 @@ Layered. Each gate catches different things.
 - Trivy — Docker image, dependency, and IaC scanning
 
 **Runtime / edge (always-on, in front of the API) — vendor TBD per client decision:**
+
 - **Option A (recommended for MVP):** Cloudflare Pro ($25/mo) — OWASP managed rules, Bot Fight Mode, DDoS, geo-restriction, rate limits at edge. App Service IP-restricted to Cloudflare ranges.
 - **Option B:** Azure Front Door Premium + WAF ($335/mo) — same protections plus ML-based Bot Manager, private link to App Service (zero public IPs on backend).
 - **Common to both:** VNet + private endpoints for Postgres / Redis / Blob / Key Vault (no public IPs on data stores)
@@ -451,14 +470,17 @@ Layered. Each gate catches different things.
 - See `docs/audit/edge-security.md` for the full decision framework and custom rules
 
 **Weekly / on-demand:**
+
 - OWASP ZAP — dynamic scan (DAST) against staging
 - `pnpm audit` + `flutter pub outdated` — manual dependency sanity check
 
 **Quarterly:**
+
 - External pen-test (client-side)
 - Secrets rotation per `docs/audit/encryption-policy.md` rotation table
 
 **On every PR touching auth/payments/PII:**
+
 - Run the `security-review` skill in Claude Code before merging
 
 ---
@@ -495,6 +517,7 @@ docs/audit/
 To keep MVP scope tight, certain items are explicitly deferred. Don't accidentally rebuild what's deferred.
 
 **DROP (don't build at all):**
+
 - Magic link login
 - Welcome tour / coach marks
 - Tasker availability calendar + API
@@ -514,6 +537,7 @@ To keep MVP scope tight, certain items are explicitly deferred. Don't accidental
 - Category landing pages (SEO)
 
 **POST (deferred, may revisit at month 3+):**
+
 - SEO content auto-generation per task
 - Bid AI coaching nudges (needs real bid acceptance data first)
 - Review authenticity scoring (needs review data first)
@@ -530,11 +554,13 @@ To keep MVP scope tight, certain items are explicitly deferred. Don't accidental
 - Load testing, DR drills
 
 **Promoted from POST → IN this round:**
+
 - Multi-turn clarifying ReAct loop (multi-turn dialogue when AI confidence is low on required fields)
 - Multimodal image-based task extraction (vision model infers scope/materials/duration from photos)
 - EXIF tampering / consistency check (detect tasker uploading old/wrong-location photos as completion proof)
 
 **MANUAL (operator-driven via admin or external tool):**
+
 - Auto-invite broadcast on cold-start (admin pushes manually)
 - Connect onboarding nudges (admin contacts stuck taskers)
 - Synthetic supply seeding (hand-onboard first 50 taskers per geography)
@@ -598,19 +624,19 @@ To keep MVP scope tight, certain items are explicitly deferred. Don't accidental
 
 ## 24. Reference Files in the Repo
 
-| File | Purpose |
-| --- | --- |
-| `PROJECT_CONTEXT.md` (this file) | Master context — load first |
-| `CLAUDE.md` (root) | Short rules — auto-loaded by Claude Code |
-| `apps/*/CLAUDE.md` | Surface-specific rules |
+| File                             | Purpose                                          |
+| -------------------------------- | ------------------------------------------------ |
+| `PROJECT_CONTEXT.md` (this file) | Master context — load first                      |
+| `CLAUDE.md` (root)               | Short rules — auto-loaded by Claude Code         |
+| `apps/*/CLAUDE.md`               | Surface-specific rules                           |
 | `inventory/` (local, gitignored) | Internal scoping + planning docs (not committed) |
-| `docs/adrs/` | ADRs as they're written |
-| `docs/audit/` | IT audit documentation templates |
-| `packages/prisma/schema.prisma` | Database schema source of truth |
-| `ops/docker/dev.yml` | Local Postgres + Redis |
-| `.claude/skills/` | Custom Claude Code skills |
-| `lefthook.yml` | Pre-commit + pre-push hook config |
-| `.env.example` | All environment variables documented |
+| `docs/adrs/`                     | ADRs as they're written                          |
+| `docs/audit/`                    | IT audit documentation templates                 |
+| `packages/prisma/schema.prisma`  | Database schema source of truth                  |
+| `ops/docker/dev.yml`             | Local Postgres + Redis                           |
+| `.claude/skills/`                | Custom Claude Code skills                        |
+| `lefthook.yml`                   | Pre-commit + pre-push hook config                |
+| `.env.example`                   | All environment variables documented             |
 
 ---
 
@@ -631,4 +657,4 @@ Before starting any work, the AI assistant should confirm:
 
 ---
 
-*End of project context brief. Begin coding.*
+_End of project context brief. Begin coding._

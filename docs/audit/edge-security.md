@@ -21,6 +21,7 @@ Postgres + Redis + Blob + Key Vault (private endpoints, no public IPs)
 ```
 
 Three subdomains:
+
 - `api.jobbees.com.au` → NestJS API
 - `admin.jobbees.com.au` → Next.js admin
 - `jobbees.com.au` + `www` → Next.js public web
@@ -46,21 +47,22 @@ Three subdomains:
 
 ### Trade-offs vs Azure Front Door Premium
 
-| Aspect | Cloudflare Pro |
-| --- | --- |
-| WAF managed rules | ✅ OWASP Core Rule Set |
-| Bot blocking | ✅ Bot Fight Mode (rule-based) — less sophisticated than Azure's ML model but catches common bots |
-| DDoS protection | ✅ Industry-leading; Cloudflare absorbs massive attacks routinely |
-| Rate limiting at edge | ✅ Per-rule, basic |
-| TLS termination + cert mgmt | ✅ Automatic |
-| Logs delivery | Cloudflare dashboard (export to S3/cloud storage on Business+ plan) — **not native in App Insights** |
+| Aspect                      | Cloudflare Pro                                                                                           |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| WAF managed rules           | ✅ OWASP Core Rule Set                                                                                   |
+| Bot blocking                | ✅ Bot Fight Mode (rule-based) — less sophisticated than Azure's ML model but catches common bots        |
+| DDoS protection             | ✅ Industry-leading; Cloudflare absorbs massive attacks routinely                                        |
+| Rate limiting at edge       | ✅ Per-rule, basic                                                                                       |
+| TLS termination + cert mgmt | ✅ Automatic                                                                                             |
+| Logs delivery               | Cloudflare dashboard (export to S3/cloud storage on Business+ plan) — **not native in App Insights**     |
 | Private link to App Service | ❌ **App Service needs a public IP**, locked down via inbound IP allowlist of Cloudflare's published IPs |
-| Cross-cloud portable | ✅ Works with any backend (Azure, AWS, GCP) |
-| Vendor relationship | New (Cloudflare account, billing, support) |
+| Cross-cloud portable        | ✅ Works with any backend (Azure, AWS, GCP)                                                              |
+| Vendor relationship         | New (Cloudflare account, billing, support)                                                               |
 
 ### Why "App Service still has a public IP" is OK at MVP
 
 The standard hardening is: configure App Service to **only accept inbound traffic from Cloudflare's IP ranges** (Cloudflare publishes them and refreshes monthly). Practically:
+
 - Direct access to the App Service URL from the public internet returns 403
 - All real traffic flows: user → Cloudflare → App Service → response
 - The public IP is technically present but unreachable from anywhere except Cloudflare
@@ -71,14 +73,14 @@ The only thing it doesn't give you: the "zero public IPs anywhere" posture that 
 
 ### Custom rule plan
 
-| # | Rule | Action | Notes |
-| --- | --- | --- | --- |
-| 1 | OWASP Core Rule Set | Block | Managed; tune sensitivity per traffic |
-| 2 | Bot Fight Mode | Block known bad bots | Enable in Cloudflare dashboard |
-| 3 | Geo-restrict `admin.jobbees.com.au` to AU | Block non-AU | Custom firewall rule |
-| 4 | Rate limit `/auth/*` to 30 req/min per IP | Block over limit | Cloudflare Rate Limiting feature |
-| 5 | Rate limit `/payment/*` to 60 req/min per IP | Block over limit | Same |
-| 6 | Rate limit `/ai/*` to 60 req/min per user (via auth token) | Block over limit | Custom rule with header inspection |
+| #   | Rule                                                       | Action               | Notes                                 |
+| --- | ---------------------------------------------------------- | -------------------- | ------------------------------------- |
+| 1   | OWASP Core Rule Set                                        | Block                | Managed; tune sensitivity per traffic |
+| 2   | Bot Fight Mode                                             | Block known bad bots | Enable in Cloudflare dashboard        |
+| 3   | Geo-restrict `admin.jobbees.com.au` to AU                  | Block non-AU         | Custom firewall rule                  |
+| 4   | Rate limit `/auth/*` to 30 req/min per IP                  | Block over limit     | Cloudflare Rate Limiting feature      |
+| 5   | Rate limit `/payment/*` to 60 req/min per IP               | Block over limit     | Same                                  |
+| 6   | Rate limit `/ai/*` to 60 req/min per user (via auth token) | Block over limit     | Custom rule with header inspection    |
 
 ---
 
@@ -106,6 +108,7 @@ The only thing it doesn't give you: the "zero public IPs anywhere" posture that 
 ### Why "Premium" specifically
 
 The Standard tier of Azure Front Door (~$50/month with WAF) is cheaper but doesn't include:
+
 - Bot Manager (only available on Premium)
 - Private link to backend (only Premium)
 - Microsoft Default Rule Set 2.1 (Standard is on older v1.1)
@@ -114,14 +117,14 @@ If we go Azure, Premium is the right choice. Standard is in between two viable o
 
 ### Custom rule plan
 
-| # | Rule | Action |
-| --- | --- | --- |
-| 100 | Geo-restrict `/admin/*` paths to AU only | Block if country ≠ AU |
-| 200 | Geo-restrict sanctioned countries | Block |
-| 300 | Rate limit `/auth/*` to 30 req/min per IP | Block over limit |
-| 400 | Rate limit `/payment/*` to 60 req/min per IP | Block over limit |
-| 500 | Rate limit `/ai/*` to 60 req/min per user | Block over limit |
-| 600 | Block known TOR exit nodes (managed list) | Block |
+| #   | Rule                                         | Action                |
+| --- | -------------------------------------------- | --------------------- |
+| 100 | Geo-restrict `/admin/*` paths to AU only     | Block if country ≠ AU |
+| 200 | Geo-restrict sanctioned countries            | Block                 |
+| 300 | Rate limit `/auth/*` to 30 req/min per IP    | Block over limit      |
+| 400 | Rate limit `/payment/*` to 60 req/min per IP | Block over limit      |
+| 500 | Rate limit `/ai/*` to 60 req/min per user    | Block over limit      |
+| 600 | Block known TOR exit nodes (managed list)    | Block                 |
 
 ---
 
@@ -129,14 +132,14 @@ If we go Azure, Premium is the right choice. Standard is in between two viable o
 
 Independent of vendor choice, the backend network is locked down:
 
-| Resource | Network | Public IP |
-| --- | --- | --- |
-| Edge (Cloudflare or Azure Front Door) | Public (anycast) | Yes (this is the front door) |
-| Azure App Service (3 apps) | VNet integrated | Cloudflare option: yes, IP-restricted to Cloudflare. Front Door option: no (private link) |
-| Azure Database for PostgreSQL | VNet private endpoint | **No** |
-| Azure Cache for Redis | VNet private endpoint | **No** |
-| Azure Blob Storage | VNet private endpoint | **No** |
-| Azure Key Vault | VNet private endpoint | **No** |
+| Resource                              | Network               | Public IP                                                                                 |
+| ------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
+| Edge (Cloudflare or Azure Front Door) | Public (anycast)      | Yes (this is the front door)                                                              |
+| Azure App Service (3 apps)            | VNet integrated       | Cloudflare option: yes, IP-restricted to Cloudflare. Front Door option: no (private link) |
+| Azure Database for PostgreSQL         | VNet private endpoint | **No**                                                                                    |
+| Azure Cache for Redis                 | VNet private endpoint | **No**                                                                                    |
+| Azure Blob Storage                    | VNet private endpoint | **No**                                                                                    |
+| Azure Key Vault                       | VNet private endpoint | **No**                                                                                    |
 
 In both options, the data stores (Postgres, Redis, Blob, Key Vault) have **no public IPs**. The only difference is whether the App Service tier itself has a public IP (Cloudflare option) or not (Front Door option).
 

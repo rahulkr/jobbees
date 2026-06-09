@@ -16,7 +16,6 @@
 # row in docs/audit/security-by-stage.md.
 
 rules:
-
   # ============================================================================
   # A. Money integrity (CLAUDE.md rule 5: "All money in cents (integer)")
   # ============================================================================
@@ -30,7 +29,7 @@ rules:
     languages: [generic]
     paths:
       include:
-        - "**/packages/prisma/schema.prisma"
+        - '**/packages/prisma/schema.prisma'
 
   - id: jobbees-prisma-money-as-float
     pattern-regex: '(amount|price|cost|fee|budget|total|earnings|balance|payout|charge|refund)\w*\s+Float'
@@ -41,7 +40,7 @@ rules:
     languages: [generic]
     paths:
       include:
-        - "**/packages/prisma/schema.prisma"
+        - '**/packages/prisma/schema.prisma'
 
   - id: jobbees-money-multiplied-by-tax-literal
     pattern-either:
@@ -57,9 +56,9 @@ rules:
     languages: [typescript]
     paths:
       exclude:
-        - "**/apps/api/src/modules/tax/**"
-        - "**/*.spec.ts"
-        - "**/*.test.ts"
+        - '**/apps/api/src/modules/tax/**'
+        - '**/*.spec.ts'
+        - '**/*.test.ts'
 
   # NOTE: jobbees-money-field-without-currency removed.
   # The original rule used a single-line regex lookahead which cannot see the
@@ -147,9 +146,9 @@ rules:
     languages: [typescript]
     paths:
       exclude:
-        - "**/*.spec.ts"
-        - "**/*.test.ts"
-        - "**/packages/prisma/seed.ts"
+        - '**/*.spec.ts'
+        - '**/*.test.ts'
+        - '**/packages/prisma/seed.ts'
 
   - id: jobbees-prisma-select-leaks-sensitive-fields
     pattern-regex: 'select:\s*\{[^}]*(passwordHash|refreshToken|otpSecret|stripeSecret|webhookSecret|embedding)[^}]*\}'
@@ -180,8 +179,8 @@ rules:
     languages: [typescript]
     paths:
       exclude:
-        - "**/apps/api/src/modules/ai/pii.ts"
-        - "**/apps/api/src/modules/ai/**/*.spec.ts"
+        - '**/apps/api/src/modules/ai/pii.ts'
+        - '**/apps/api/src/modules/ai/**/*.spec.ts'
 
   - id: jobbees-logger-includes-pii
     pattern-regex: 'logger\.(info|debug|warn|error)\([^)]*\$\{[^}]*(email|phoneNumber|fullName|address|abn|passport|license|ssn|bankAccount)[^}]*\}[^)]*\)'
@@ -201,7 +200,7 @@ rules:
     languages: [generic]
     paths:
       include:
-        - "**/packages/prisma/schema.prisma"
+        - '**/packages/prisma/schema.prisma'
 
   # ============================================================================
   # G. Secrets
@@ -216,8 +215,8 @@ rules:
     languages: [generic]
     paths:
       exclude:
-        - ".env.example"
-        - "**/*.md"
+        - '.env.example'
+        - '**/*.md'
 
   - id: jobbees-google-api-key-hardcoded
     pattern-regex: 'AIza[0-9A-Za-z_-]{35}'
@@ -227,8 +226,8 @@ rules:
     languages: [generic]
     paths:
       exclude:
-        - ".env.example"
-        - "**/*.md"
+        - '.env.example'
+        - '**/*.md'
 
   - id: jobbees-openai-api-key-hardcoded
     pattern-regex: 'sk-[A-Za-z0-9]{20,}'
@@ -238,8 +237,8 @@ rules:
     languages: [generic]
     paths:
       exclude:
-        - ".env.example"
-        - "**/*.md"
+        - '.env.example'
+        - '**/*.md'
 
   - id: jobbees-env-loaded-via-process-env-directly
     pattern: process.env.$KEY
@@ -251,12 +250,12 @@ rules:
     languages: [typescript]
     paths:
       include:
-        - "**/apps/api/src/**"
+        - '**/apps/api/src/**'
       exclude:
-        - "**/apps/api/src/config/**"
-        - "**/apps/api/src/main.ts"
-        - "**/*.spec.ts"
-        - "**/*.test.ts"
+        - '**/apps/api/src/config/**'
+        - '**/apps/api/src/main.ts'
+        - '**/*.spec.ts'
+        - '**/*.test.ts'
 
   # ============================================================================
   # H. Webhook signature verification
@@ -302,7 +301,7 @@ rules:
     languages: [generic]
     paths:
       include:
-        - "**/packages/prisma/schema.prisma"
+        - '**/packages/prisma/schema.prisma'
 
   - id: jobbees-prisma-uses-autoincrement-id
     pattern-regex: '@id\s+@default\(autoincrement\(\)\)'
@@ -313,7 +312,7 @@ rules:
     languages: [generic]
     paths:
       include:
-        - "**/packages/prisma/schema.prisma"
+        - '**/packages/prisma/schema.prisma'
 
   # NOTE: jobbees-prisma-fk-without-index removed.
   # The original rule was a single-line regex that flagged every `xxxId String`
@@ -343,5 +342,5 @@ rules:
     languages: [typescript, javascript]
     paths:
       include:
-        - "**/apps/api/src/main.ts"
-        - "**/apps/api/src/**/bootstrap*.ts"
+        - '**/apps/api/src/main.ts'
+        - '**/apps/api/src/**/bootstrap*.ts'

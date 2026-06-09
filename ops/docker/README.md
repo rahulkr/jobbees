@@ -17,10 +17,10 @@ docker volume rm jobbees_postgres_data jobbees_redis_data
 
 ## What's running
 
-| Service | Port | Notes |
-| --- | --- | --- |
+| Service                | Port | Notes                                                 |
+| ---------------------- | ---- | ----------------------------------------------------- |
 | Postgres 16 + pgvector | 5432 | User: `jobbees` / Password: `jobbees` / DB: `jobbees` |
-| Redis 7 | 6379 | No auth (local dev only) |
+| Redis 7                | 6379 | No auth (local dev only)                              |
 
 ## Connecting
 
