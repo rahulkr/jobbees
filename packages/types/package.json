@@ -1,0 +1,15 @@
+{
+  "name": "@jobbees/types",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "generate": "echo 'TODO: generate types from apps/api OpenAPI spec via openapi-typescript'",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@jobbees/tsconfig": "workspace:*"
+  }
+}

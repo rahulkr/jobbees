@@ -1,0 +1,11 @@
+node_modules
+dist
+build
+.next
+.turbo
+coverage
+pnpm-lock.yaml
+apps/mobile
+**/migrations/**/*.sql
+packages/prisma/generated
+inventory/*.csv

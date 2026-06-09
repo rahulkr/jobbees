@@ -1,0 +1,59 @@
+# Local development Docker Compose
+#
+# Start:  pnpm docker:up        (or `docker compose -f ops/docker/dev.yml up -d`)
+# Stop:   pnpm docker:down
+# Logs:   pnpm docker:logs
+# Reset:  pnpm docker:down && docker volume rm jobbees_postgres_data jobbees_redis_data
+#
+# Services:
+# - Postgres 16 with pgvector extension preinstalled
+# - Redis 7 (sessions, rate limits, idempotency, BullMQ)
+#
+# The Postgres image is the official pgvector image which already has the vector
+# extension built. After containers start, the api app will run migrations including
+# CREATE EXTENSION IF NOT EXISTS vector.
+
+name: jobbees
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: jobbees-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jobbees
+      POSTGRES_PASSWORD: jobbees
+      POSTGRES_DB: jobbees
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Init SQL — only runs on first container start (when data dir is empty)
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobbees -d jobbees"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: jobbees-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --save 60 1
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+    name: jobbees_postgres_data
+  redis_data:
+    name: jobbees_redis_data

@@ -1,0 +1,7 @@
+packages:
+  - "apps/api"
+  - "apps/admin"
+  - "apps/web"
+  - "packages/*"
+
+# apps/mobile is Flutter — managed via pubspec.yaml, not pnpm workspaces.

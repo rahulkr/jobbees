@@ -1,0 +1,37 @@
+{
+  "name": "jobbees",
+  "version": "0.1.0",
+  "private": true,
+  "description": "JOBBees — Australian peer-to-peer task marketplace monorepo",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=22.11.0",
+    "pnpm": ">=9.12.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "db:generate": "pnpm --filter @jobbees/prisma generate",
+    "db:migrate:dev": "pnpm --filter @jobbees/prisma migrate:dev",
+    "db:migrate:deploy": "pnpm --filter @jobbees/prisma migrate:deploy",
+    "db:studio": "pnpm --filter @jobbees/prisma studio",
+    "db:seed": "pnpm --filter @jobbees/prisma seed",
+    "docker:up": "docker compose -f ops/docker/dev.yml up -d",
+    "docker:down": "docker compose -f ops/docker/dev.yml down",
+    "docker:logs": "docker compose -f ops/docker/dev.yml logs -f",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@jobbees/eslint-config": "workspace:*",
+    "@jobbees/tsconfig": "workspace:*",
+    "lefthook": "^1.7.0",
+    "prettier": "^3.3.3",
+    "turbo": "^2.1.0",
+    "typescript": "^5.6.0"
+  }
+}

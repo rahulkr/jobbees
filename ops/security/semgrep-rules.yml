@@ -1,0 +1,347 @@
+# JOBBees Semgrep rules
+#
+# Project-specific static analysis rules. These complement (do not replace) the
+# `security-review` Claude Code skill and the generic Semgrep registry rules.
+#
+# Run locally:   semgrep --config ops/security/semgrep-rules.yml apps packages
+# Run with registry: semgrep --config p/typescript --config p/nestjs --config ops/security/semgrep-rules.yml
+# Run in CI:     see .github/workflows/semgrep.yml
+#
+# Severity convention:
+#   ERROR   = block merge (hard rule from CLAUDE.md)
+#   WARNING = surface to reviewer, may be accepted with written justification
+#   INFO    = informational, no action required
+#
+# Each rule maps to a check in .claude/skills/security-review/SKILL.md and a
+# row in docs/audit/security-by-stage.md.
+
+rules:
+
+  # ============================================================================
+  # A. Money integrity (CLAUDE.md rule 5: "All money in cents (integer)")
+  # ============================================================================
+
+  - id: jobbees-prisma-money-as-decimal
+    pattern-regex: '(amount|price|cost|fee|budget|total|earnings|balance|payout|charge|refund)\w*\s+Decimal'
+    message: >
+      Money field declared as `Decimal`. JOBBees stores all money as `Int` cents.
+      Rename to `*Cents` and change type to `Int`. See CLAUDE.md rule 5.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - "**/packages/prisma/schema.prisma"
+
+  - id: jobbees-prisma-money-as-float
+    pattern-regex: '(amount|price|cost|fee|budget|total|earnings|balance|payout|charge|refund)\w*\s+Float'
+    message: >
+      Money field declared as `Float`. Floats lose precision — never use for money.
+      Rename to `*Cents` and change type to `Int`. See CLAUDE.md rule 5.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - "**/packages/prisma/schema.prisma"
+
+  - id: jobbees-money-multiplied-by-tax-literal
+    pattern-either:
+      - pattern: $X * 0.1
+      - pattern: $X * 1.1
+      - pattern: $X / 11
+      - pattern: $X * 10 / 11
+    message: >
+      Inline GST math detected (* 0.1, * 1.1, etc.). All GST calculation MUST go
+      through `apps/api/src/modules/tax/gst.service.ts` which handles rounding,
+      currency, and edge cases. See .claude/skills/au-tax/SKILL.md.
+    severity: ERROR
+    languages: [typescript]
+    paths:
+      exclude:
+        - "**/apps/api/src/modules/tax/**"
+        - "**/*.spec.ts"
+        - "**/*.test.ts"
+
+  # NOTE: jobbees-money-field-without-currency removed.
+  # The original rule used a single-line regex lookahead which cannot see the
+  # model's `countryCode` field or `currency` field when declared elsewhere in
+  # the model block. JOBBees design: currency lives on the Country table and
+  # every money-bearing model joins via `countryCode → Country.currencyCode`.
+  # See ADR 003 (multi-country readiness). Enforcement moved to:
+  #   1. `.claude/skills/security-review/SKILL.md` §H2 (currency strategy)
+  #   2. `.github/pull_request_template.md` (Prisma section)
+
+  # ============================================================================
+  # B. Idempotency (CLAUDE.md rule 3)
+  # ============================================================================
+
+  - id: jobbees-stripe-call-without-idempotency-key
+    patterns:
+      - pattern-either:
+          - pattern: $STRIPE.paymentIntents.create($PARAMS)
+          - pattern: $STRIPE.paymentIntents.capture($ID, $PARAMS)
+          - pattern: $STRIPE.refunds.create($PARAMS)
+          - pattern: $STRIPE.transfers.create($PARAMS)
+          - pattern: $STRIPE.payouts.create($PARAMS)
+          - pattern: $STRIPE.charges.create($PARAMS)
+      - pattern-not: '$STRIPE.$METHOD(..., {idempotencyKey: $K})'
+      - pattern-not: '$STRIPE.$METHOD(..., {idempotencyKey: $K, ...})'
+    message: >
+      Stripe mutating call without `idempotencyKey`. Required to make retries safe.
+      Derive from request header: `{ idempotencyKey: `stripe:${ctx.idempotencyKey}` }`.
+      See .claude/skills/stripe-payment/SKILL.md.
+    severity: ERROR
+    languages: [typescript]
+
+  # ============================================================================
+  # NOTE — Decorator-presence checks are enforced elsewhere
+  # ============================================================================
+  #
+  # The following checks WERE attempted as Semgrep rules but removed because
+  # Semgrep's TS pattern parser does not cleanly express "method has decorator X"
+  # without a combinatorial explosion (decorator order × arg form × HTTP verb).
+  # They are enforced via:
+  #   1. `.claude/skills/security-review/SKILL.md` (auto-runs when AI edits controllers)
+  #   2. `.github/pull_request_template.md` (reviewer checklist)
+  #   3. Required human review on auth/payment/PII PRs (CLAUDE.md rule 2)
+  #
+  # Removed:
+  #   - jobbees-mutating-controller-without-idempotency-interceptor  → skill §C1, PR template
+  #   - jobbees-controller-without-auth-guard                         → skill §B1, PR template
+  #   - jobbees-mutating-controller-without-roles                     → skill §B2, PR template
+  #   - jobbees-auth-endpoint-without-rate-limit                      → skill §D1, PR template
+  #
+  # If a future version of Semgrep adds first-class decorator-set matching,
+  # restore these rules. Until then, the checklist + skill are the gates.
+
+  # ============================================================================
+  # E. SQL injection / soft delete
+  # ============================================================================
+
+  - id: jobbees-raw-query-with-interpolation
+    pattern-either:
+      - pattern: $PRISMA.$queryRaw(`...${$X}...`)
+      - pattern: $PRISMA.$executeRaw(`...${$X}...`)
+    message: >
+      Raw query with string interpolation. Use `Prisma.sql` template tag or
+      `$queryRawUnsafe` with parameter array. Never interpolate untrusted input.
+      See security-review skill §E1.
+    severity: ERROR
+    languages: [typescript]
+
+  - id: jobbees-find-without-soft-delete-filter
+    patterns:
+      - pattern-either:
+          - pattern: $PRISMA.user.findMany($ARGS)
+          - pattern: $PRISMA.user.findFirst($ARGS)
+          - pattern: $PRISMA.task.findMany($ARGS)
+          - pattern: $PRISMA.task.findFirst($ARGS)
+          - pattern: $PRISMA.bid.findMany($ARGS)
+          - pattern: $PRISMA.review.findMany($ARGS)
+      - pattern-not: '$PRISMA.$M.$N({..., where: {..., deletedAt: $X, ...}, ...})'
+      - pattern-not: '$PRISMA.$M.$N({..., where: {deletedAt: $X, ...}})'
+    message: >
+      Query on soft-deletable model without explicit `deletedAt` filter. Either
+      use the `softDeleteExtension` from `packages/prisma/extensions/`, or add
+      `where: { deletedAt: null }` explicitly. See security-review skill §E2.
+    severity: WARNING
+    languages: [typescript]
+    paths:
+      exclude:
+        - "**/*.spec.ts"
+        - "**/*.test.ts"
+        - "**/packages/prisma/seed.ts"
+
+  - id: jobbees-prisma-select-leaks-sensitive-fields
+    pattern-regex: 'select:\s*\{[^}]*(passwordHash|refreshToken|otpSecret|stripeSecret|webhookSecret|embedding)[^}]*\}'
+    message: >
+      Prisma `select` includes a sensitive field that should never leave the
+      database layer. Remove it from the projection.
+    severity: ERROR
+    languages: [typescript]
+
+  # ============================================================================
+  # F. PII / LLM safety
+  # ============================================================================
+
+  - id: jobbees-llm-call-without-pii-redaction
+    patterns:
+      - pattern-either:
+          - pattern: '$CLIENT.generateContent({contents: $X, ...})'
+          - pattern: '$CLIENT.messages.create({messages: $X, ...})'
+          - pattern: '$CLIENT.chat.completions.create({messages: $X, ...})'
+          - pattern: '$CLIENT.responses.create({input: $X, ...})'
+      - pattern-not: '$CLIENT.$M({..., contents: redactPii(...), ...})'
+      - pattern-not: '$CLIENT.$M({..., messages: redactPii(...), ...})'
+      - pattern-not: '$CLIENT.$M({..., input: redactPii(...), ...})'
+    message: >
+      External LLM call with raw input. PII MUST go through `redactPii()` from
+      `apps/api/src/modules/ai/pii.ts` before any external prompt. CLAUDE.md rule 9.
+    severity: ERROR
+    languages: [typescript]
+    paths:
+      exclude:
+        - "**/apps/api/src/modules/ai/pii.ts"
+        - "**/apps/api/src/modules/ai/**/*.spec.ts"
+
+  - id: jobbees-logger-includes-pii
+    pattern-regex: 'logger\.(info|debug|warn|error)\([^)]*\$\{[^}]*(email|phoneNumber|fullName|address|abn|passport|license|ssn|bankAccount)[^}]*\}[^)]*\)'
+    message: >
+      Logger statement appears to include PII via template literal. Redact to
+      `[REDACTED:email]` or configure pino redact paths. CLAUDE.md rule 9.
+    severity: WARNING
+    languages: [typescript]
+
+  - id: jobbees-stores-government-id-number
+    pattern-regex: '(passportNumber|driverLicenseNumber|driversLicenseNumber|ssn|medicareNumber)\s+String'
+    message: >
+      Government ID number field detected in schema. JOBBees minimizes KYC PII —
+      Didit holds the document; we store only verification status + session ID.
+      Remove unless explicit business + legal justification exists.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - "**/packages/prisma/schema.prisma"
+
+  # ============================================================================
+  # G. Secrets
+  # ============================================================================
+
+  - id: jobbees-stripe-secret-key-hardcoded
+    pattern-regex: '(sk_live|sk_test|rk_live|rk_test)_[A-Za-z0-9]{16,}'
+    message: >
+      Stripe secret key appears hardcoded in source. Rotate the key IMMEDIATELY,
+      then move to `.env.local` (dev) or Azure Key Vault (staging/prod).
+    severity: ERROR
+    languages: [generic]
+    paths:
+      exclude:
+        - ".env.example"
+        - "**/*.md"
+
+  - id: jobbees-google-api-key-hardcoded
+    pattern-regex: 'AIza[0-9A-Za-z_-]{35}'
+    message: >
+      Google API key appears hardcoded. Rotate immediately; move to Key Vault.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      exclude:
+        - ".env.example"
+        - "**/*.md"
+
+  - id: jobbees-openai-api-key-hardcoded
+    pattern-regex: 'sk-[A-Za-z0-9]{20,}'
+    message: >
+      OpenAI / Anthropic style secret key appears hardcoded. Rotate; use Key Vault.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      exclude:
+        - ".env.example"
+        - "**/*.md"
+
+  - id: jobbees-env-loaded-via-process-env-directly
+    pattern: process.env.$KEY
+    message: >
+      Direct `process.env.X` read. Use `ConfigService.get(...)` which validates
+      via the schema in `apps/api/src/config/` and reads Key Vault references
+      in staging/prod.
+    severity: WARNING
+    languages: [typescript]
+    paths:
+      include:
+        - "**/apps/api/src/**"
+      exclude:
+        - "**/apps/api/src/config/**"
+        - "**/apps/api/src/main.ts"
+        - "**/*.spec.ts"
+        - "**/*.test.ts"
+
+  # ============================================================================
+  # H. Webhook signature verification
+  # ============================================================================
+
+  # NOTE: jobbees-stripe-webhook-without-signature-verify removed.
+  # Same reason as the other decorator-based rules — Semgrep's TS parser doesn't
+  # handle `... stripe.webhooks.constructEvent(...) ...` as a body-presence check
+  # without parse errors. The check is enforced via:
+  #   1. `.claude/skills/security-review/SKILL.md` §H5
+  #   2. `.github/pull_request_template.md` (Webhook section)
+  #   3. Required human review on payment PRs (CLAUDE.md rule 2)
+
+  # ============================================================================
+  # I. Audit trail
+  # ============================================================================
+
+  - id: jobbees-audit-log-mutated
+    pattern-either:
+      - pattern: $PRISMA.auditLog.update($X)
+      - pattern: $PRISMA.auditLog.updateMany($X)
+      - pattern: $PRISMA.auditLog.delete($X)
+      - pattern: $PRISMA.auditLog.deleteMany($X)
+      - pattern: $PRISMA.auditLog.upsert($X)
+    message: >
+      AuditLog is append-only. Updating or deleting audit records destroys the
+      compliance trail. If you need to correct, write a new compensating record.
+    severity: ERROR
+    languages: [typescript]
+
+  # ============================================================================
+  # J. Misc — ID convention
+  # ============================================================================
+
+  - id: jobbees-prisma-uses-cuid1-not-cuid2
+    pattern-regex: '@id\s+@default\(cuid\(\)\)'
+    message: >
+      Model uses `cuid()` (cuid1). JOBBees standard is cuid2 set in app code via
+      `@paralleldrive/cuid2`. Update the field to:
+      `id String @id @default(dbgenerated("...")) ` — or apply the cuid2 default
+      in the service layer.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - "**/packages/prisma/schema.prisma"
+
+  - id: jobbees-prisma-uses-autoincrement-id
+    pattern-regex: '@id\s+@default\(autoincrement\(\)\)'
+    message: >
+      Auto-increment Int IDs leak record count and ordering. JOBBees uses cuid2
+      strings. Replace with `id String @id @default(...)`. CLAUDE.md rule 7.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - "**/packages/prisma/schema.prisma"
+
+  # NOTE: jobbees-prisma-fk-without-index removed.
+  # The original rule was a single-line regex that flagged every `xxxId String`
+  # field, regardless of whether `@@index([xxxId])` was declared later in the
+  # same model block (which it always is in a well-built schema). Multi-line
+  # block-aware checks aren't reliably expressible in Semgrep generic mode.
+  # CLAUDE.md rule 8 stays as the convention. Enforcement moved to:
+  #   1. `.claude/skills/security-review/SKILL.md` §J (Prisma index check)
+  #   2. `.github/pull_request_template.md` (Prisma section asks reviewer to verify)
+  #   3. Prisma `migration diff` review in PR (visible new FK without new index = flag)
+
+  # ============================================================================
+  # K. Configuration / migration
+  # ============================================================================
+
+  - id: jobbees-prisma-migrate-deploy-at-startup
+    pattern-either:
+      - pattern: |
+          exec("prisma migrate deploy")
+      - pattern: |
+          exec("npx prisma migrate deploy")
+      - pattern-regex: "spawn\\(['\"]prisma['\"].*migrate.*deploy"
+    message: >
+      App startup must NOT run `prisma migrate deploy`. Only CI runs migrations.
+      CLAUDE.md rule 12.
+    severity: ERROR
+    languages: [typescript, javascript]
+    paths:
+      include:
+        - "**/apps/api/src/main.ts"
+        - "**/apps/api/src/**/bootstrap*.ts"
