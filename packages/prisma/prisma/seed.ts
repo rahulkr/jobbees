@@ -4,3 +4,5 @@
 // Restored path: packages/prisma/seed.ts
 // Configured in packages/prisma/package.json prisma.seed
 export {};
+
+const _ciGateTest: number = 'this should fail typecheck';
