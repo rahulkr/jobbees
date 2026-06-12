@@ -1,13 +1,19 @@
 name: CI
 
-# Runs on every PR and on every push to main.
+# Runs on every PR targeting main.
 # Gates: lint + typecheck + test + gitleaks.
 # Semgrep is a separate workflow (.github/workflows/semgrep.yml).
+#
+# IMPORTANT: We intentionally do NOT trigger on `push: branches: [main]`.
+# Reason: branch protection requires all changes through PRs, so a push to
+# main always corresponds to a just-merged PR whose CI already passed. Running
+# CI again on the merge commit is wasted minutes — and worse, when both
+# triggers exist, GitHub appends "(pull_request)" or "(push)" to the displayed
+# check name, which breaks the required-status-check matcher in branch rulesets.
+# Single trigger = clean check names = ruleset matches cleanly.
 
 on:
   pull_request:
-    branches: [main]
-  push:
     branches: [main]
   workflow_dispatch:
 
