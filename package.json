@@ -36,8 +36,10 @@
   },
   "pnpm": {
     "overrides": {
-      "eslint": "^9.18.0"
+      "eslint": "^9.18.0",
+      "prisma": "5.22.0",
+      "@prisma/client": "5.22.0"
     },
-    "comment": "Pinned to ESLint v9 because eslint-plugin-react (used by Next.js's eslint-config-next) calls the legacy context.getFilename() API, which ESLint v10 removed. Revisit when the React plugin and the wider ecosystem catch up. Until then, do NOT bump eslint past ^9 — it will break apps/admin and apps/web lint."
+    "comment": "Pinned versions explained: (1) ESLint v9 because eslint-plugin-react (used by Next.js's eslint-config-next) calls the legacy context.getFilename() API, which ESLint v10 removed. (2) Prisma 5.22.0 because v7 removed the `url = env('DATABASE_URL')` syntax from datasource blocks (now requires prisma.config.ts) and reworked the client config — neither of which is in scope for MVP. v6 fine too but v5 is the explicit CLAUDE.md rule 13 baseline. Do NOT bump these without an ADR per CLAUDE.md rule 13."
   }
 }
