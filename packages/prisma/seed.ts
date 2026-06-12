@@ -46,13 +46,31 @@ const adapter = new PrismaPg({
 });
 const prisma = new PrismaClient({ adapter });
 
-// ─── DELIBERATE TYPE ERROR — TEMPORARY ─────────────────────────────────
-// This line is here to test the CI gate. It is a string assigned to a
-// `number` typed variable, which tsc must catch on `pnpm --filter
-// @jobbees/prisma run typecheck`. If CI passes with this line in place,
-// the typecheck script is not actually scanning seed.ts.
-// REMOVE THIS BLOCK AFTER VERIFYING CI BLOCKS THE MERGE.
+// ─── DELIBERATE FAILURES — TEMPORARY CI-GATE VERIFICATION ──────────────
+// Three independent failure modes in one commit, to verify three layers
+// of the safety net all fire correctly. REMOVE THIS BLOCK AFTER MERGE
+// IS PROVEN BLOCKED — none of this should ever ship.
+
+// (1) Typecheck failure — string assigned to number.
+//     Caught by tsc via 'CI / Lint / typecheck / test (Node)'.
 const _ciGateTest: number = 'this should fail typecheck';
+
+// (2) Secrets failure — AWS-access-key pattern AKIA[A-Z0-9]{16}.
+//     Caught by gitleaks via 'CI / Gitleaks (secrets scan)'.
+//     Pattern is intentionally synthetic ('AKIA' + 'FAKETESTCIGATE99') so
+//     no real credential is exposed; the regex match is what trips the scan.
+const _awsKeyTrigger = 'AKIAFAKETESTCIGATE99';
+
+// (3) Static-analysis failure — eval() on a string.
+//     Caught by Semgrep (rule pack p/owasp-top-ten + p/typescript) via
+//     'Semgrep / Static analysis'. eval is the classic example.
+// eslint-disable-next-line @typescript-eslint/no-implied-eval, no-eval
+const _evalTrigger = eval('1 + 1');
+
+// Silence unused-var errors so the OTHER errors above are the ones that fail CI:
+void _ciGateTest;
+void _awsKeyTrigger;
+void _evalTrigger;
 // ───────────────────────────────────────────────────────────────────────
 
 async function main() {
