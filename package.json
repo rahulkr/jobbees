@@ -38,8 +38,9 @@
     "overrides": {
       "eslint": "^9.18.0",
       "prisma": "5.22.0",
-      "@prisma/client": "5.22.0"
+      "@prisma/client": "5.22.0",
+      "typescript": "5.9.2"
     },
-    "comment": "Pinned versions explained: (1) ESLint v9 because eslint-plugin-react (used by Next.js's eslint-config-next) calls the legacy context.getFilename() API, which ESLint v10 removed. (2) Prisma 5.22.0 because v7 removed the `url = env('DATABASE_URL')` syntax from datasource blocks (now requires prisma.config.ts) and reworked the client config — neither of which is in scope for MVP. v6 fine too but v5 is the explicit CLAUDE.md rule 13 baseline. Do NOT bump these without an ADR per CLAUDE.md rule 13."
+    "comment": "Pinned versions explained: (1) ESLint v9 because eslint-plugin-react (used by Next.js's eslint-config-next) calls the legacy context.getFilename() API, which ESLint v10 removed. (2) Prisma 5.22.0 because v7 removed the `url = env('DATABASE_URL')` syntax from datasource blocks (now requires prisma.config.ts) and reworked the client config — neither in scope for MVP. v5 is the explicit CLAUDE.md rule 13 baseline. (3) TypeScript 5.9.2 because v6 deprecated `baseUrl` (and other options) with hard CI errors, and is also a CLAUDE.md rule 13 violation. Do NOT bump any of these without an ADR per CLAUDE.md rule 13."
   }
 }
