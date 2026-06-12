@@ -107,7 +107,10 @@ jobs:
       - name: Generate Prisma client
         # Several typecheck targets depend on the generated client. Do this once
         # at the top so each workspace's typecheck doesn't have to.
-        run: pnpm exec prisma generate --schema=packages/prisma/schema.prisma
+        # `prisma` is only installed in @jobbees/prisma (not hoisted), so we have
+        # to run it via the workspace filter. The package.json there has a
+        # `generate` script + a `prisma.schema` field, so no flags needed.
+        run: pnpm --filter @jobbees/prisma run generate
 
       - name: Lint
         # --max-warnings=0 — warnings are errors in CI; if a warning appears the
@@ -120,8 +123,9 @@ jobs:
       - name: Prisma migrations apply (test DB)
         # Apply migrations to the empty CI Postgres so integration tests have a
         # schema. Uses `migrate deploy` (not `migrate dev`) — non-interactive,
-        # exits non-zero on any drift.
-        run: pnpm exec prisma migrate deploy --schema=packages/prisma/schema.prisma
+        # exits non-zero on any drift. Same workspace-filter pattern as
+        # `generate` above — prisma binary lives in @jobbees/prisma only.
+        run: pnpm --filter @jobbees/prisma run migrate:deploy
 
       - name: Test
         run: pnpm exec turbo run test
