@@ -1,12 +1,17 @@
 name: Semgrep
 
+# IMPORTANT: We intentionally do NOT trigger on `push: branches: [main]`.
+# Same reasoning as ci.yml — branch protection forces merges through PRs, so
+# main pushes are post-PR no-ops. Single trigger keeps the displayed check
+# name clean ("Semgrep / Static analysis" without the "(pull_request)" suffix)
+# so the branch ruleset's required-status-check matcher works.
+#
+# Daily scheduled scan against main still runs — catches issues introduced
+# by dependency updates or new Semgrep registry rules between PRs.
+
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
-  # Daily scan against main — catches issues introduced by dependency updates
-  # or new Semgrep registry rules without waiting for the next PR
   schedule:
     - cron: '23 8 * * *' # 08:23 UTC daily (low traffic time)
   workflow_dispatch:
