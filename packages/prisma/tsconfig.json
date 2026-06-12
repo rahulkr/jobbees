@@ -1,0 +1,21 @@
+{
+  "extends": "@jobbees/tsconfig/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    // The Prisma client lives at ./generated/ but we don't want to typecheck
+    // generated code — it's huge, slow, and Prisma is responsible for its
+    // correctness. Keep the entrypoint types narrow to just our hand-written
+    // files (schema config + seed).
+    "rootDir": "."
+  },
+  // Files we DO want typechecked:
+  //   - seed.ts (uses PrismaClient + faker; catches type drift early)
+  //   - prisma.config.ts (Prisma 7 config — bad config = silent migrate failure)
+  //
+  // We deliberately don't add generated/** because that's >100k lines of
+  // generated code we don't author; tsc would waste time on it. The Prisma
+  // CLI guarantees its output's type correctness.
+  "include": ["seed.ts", "prisma.config.ts"],
+  "exclude": ["node_modules", "generated", "migrations"]
+}
