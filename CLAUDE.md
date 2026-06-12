@@ -12,9 +12,9 @@ JOBBees: Australian peer-to-peer task marketplace. Mobile-first, Node/NestJS bac
 
 ## Tech stack (locked, do not re-litigate)
 
-- Backend: Node 22 + TypeScript + NestJS + Prisma + PostgreSQL 16 (with pgvector) + Redis + BullMQ + Socket.IO (single-node at MVP)
+- Backend: Node 24 + TypeScript 5.9 + NestJS 11 + Prisma 5.22 + PostgreSQL 16 (with pgvector) + Redis + BullMQ + Socket.IO (single-node at MVP)
 - Mobile: Flutter + Riverpod + go_router + dio
-- Admin + Web: Next.js 14 (App Router) + shadcn/ui + Tailwind
+- Admin + Web: Next.js 16 (App Router) + React 19 + shadcn/ui + Tailwind 4
 - Payments: Stripe + Stripe Connect Express + Stripe Identity
 - LLMs: Gemini Flash (high-volume) + Claude Sonnet (disputes, admin co-pilot) + OpenAI embeddings (1536 dims)
 - Hosting: Azure (App Service, Postgres Flexible, Cache for Redis, Blob, Key Vault, App Insights)

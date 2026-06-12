@@ -28,7 +28,7 @@ jobbees/
 
 **Prerequisites:**
 
-- Node.js 22.11.0+ (use `nvm install` — `.nvmrc` is pinned)
+- Node.js 24.0.0+ (use `nvm install` — `.nvmrc` is pinned)
 - pnpm 9.12.0+ (`npm install -g pnpm`)
 - Docker Desktop (for local Postgres + Redis)
 - Flutter 3.24+ (for the mobile app)
