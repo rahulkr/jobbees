@@ -185,3 +185,58 @@ jobs:
 
       - name: Test
         run: flutter test
+
+  # ---------------------------------------------------------------------------
+  # Rollup — single required status check for branch protection rulesets
+  # ---------------------------------------------------------------------------
+  # Per GitHub's "Handling skipped but required checks" guidance
+  # (https://docs.github.com/en/pull-requests/.../troubleshooting-required-status-checks),
+  # using individual job names as required status checks runs into matching
+  # bugs caused by:
+  #   1. Test-merge-commit vs head-commit SHA mismatches
+  #   2. The (pull_request) suffix that GitHub adds for disambiguation
+  #   3. Skipped jobs (like our conditional Flutter job) staying in "Pending"
+  #
+  # The fix is a single rollup job that depends on every job we care about
+  # and reports a single, stable check name. The ruleset requires ONLY this
+  # one check; the individual jobs are still visible in the PR but aren't
+  # gated directly.
+  #
+  # Note `if: always()` — without it, this job would be skipped when any
+  # `needs` dep fails, which means GitHub would report "skipped" (= "success"
+  # for matrix purposes per the GitHub docs) and a red merge would slip
+  # through. With `always()` we run no matter what and explicitly check each
+  # dep's result.
+  ci-required:
+    name: CI required
+    needs: [secrets, node, flutter]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify required jobs passed
+        run: |
+          secrets_result="${{ needs.secrets.result }}"
+          node_result="${{ needs.node.result }}"
+          flutter_result="${{ needs.flutter.result }}"
+
+          echo "secrets: $secrets_result"
+          echo "node:    $node_result"
+          echo "flutter: $flutter_result  (skipped is OK — Flutter job runs only on mobile-tagged PRs)"
+
+          # Hard gates: secrets + node MUST be success
+          if [ "$secrets_result" != "success" ]; then
+            echo "::error::Gitleaks (secrets scan) did not pass (result: $secrets_result)"
+            exit 1
+          fi
+          if [ "$node_result" != "success" ]; then
+            echo "::error::Lint / typecheck / test (Node) did not pass (result: $node_result)"
+            exit 1
+          fi
+
+          # Flutter is conditional — success OR skipped are both acceptable
+          if [ "$flutter_result" != "success" ] && [ "$flutter_result" != "skipped" ]; then
+            echo "::error::Analyze / test (Flutter) did not pass or skip cleanly (result: $flutter_result)"
+            exit 1
+          fi
+
+          echo "All required CI gates passed."
