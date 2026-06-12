@@ -16,13 +16,25 @@
 //   HNSW indexes added in raw SQL migrations.
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "./generated"
+  provider        = "prisma-client-js"
+  output          = "./generated"
+  // Driver adapters are required by the Prisma 7 pattern we use: PrismaClient
+  // receives a PrismaPg adapter constructed from process.env.DATABASE_URL,
+  // instead of the legacy `datasource db { url = env(...) }` line that no
+  // longer exists in v7. Adapters are still gated behind a preview flag at
+  // schema-generation time — once they go GA we can drop this line.
+  // See packages/prisma/seed.ts and (later) apps/api/src/.../prisma.service.ts
+  // for the consumers.
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Connection URL lives in prisma.config.ts (Prisma 7 pattern). The migrate
+  // engine reads DATABASE_URL from env via the config file. Application code
+  // instantiates PrismaClient with a driver adapter (PrismaPg) — see
+  // apps/api/src/.../prisma.service.ts when it lands in Sprint 1.
+  //
   // Note: pgvector extension is created via the raw migration
   // 000_enable_pgvector/migration.sql. Vector columns use
   // Unsupported("vector(1536)") below, and we query them via

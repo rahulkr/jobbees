@@ -6,7 +6,7 @@
 # Reset:  pnpm docker:down && docker volume rm jobbees_postgres_data jobbees_redis_data
 #
 # Services:
-# - Postgres 16 with pgvector extension preinstalled
+# - Postgres 17 with pgvector extension preinstalled
 # - Redis 7 (sessions, rate limits, idempotency, BullMQ)
 #
 # The Postgres image is the official pgvector image which already has the vector
@@ -17,7 +17,7 @@ name: jobbees
 
 services:
   postgres:
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg17
     container_name: jobbees-postgres
     restart: unless-stopped
     environment:

@@ -14,18 +14,17 @@
     "format": "prisma format"
   },
   "dependencies": {
-    "@prisma/client": "5.22.0"
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.4.0",
     "@jobbees/tsconfig": "workspace:*",
     "@paralleldrive/cuid2": "^3.3.0",
-    "prisma": "5.22.0",
+    "@types/node": "^24.0.0",
+    "dotenv": "^17.0.0",
+    "prisma": "^7.8.0",
     "tsx": "^4.22.4",
     "typescript": "^5.9.0"
-  },
-  "prisma": {
-    "schema": "./schema.prisma",
-    "seed": "tsx seed.ts"
   }
 }

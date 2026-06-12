@@ -34,7 +34,7 @@ TODO: insert architecture diagram (PNG / SVG) showing:
 
 ### Data layer
 
-- **PostgreSQL 16** (Azure Database for PostgreSQL Flexible Server) with pgvector extension
+- **PostgreSQL 17** (Azure Database for PostgreSQL Flexible Server) with pgvector extension
 - **Redis** (Azure Cache for Redis) — sessions, rate limits, idempotency, BullMQ job queue
 - **Azure Blob Storage** — user uploads, completion proof photos, generated PDFs
 

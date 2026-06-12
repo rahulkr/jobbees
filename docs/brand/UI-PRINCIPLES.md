@@ -4,7 +4,7 @@ Modern best-of-industry patterns layered on top of the brand palette in `COLORS.
 
 ## Design system
 
-**Material 3 (Material You)** via Flutter 3.24+. We use `useMaterial3: true` everywhere. This gives us:
+**Material 3 (Material You)** via Flutter 3.44+. We use `useMaterial3: true` everywhere. This gives us:
 
 - Dynamic shape (rounded corners scale with surface)
 - Filled / Outlined / Text button variants with semantic distinction

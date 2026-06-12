@@ -51,7 +51,7 @@ jobs:
     # Versions match the production target (Postgres 16, Redis 7).
     services:
       postgres:
-        image: pgvector/pgvector:pg16
+        image: pgvector/pgvector:pg17
         env:
           POSTGRES_USER: jobbees
           POSTGRES_PASSWORD: jobbees_test
@@ -161,7 +161,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           # Pin to the same channel used locally. Bump deliberately.
-          flutter-version: '3.24.x'
+          flutter-version: '3.44.x'
           channel: stable
           cache: true
 

@@ -69,7 +69,7 @@ Mid-sprint Friday sync (week 1 end) is optional but recommended — 15-min "here
 
 - Monorepo scaffold: pnpm workspaces + Turborepo, four apps (mobile/api/admin/web), four packages (prisma/types/tsconfig/eslint-config)
 - Prisma schema with 9 models (Country, User, UserSkill, Category, Task, TaskPhoto, TaskQuestion, Bid, Review, AuditLog), cuid2 IDs, integer cents, soft delete, pgvector
-- Migration `000_enable_pgvector` + initial migration applied to local Postgres 16
+- Migration `000_enable_pgvector` + initial migration applied to local Postgres 17
 - 4 ADRs (monorepo & stack, database conventions, multi-country readiness, category types)
 - 19 IT audit docs (encryption, IR, BCP/DR, retention, DSR, access control, vendor list, edge security, security-by-stage, etc.)
 - 6 custom Claude Code skills: `stripe-payment`, `au-tax`, `pgvector-match`, `tier0-dispute`, `multimodal-extraction`, `security-review`

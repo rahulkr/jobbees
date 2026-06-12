@@ -30,7 +30,7 @@ Then Sprints 1-12 spend the ~945-hour build budget on actual features without re
 - Root config: ESLint v9 flat config (base + per-app), Prettier, lefthook, turbo.json, tsconfig.base.json
 - Pre-commit hooks: gitleaks, ESLint, Prettier, TypeScript typecheck
 - Pre-push hook: test
-- Local Docker: Postgres 16 + pgvector extension, Redis 7, init scripts
+- Local Docker: Postgres 17 + pgvector extension, Redis 7, init scripts
 
 ### Data model
 

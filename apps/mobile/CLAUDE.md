@@ -4,7 +4,7 @@ User-facing app for both posters and taskers. Calls the NestJS API for everythin
 
 ## Stack
 
-- Flutter 3.24+ on Dart 3.5+ (iOS + Android)
+- Flutter 3.44+ on Dart 3.9+ (iOS + Android)
 - Riverpod (state management with code generation)
 - go_router (declarative routing)
 - dio (HTTP client with interceptors)
