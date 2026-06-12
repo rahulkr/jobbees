@@ -1,10 +1,10 @@
 # Sprint 12 — Soft launch + first real users + retrospective
 
-**Dates:** Mon 16 Nov → Fri 27 Nov 2026 (10 working days)
+**Dates:** Mon 23 Nov → Fri 4 Dec 2026 (10 working days)
 **Theme:** A real Sydney tasker, in a real suburb, completes a real task posted by a real poster, with real money flowing through Stripe live mode. The MVP exists in the world.
 **Hours budget:** ~50 (split across launch ops, monitoring, bug-fix, retrospective)
-**Mid-sprint demo:** Fri 20 Nov
-**End-of-sprint demo:** Fri 27 Nov (the launch video)
+**Mid-sprint demo:** Fri 27 Nov
+**End-of-sprint demo:** Fri 4 Dec (the launch video)
 
 **🚨 Stripe goes LIVE this sprint.** One-way decision per the Stripe live-mode toggle. Cannot easily reverse. Switch-checklist must be reviewed by eng lead + client before flipping.
 
@@ -16,48 +16,48 @@ By Friday 27 Nov, JOBBees has 30-50 real taskers onboarded in one Sydney suburb,
 
 ### Launch ops
 
-| Item | Hrs | Notes |
-| --- | --- | --- |
-| Pick the launch suburb | 1 | Newtown, Surry Hills, Bondi? Population density + tasker availability + transport |
-| Recruit 30-50 taskers via manual outreach | 8 | LinkedIn, Facebook groups, Gumtree-replacement posts, friends. Admin invitation tool from S9 |
-| Onboard each tasker (admin walks through KYC + Connect) | 8 | Synthetic supply seeding — inventory row 509 says MANUAL — confirmed |
-| Stripe live-mode switch + checklist review | 3 | Eng lead + client both sign off |
-| First real poster recruited + onboarded | 1 | Could be a friend, the client, or via referral from the taskers |
-| First real task posted | 1 | The launch moment |
-| First real task completed | n/a | Hands-off — watch + monitor |
-| Record + edit launch video | 3 | The Sprint 12 demo IS this |
+| Item                                                    | Hrs | Notes                                                                                        |
+| ------------------------------------------------------- | --- | -------------------------------------------------------------------------------------------- |
+| Pick the launch suburb                                  | 1   | Newtown, Surry Hills, Bondi? Population density + tasker availability + transport            |
+| Recruit 30-50 taskers via manual outreach               | 8   | LinkedIn, Facebook groups, Gumtree-replacement posts, friends. Admin invitation tool from S9 |
+| Onboard each tasker (admin walks through KYC + Connect) | 8   | Synthetic supply seeding — inventory row 509 says MANUAL — confirmed                         |
+| Stripe live-mode switch + checklist review              | 3   | Eng lead + client both sign off                                                              |
+| First real poster recruited + onboarded                 | 1   | Could be a friend, the client, or via referral from the taskers                              |
+| First real task posted                                  | 1   | The launch moment                                                                            |
+| First real task completed                               | n/a | Hands-off — watch + monitor                                                                  |
+| Record + edit launch video                              | 3   | The Sprint 12 demo IS this                                                                   |
 
 ### Monitoring + daily ops
 
-| Item | Hrs | Notes |
-| --- | --- | --- |
-| Daily 30-min standup (yourself + client) | 5 | 10 working days × 30min |
-| Monitor App Insights — error rate, latency, exceptions | 5 | Check 3× daily |
-| Monitor Cloudflare WAF — blocks, anomalies | 2 | Daily |
-| Monitor Stripe webhook delivery — failures, retries | 2 | Daily |
-| Cost tracking — Azure + Cloudflare + LLMs + Stripe fees | 2 | Daily |
-| Bug-fix budget — what breaks live, fix live | 12 | Reserved |
+| Item                                                    | Hrs | Notes                   |
+| ------------------------------------------------------- | --- | ----------------------- |
+| Daily 30-min standup (yourself + client)                | 5   | 10 working days × 30min |
+| Monitor App Insights — error rate, latency, exceptions  | 5   | Check 3× daily          |
+| Monitor Cloudflare WAF — blocks, anomalies              | 2   | Daily                   |
+| Monitor Stripe webhook delivery — failures, retries     | 2   | Daily                   |
+| Cost tracking — Azure + Cloudflare + LLMs + Stripe fees | 2   | Daily                   |
+| Bug-fix budget — what breaks live, fix live             | 12  | Reserved                |
 
 ### End-of-MVP audit
 
-| Item | Hrs | Notes |
-| --- | --- | --- |
-| Run `./scripts/coverage.sh --remaining` | 0.5 | Should be ≤2% remaining |
-| Document any unfinished IN/IN★ rows in `docs/sprints/post-mvp-deferred.md` | 2 | Justification per row |
-| Re-run `security-review` skill across entire repo | 2 | Final check |
-| Re-run Semgrep + CodeQL + Trivy CVE | 1 | Final clean scan |
-| Verify all audit docs have current "Last reviewed" dates | 1 | |
-| Verify all ADRs reflect actual built state | 1 | |
-| Update PROJECT_CONTEXT.md with launch state | 1 | |
+| Item                                                                       | Hrs | Notes                   |
+| -------------------------------------------------------------------------- | --- | ----------------------- |
+| Run `./scripts/coverage.sh --remaining`                                    | 0.5 | Should be ≤2% remaining |
+| Document any unfinished IN/IN★ rows in `docs/sprints/post-mvp-deferred.md` | 2   | Justification per row   |
+| Re-run `security-review` skill across entire repo                          | 2   | Final check             |
+| Re-run Semgrep + CodeQL + Trivy CVE                                        | 1   | Final clean scan        |
+| Verify all audit docs have current "Last reviewed" dates                   | 1   |                         |
+| Verify all ADRs reflect actual built state                                 | 1   |                         |
+| Update PROJECT_CONTEXT.md with launch state                                | 1   |                         |
 
 ### Retrospective
 
-| Item | Hrs | Notes |
-| --- | --- | --- |
-| Draft `docs/sprints/retrospective.md` | 3 | What worked, what didn't, surprises, lessons |
-| Draft `docs/sprints/post-mvp-roadmap.md` | 2 | What's next: scaling, POST features, additional suburbs, etc. |
-| Hand-off doc: how to onboard a future dev | 2 | |
-| Client wrap meeting | 1 | |
+| Item                                      | Hrs | Notes                                                         |
+| ----------------------------------------- | --- | ------------------------------------------------------------- |
+| Draft `docs/sprints/retrospective.md`     | 3   | What worked, what didn't, surprises, lessons                  |
+| Draft `docs/sprints/post-mvp-roadmap.md`  | 2   | What's next: scaling, POST features, additional suburbs, etc. |
+| Hand-off doc: how to onboard a future dev | 2   |                                                               |
+| Client wrap meeting                       | 1   |                                                               |
 
 **Sprint total: ~75h** (exceeds 50h budget — soft-launch hours are unpredictable; budget is aspirational, not a cap)
 
@@ -133,16 +133,16 @@ This isn't a screencast — it's the **launch video**. 3-4 min, polished. Send t
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| Stripe live switch reveals a config bug | Medium | Critical | Test in staging with the same flow before flipping; have rollback plan |
-| First real payment fails | Medium | Critical | Manual monitoring during first 24h; engineer on-call |
-| Tasker no-shows on first real task — bad first impression | Medium | High | Personally vet the first 5 taskers; have a backup tasker on standby |
-| Cloudflare WAF blocks real users mid-launch | Low | High | Monitor block log daily; whitelist if false positives |
-| ATO reporting bug found in live data | Medium | Critical | Tax advisor reviews the first month's report; document any issues |
-| Client wants to push major launch announcement before MVP is stable | Medium | Medium | Soft-launch is intentionally low-key; full marketing in post-MVP |
-| Burn rate exceeds expected (Azure spend) | Medium | Medium | Daily cost monitoring; alert at $X/day; downscale if needed |
-| Apple / Play store rejects launch build at last minute | Low | High | Have a stable build approved before mid-sprint; minor patches can be pushed via TestFlight |
+| Risk                                                                | Likelihood | Impact   | Mitigation                                                                                 |
+| ------------------------------------------------------------------- | ---------- | -------- | ------------------------------------------------------------------------------------------ |
+| Stripe live switch reveals a config bug                             | Medium     | Critical | Test in staging with the same flow before flipping; have rollback plan                     |
+| First real payment fails                                            | Medium     | Critical | Manual monitoring during first 24h; engineer on-call                                       |
+| Tasker no-shows on first real task — bad first impression           | Medium     | High     | Personally vet the first 5 taskers; have a backup tasker on standby                        |
+| Cloudflare WAF blocks real users mid-launch                         | Low        | High     | Monitor block log daily; whitelist if false positives                                      |
+| ATO reporting bug found in live data                                | Medium     | Critical | Tax advisor reviews the first month's report; document any issues                          |
+| Client wants to push major launch announcement before MVP is stable | Medium     | Medium   | Soft-launch is intentionally low-key; full marketing in post-MVP                           |
+| Burn rate exceeds expected (Azure spend)                            | Medium     | Medium   | Daily cost monitoring; alert at $X/day; downscale if needed                                |
+| Apple / Play store rejects launch build at last minute              | Low        | High     | Have a stable build approved before mid-sprint; minor patches can be pushed via TestFlight |
 
 ## Explicitly NOT in scope
 
@@ -155,18 +155,18 @@ This isn't a screencast — it's the **launch video**. 3-4 min, polished. Send t
 
 ## Day-by-day rough plan
 
-| Day | Focus |
-| --- | --- |
-| Mon 16 (D1) | **Stripe live-mode switch.** Checklist review + flip. First $0.50 test live transaction (refund immediately). |
-| Tue 17 (D2) | Start tasker outreach — LinkedIn, Facebook, Gumtree-replacement posts. Goal: 10 leads by EOD. |
-| Wed 18 (D3) | Onboard first 5 taskers via admin tool. Walk each through KYC + Connect personally. |
-| Thu 19 (D4) | Onboard next 10 taskers. Daily monitoring kicks in. |
-| Fri 20 (D5) | Mid-sprint demo: "we have 15 verified taskers ready." |
-| Mon 23 (D6) | First real poster recruited (client or friend). First real task posted. Watch carefully. |
-| Tue 24 (D7) | Onboard remaining taskers (up to 50). First real task completes. Record key moments. |
-| Wed 25 (D8) | Bug-fix from real-world feedback. Monitor + iterate. |
-| Thu 26 (D9) | End-of-MVP audit: coverage script, security scans, audit doc reviews. Retrospective drafting. |
-| Fri 27 (D10) | Launch video record + edit. Final wrap call. Tag `sprint-12-end` AND `mvp-v1.0`. |
+| Day          | Focus                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------- |
+| Mon 16 (D1)  | **Stripe live-mode switch.** Checklist review + flip. First $0.50 test live transaction (refund immediately). |
+| Tue 17 (D2)  | Start tasker outreach — LinkedIn, Facebook, Gumtree-replacement posts. Goal: 10 leads by EOD.                 |
+| Wed 18 (D3)  | Onboard first 5 taskers via admin tool. Walk each through KYC + Connect personally.                           |
+| Thu 19 (D4)  | Onboard next 10 taskers. Daily monitoring kicks in.                                                           |
+| Fri 20 (D5)  | Mid-sprint demo: "we have 15 verified taskers ready."                                                         |
+| Mon 23 (D6)  | First real poster recruited (client or friend). First real task posted. Watch carefully.                      |
+| Tue 24 (D7)  | Onboard remaining taskers (up to 50). First real task completes. Record key moments.                          |
+| Wed 25 (D8)  | Bug-fix from real-world feedback. Monitor + iterate.                                                          |
+| Thu 26 (D9)  | End-of-MVP audit: coverage script, security scans, audit doc reviews. Retrospective drafting.                 |
+| Fri 27 (D10) | Launch video record + edit. Final wrap call. Tag `sprint-12-end` AND `mvp-v1.0`.                              |
 
 ## Definition of "MVP done"
 

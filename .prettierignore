@@ -9,3 +9,7 @@ apps/mobile
 **/migrations/**/*.sql
 packages/prisma/generated
 inventory/*.csv
+
+# Python virtual environments (anywhere in tree)
+**/venv/
+**/.venv/

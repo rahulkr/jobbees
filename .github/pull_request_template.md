@@ -70,13 +70,17 @@ Walk through every box that applies. Tick **only** what you've actually verified
 - [ ] Sharing-economy reporting fields populated (name, ABN or `noAbnReason`, address)
 - [ ] Tax-advisor review required if this changes RCTI / ATO logic — flagged in PR description
 
-### Touches `apps/api/src/modules/kyc/**` (Didit)?
+### Touches `apps/api/src/modules/license/**` (per-category trade license verification)?
+
+Per **ADR 005**: no identity-vendor KYC. Verification = Stripe Connect (Stripe handles) + ABN (ABR API) + License (manual admin review).
 
 - [ ] N/A
-- [ ] Webhook verifies HMAC signature before processing
-- [ ] Only `diditSessionId`, `kycStatus`, `kycVerifiedAt`, `documentType` persisted
-- [ ] No raw ID images, selfies, or government ID numbers stored on JOBBees side
-- [ ] AuditLog write on KYC status change
+- [ ] Bid-time guard: tasker without APPROVED + non-expired License for a `requiresLicense: true` Category cannot bid (403 with actionable message)
+- [ ] License expiry cron: APPROVED licenses with `expiresAt < now()` auto-transition to EXPIRED + email tasker; 14d/7d/1d advance reminders fire
+- [ ] License blobs stored under retention policy in `docs/audit/data-retention-policy.md` (7 years)
+- [ ] AuditLog write on every License status transition (PENDING → APPROVED / REJECTED / EXPIRED), with admin `actorId` for manual decisions
+- [ ] Admin license review queue cross-checks against AU state register URL (recorded in reviewer notes)
+- [ ] No license number persisted from a state register other than the one the tasker claimed (i.e., don't accidentally cross-check VIC registers for a NSW-issued license without recording it)
 
 ### Touches `apps/api/src/modules/ai/**` or any external LLM call?
 

@@ -1,13 +1,13 @@
 # Sprint 0 — Foundation, AI setup, security tooling
 
-**Dates:** Mon 1 Jun → Fri 12 Jun 2026 (10 working days)
-**Theme:** Get every prerequisite in place so Sprint 1 can be pure feature work from day one.
-**Hours spent:** ~70 (foundation work — not billed against the v1.1 build budget)
-**Status:** In progress. Wraps Friday 12 Jun.
+**Dates:** Mon 1 Jun → Fri 19 Jun 2026 (15 working days — extended +1 week to absorb the research catch-up: AI skills generation, ADRs 005-008 design cycles, license verification model, brand colour lock-in from RN prototype)
+**Theme:** Get every prerequisite in place so Sprint 1 can be pure backend feature work from day one.
+**Hours spent:** ~80 (foundation work — not billed against the v1.1 build budget; +10h vs initial estimate due to the catch-up week)
+**Status:** In progress. Wraps Friday 19 Jun.
 
 ## Why a Sprint 0?
 
-Sprint 0 isn't a feature sprint. It's the prerequisite plumbing — the choices and structures that have to be made *once*, *up front*, and live with you for the life of the project. Trying to do this work mid-sprint while also shipping features is how you ship the wrong architecture and discover it in Sprint 6.
+Sprint 0 isn't a feature sprint. It's the prerequisite plumbing — the choices and structures that have to be made _once_, _up front_, and live with you for the life of the project. Trying to do this work mid-sprint while also shipping features is how you ship the wrong architecture and discover it in Sprint 6.
 
 Specifically, Sprint 0 covers:
 
@@ -51,8 +51,10 @@ Then Sprints 1-12 spend the ~945-hour build budget on actual features without re
 
 ADRs to land before end of Sprint 0:
 
-- ADR 005 — KYC strategy (Didit vs manual) — **pending client decision**
-- ADR 006 — Auth token storage (Bearer for mobile, HttpOnly cookie for web/admin) — **decision in Sprint 1 D1, but ADR can land Sprint 0 with default**
+- ADR 005 — Verification strategy (Stripe Connect + ABN + manual per-category license review; no identity vendor) — **Accepted**
+- ADR 006 — Auth token storage (Bearer for mobile, HttpOnly cookie for web/admin) — **Accepted**
+- ADR 007 — Edge security (Cloudflare Pro at $20/mo annual; Cloudflare Free for staging) — **Accepted**
+- ADR 008 — OTP / SMS strategy (MockOtpService for Sprint 1-4; production vendor decision deferred to Sprint 5 D1) — **Partially accepted (pattern locked)**
 
 ### IT audit documentation (19 docs)
 
@@ -104,7 +106,7 @@ ADRs to land before end of Sprint 0:
 
 ### Plan + tracking
 
-- `docs/sprints/PLAN.md` — 12-sprint master plan (Mon 15 Jun → Fri 27 Nov 2026), vertical slices, weekly Friday demos
+- `docs/sprints/PLAN.md` — 12-sprint master plan (Mon 22 Jun → Fri 4 Dec 2026), vertical slices from Sprint 2 onwards (Sprint 1 is backend-only auth foundation), weekly Friday demos
 - `docs/sprints/sprint-01-onboarding-and-auth.md` — Sprint 1 detail (this is the next sprint)
 - `docs/sprints/sprint-00-foundation-and-setup.md` — this doc
 - `scripts/coverage.sh` — Friday CSV → coverage % report
@@ -122,27 +124,30 @@ ADRs to land before end of Sprint 0:
 
 ### Decisions needed (client side)
 
-| Decision | Who | Needed by | Default if not decided |
-| --- | --- | --- | --- |
-| KYC vendor: Didit vs manual review queue | Client | Fri 12 Jun EOD | Manual review queue |
-| Auth-token storage strategy (per-surface) | Eng lead + client | Mon 15 Jun (Sprint 1 D1) | Bearer for mobile, HttpOnly cookie for web/admin |
-| Cloudflare Pro vs Azure Front Door Premium (for Sprint 10) | Client | mid-Sprint 9 (procurement lead time) | Cloudflare Pro ($25/mo) |
-| Tax advisor engagement | Client | mid-Sprint 5 | Engage anyway |
+| Decision                                          | Who               | Needed by                      | Status                                                                                          |
+| ------------------------------------------------- | ----------------- | ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| ~~KYC vendor~~                                    | n/a               | n/a                            | ✅ RESOLVED — ADR 005 (Stripe Connect + ABN + manual per-category license). No identity vendor. |
+| ~~Auth-token storage strategy (per-surface)~~     | n/a               | n/a                            | ✅ RESOLVED — ADR 006 (Bearer mobile, HttpOnly cookie web/admin).                               |
+| ~~Cloudflare Pro vs Azure Front Door Premium~~    | n/a               | n/a                            | ✅ RESOLVED — ADR 007 (Cloudflare Pro $20/mo annual).                                           |
+| ~~Stripe / Apple / Google account setup~~         | n/a               | n/a                            | ✅ Already in place — no setup blockers                                                         |
+| Tax advisor — soft engagement (RFP only)          | Client            | Mid Sprint 5 (Fri 21 Aug 2026) | RFP / shortlist; no money committed. Formal paid review moves to Sprint 11                      |
+| Lawyer engagement for ToS + Privacy Policy review | Client            | Sprint 11 D1 (Mon 9 Nov 2026)  | Self-draft from public templates during Sprint 8; lawyer reviews in S11                         |
+| Phone OTP production vendor                       | Eng lead + client | Sprint 5 D1 (Mon 17 Aug 2026)  | ADR 008 — pattern locked, vendor TBD (Firebase / Notifyre / Twilio)                             |
 
 ### Things to set up (operational side)
 
-- [ ] OAuth client IDs: Google + Apple (Apple needs paid Developer Program enrolment — start now, ~3 day approval)
-- [ ] Notifyre alpha sender ID application (`JOBBEES`) — submitted to Notifyre, allow 5-7 business days
+- [ ] OAuth client IDs: Google + Apple — create in existing Developer Consoles when Sprint 2 starts (instant)
+- [ ] Notifyre alpha sender ID application (`JOBBEES`) — submit Mon 22 Jun (Sprint 1 D1), allow 5-7 business days
 - [ ] SendGrid account (free tier OK for dev) — domain verification can wait until S10
-- [ ] Stripe Australia account in test mode (free) — can start now, validates as part of S2 work
-- [ ] Stripe Connect onboarding application — 5-10 business days approval, start now
-- [ ] (Optional) Didit sandbox account if KYC decision = Didit — free, instant
+- [x] Stripe account in place (existing) — Connect Express integration uses existing account
+- [x] Apple Developer Program enrolled (existing) — TestFlight in S11 uses existing enrolment
+- [x] Google Play Developer enrolled (existing) — Play internal track in S11 uses existing enrolment
 - [ ] Branch protection on `main` (require 1 reviewer + all CI checks)
 - [ ] Enable Dependabot security alerts in repo settings → Security & analysis
 
-## Sprint 0 wrap-up demo (Fri 12 Jun) — script
+## Sprint 0 wrap-up demo (Fri 19 Jun) — script
 
-This demo establishes credibility with the client: it shows everything that's been built isn't a coding sprint but a foundation that *enables* coding sprints. Aim for a 5-7 minute screen-cast.
+This demo establishes credibility with the client: it shows everything that's been built isn't a coding sprint but a foundation that _enables_ coding sprints. Aim for a 5-7 minute screen-cast.
 
 ```
 00:00 — "Welcome to Sprint 0 wrap. This sprint was foundation work — what
@@ -195,16 +200,23 @@ This demo establishes credibility with the client: it shows everything that's be
         live, the README, the first commit.
 
 05:30 — Stoplight summary:
-        ✅ Green: monorepo, schema, ADRs, audit docs, security tooling,
-                 Claude skills, CI, repo on GitHub, plan locked.
-        🟡 Yellow: pending decisions — KYC vendor (need by EOD today),
-                   auth-token strategy (need by Monday).
+        ✅ Green: monorepo, schema, ADRs (005-008 all accepted), audit
+                 docs, security tooling, Claude skills, CI, repo on
+                 GitHub, plan locked, verification model decided
+                 (Stripe Connect + ABN + manual license per category),
+                 edge security decided (Cloudflare Pro), auth tokens
+                 decided, OTP pattern decided.
+        🟡 Yellow: phone OTP vendor pending (decision deferred to S5),
+                   tax advisor engagement still TODO.
         🔴 Red: none.
 
-05:50 — "Next sprint starts Monday 15 Jun. We need from you today:
-        (1) KYC vendor decision — Didit (vendor) or manual review queue;
-        (2) sign-off on the Sprint 1 demo script — does it cover what
-        you want to see Friday 26 Jun?"
+05:50 — "Sprint 1 starts Monday 22 Jun — backend auth foundation, no
+        UI this sprint by design. Demo on Fri 3 Jul is Postman + Swagger
+        + DB queries. First user-visible click-through is Fri 17 Jul
+        (Sprint 2). All architectural decisions are locked (ADRs 005-008).
+        Stripe / Apple / Google accounts already in place. The only
+        operational item to fire on Day 1: Notifyre alpha sender ID
+        application (5-7 business day lead time, needed for Sprint 5)."
 
 06:00 — End. Send link to demo video + this doc + PLAN.md.
 ```
@@ -214,7 +226,7 @@ This demo establishes credibility with the client: it shows everything that's be
 A foundation sprint is the most under-valued kind of sprint. Three things have to be true for it to pay off:
 
 1. **You make decisions you'll inherit.** Sprint 0 ADRs decided the database conventions, multi-country approach, category types, monorepo structure, and ESLint config. Those will affect every PR for the next 24 weeks.
-2. **You build the tooling you'll lean on.** The 6 custom Claude Code skills + 18 Semgrep rules + PR template are how the project stays correct *while* moving fast. The cost is one sprint up front; the benefit is every sprint after.
+2. **You build the tooling you'll lean on.** The 6 custom Claude Code skills + 18 Semgrep rules + PR template are how the project stays correct _while_ moving fast. The cost is one sprint up front; the benefit is every sprint after.
 3. **You set the cadence.** The 12-sprint plan + Friday demo ritual + coverage script + inventory tracker establish the rhythm. Once a rhythm exists, sprints execute themselves.
 
 If Sprint 0 hadn't happened, Sprint 1 would have been: "we need to figure out the schema → wait, what ID format are we using? → wait, do we need a security review skill? → wait, where do ADRs live?" Sprint 1 starting on a foundation means it goes straight to: open the splash screen file, start coding.

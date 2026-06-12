@@ -149,3 +149,7 @@ __pycache__/
 # Coverage formats
 coverage.xml
 *.lcov
+
+# Python virtual environments (anywhere in tree)
+**/venv/
+**/.venv/

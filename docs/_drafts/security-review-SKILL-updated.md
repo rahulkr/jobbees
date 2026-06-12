@@ -202,9 +202,14 @@ Checks are grouped by category. Each check has: id, severity, what to verify, ho
 
 **E5 — HIGH — bid-time license guard runs server-side, not client-side**
 
-- Verify: `POST /bids` checks `Category.requiresLicense` and that the bidding user has an APPROVED + non-expired `License` for that category (ADR 005)
+- Verify: `POST /bids` runs the full License guard from ADR 005, covering both unconditional and conditional categories:
+  - Unconditional: `Category.requiresLicense === true` → license always required
+  - Conditional: `Category.licenseRequiredOverCents != null` → license required when (a) the bid is hourly, OR (b) `bid.totalCents >= licenseRequiredOverCents`
+  - Otherwise: no license needed
+- Verify: when license is required, lookup is `License where userId = bidder AND categoryId = task.category AND status = APPROVED AND expiresAt > now()`
 - Verify: the guard is in the backend, not just a mobile UI hide — never trust the client
-- Fix: add the guard; return 403 with `code: 'LICENSE_REQUIRED'` and the category name
+- Verify: the 403 response includes structured `reason` (`ALWAYS_REQUIRED` / `OVER_THRESHOLD` / `HOURLY_ON_CONDITIONAL_CATEGORY`) + `licenseRequiredOverCents` + `bidTotalCents` so mobile can render context-specific copy
+- Fix: add the guard; return 403 with `code: 'LICENSE_REQUIRED'` and the structured reason payload
 
 ### F. PII handling
 

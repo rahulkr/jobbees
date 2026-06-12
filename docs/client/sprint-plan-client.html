@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>JOBBees MVP — Sprint Plan</title>
+    <style>
+      /* ------------ Brand tokens ------------ */
+      :root {
+        --primary: #ff6b2c;
+        --dark: #1a1a2e;
+        --grey: #5a5a6e;
+        --light: #f4f4f6;
+        --border: #d8d8de;
+        --success: #22c55e;
+      }
+
+      /* ------------ Print/page setup ------------ */
+      @page {
+        size: A4;
+        margin: 18mm 18mm 18mm 18mm;
+      }
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+        body {
+          background: white;
+        }
+        .page {
+          page-break-after: always;
+        }
+        .page:last-child {
+          page-break-after: auto;
+        }
+        .avoid-break {
+          page-break-inside: avoid;
+        }
+      }
+
+      /* ------------ Reset + base ------------ */
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        color: var(--dark);
+        background: #ececef;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      body {
+        padding: 24px 0;
+      }
+      .page {
+        background: white;
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto 16px auto;
+        padding: 18mm;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        position: relative;
+      }
+      .brand-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6mm;
+        background: var(--primary);
+      }
+      .page-header {
+        position: absolute;
+        top: 10mm;
+        left: 18mm;
+        right: 18mm;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 9pt;
+      }
+      .page-header .brand {
+        font-weight: 700;
+        color: var(--dark);
+      }
+      .page-header .crumb {
+        color: var(--grey);
+      }
+      .page-footer {
+        position: absolute;
+        bottom: 8mm;
+        left: 18mm;
+        right: 18mm;
+        display: flex;
+        justify-content: space-between;
+        font-size: 8pt;
+        color: var(--grey);
+        border-top: 0.5px solid var(--border);
+        padding-top: 4mm;
+      }
+      .content {
+        padding-top: 12mm;
+      }
+
+      h1 {
+        font-size: 22pt;
+        margin: 0 0 6pt 0;
+        color: var(--dark);
+      }
+      h1.cover-title {
+        font-size: 32pt;
+        margin-bottom: 4pt;
+      }
+      .subtitle {
+        font-size: 14pt;
+        color: var(--primary);
+        margin: 0 0 18pt 0;
+        font-weight: 400;
+      }
+      h2 {
+        font-size: 18pt;
+        margin: 16pt 0 6pt 0;
+        color: var(--dark);
+      }
+      h3 {
+        font-size: 12pt;
+        margin: 12pt 0 4pt 0;
+        color: var(--dark);
+      }
+      p {
+        font-size: 10.5pt;
+        line-height: 1.5;
+        margin: 0 0 8pt 0;
+      }
+      p.muted {
+        color: var(--grey);
+      }
+      p.cover-meta {
+        font-size: 10pt;
+        color: var(--grey);
+        margin: 0 0 2pt 0;
+      }
+
+      ul {
+        font-size: 10.5pt;
+        line-height: 1.5;
+        padding-left: 18pt;
+        margin: 0 0 8pt 0;
+      }
+      ul li {
+        margin-bottom: 4pt;
+      }
+
+      /* ------------ Tables ------------ */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8pt 0 12pt 0;
+        font-size: 10pt;
+      }
+      th,
+      td {
+        padding: 7pt 8pt;
+        border-bottom: 0.5px solid var(--border);
+        vertical-align: top;
+        text-align: left;
+      }
+      th {
+        background: var(--dark);
+        color: white;
+        font-weight: 700;
+        border-bottom: none;
+      }
+      tbody tr:nth-child(odd) {
+        background: var(--light);
+      }
+      tbody tr:nth-child(even) {
+        background: white;
+      }
+
+      /* Sprint timeline table */
+      table.timeline th,
+      table.timeline td {
+        font-size: 9.5pt;
+        padding: 6pt 7pt;
+      }
+      table.timeline td:first-child {
+        width: 7%;
+        font-weight: 700;
+        text-align: center;
+      }
+      table.timeline td:nth-child(2) {
+        width: 19%;
+        white-space: nowrap;
+      }
+      table.timeline td:nth-child(3) {
+        width: 28%;
+        font-weight: 600;
+      }
+      table.timeline tr.highlight td:first-child {
+        border-left: 3px solid var(--primary);
+      }
+
+      /* Summary table (at a glance) */
+      table.summary {
+        margin-top: 4pt;
+      }
+      table.summary td:first-child {
+        font-weight: 700;
+        width: 47%;
+      }
+      table.summary thead tr {
+        border-top: 1px solid var(--primary);
+      }
+      table.summary tbody tr {
+        background: white;
+      }
+      table.summary tbody tr:nth-child(odd) {
+        background: var(--light);
+      }
+
+      /* Locked / pending tables */
+      table.locked td:first-child {
+        font-weight: 700;
+        width: 30%;
+        border-left: 3px solid var(--primary);
+      }
+      table.pending td:first-child {
+        font-weight: 700;
+        width: 25%;
+      }
+      table.pending td:nth-child(2) {
+        font-weight: 700;
+        width: 25%;
+        color: var(--primary);
+      }
+
+      /* Asks table */
+      table.asks td:first-child {
+        font-weight: 700;
+        width: 32%;
+        color: var(--primary);
+      }
+
+      /* Risks layout */
+      .risk-card {
+        margin: 0 0 10pt 0;
+      }
+      .risk-card p {
+        margin: 0 0 2pt 0;
+      }
+      .risk-card .label {
+        font-weight: 700;
+      }
+      .risk-card .mit {
+        color: var(--grey);
+      }
+
+      /* Print button (hidden on print) */
+      .print-cta {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 999;
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      }
+      .print-cta:hover {
+        background: #e55a20;
+      }
+
+      /* Cover page styling */
+      .cover-content {
+        height: calc(297mm - 36mm);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        padding-left: 0;
+      }
+      .cover-content .meta-block {
+        margin-top: 24pt;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-cta no-print" onclick="window.print()">Save as PDF</button>
+
+    <!-- ===================== COVER ===================== -->
+    <section class="page avoid-break">
+      <div class="brand-bar"></div>
+      <div class="cover-content">
+        <h1 class="cover-title">JOBBees MVP</h1>
+        <p class="subtitle">Development sprint plan</p>
+        <p style="font-size: 11pt; max-width: 130mm">
+          A clear, two-week-cadence delivery schedule from foundation to soft launch.
+        </p>
+        <div class="meta-block">
+          <p class="cover-meta">
+            Project period: <strong>Mon 1 Jun &nbsp;—&nbsp; Fri 4 Dec 2026</strong> &nbsp;(27 weeks)
+          </p>
+          <p class="cover-meta">Cadence: <strong>2-week sprints</strong>, weekly Friday demos</p>
+          <p class="cover-meta">
+            Total: <strong>1 foundation sprint &nbsp;+&nbsp; 12 build sprints</strong>
+          </p>
+          <p class="cover-meta" style="margin-top: 16pt">Prepared 12 June 2026</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Plan</span>
+        <span>Page 1</span>
+      </div>
+    </section>
+
+    <!-- ===================== AT A GLANCE ===================== -->
+    <section class="page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">MVP Sprint Plan &nbsp;|&nbsp; Jun – Dec 2026</span>
+      </div>
+      <div class="content">
+        <h1>At a glance</h1>
+        <p>
+          JOBBees is an Australian peer-to-peer task marketplace. This plan delivers the MVP across
+          12 two-week build sprints, preceded by a three-week foundation sprint. Soft launch in one
+          Sydney suburb is scheduled for Sprint 12, the final week of November and first week of
+          December 2026.
+        </p>
+
+        <table class="summary">
+          <tbody>
+            <tr>
+              <td>Foundation sprint (Sprint 0)</td>
+              <td>Mon 1 Jun &nbsp;—&nbsp; Fri 19 Jun</td>
+            </tr>
+            <tr>
+              <td>First build sprint (Sprint 1)</td>
+              <td>Mon 22 Jun &nbsp;—&nbsp; Fri 3 Jul</td>
+            </tr>
+            <tr>
+              <td>First user-visible demo (end of Sprint 2)</td>
+              <td>Fri 17 Jul</td>
+            </tr>
+            <tr>
+              <td>Tax / GST / RCTI work begins (Sprint 6)</td>
+              <td>Mon 31 Aug</td>
+            </tr>
+            <tr>
+              <td>TestFlight + real-device testing (Sprint 11)</td>
+              <td>Mon 9 Nov</td>
+            </tr>
+            <tr>
+              <td>Soft launch (Sprint 12)</td>
+              <td>Mon 23 Nov &nbsp;—&nbsp; Fri 4 Dec</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>How the plan works</h2>
+        <p>
+          Sprints run for two working weeks. Every fortnight ends with a Friday demo: a
+          screen-recorded walk-through of what landed, plus a stoplight summary of what worked, what
+          slipped, and what is blocked. There is also a mid-sprint Friday sync that you can join
+          optionally.
+        </p>
+        <p>
+          From Sprint 2 onward, every Friday demo is a click-through of the mobile app showing real
+          user flows. Sprint 1 is intentionally backend-only — its demo is a technical walk-through
+          of the API and database. The reason is simple: building the authentication API first, then
+          layering mobile on top of a stable backend, saves several weeks of rework that would
+          otherwise come from building mobile against a changing API.
+        </p>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Plan</span>
+        <span>Page 2</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT TIMELINE ===================== -->
+    <section class="page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">MVP Sprint Plan &nbsp;|&nbsp; Jun – Dec 2026</span>
+      </div>
+      <div class="content">
+        <h1>Sprint timeline</h1>
+        <p class="muted">
+          Each sprint runs two weeks and ends with a Friday demo. What you will see on demo day is
+          in the right column.
+        </p>
+
+        <table class="timeline">
+          <thead>
+            <tr>
+              <th>Sprint</th>
+              <th>Dates</th>
+              <th>Theme</th>
+              <th>What you will see on Friday</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="highlight">
+              <td>0</td>
+              <td>Mon 1 Jun &nbsp;—&nbsp; Fri 19 Jun</td>
+              <td>Foundation</td>
+              <td>
+                Repo walkthrough, architecture decisions, security gates, and confirmation that
+                everything is ready for Sprint 1.
+              </td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Mon 22 Jun &nbsp;—&nbsp; Fri 3 Jul</td>
+              <td>Backend authentication foundation</td>
+              <td>
+                Technical walk-through: API endpoints in Postman, live database queries, and
+                security checks. No mobile app this sprint by design.
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Mon 6 Jul &nbsp;—&nbsp; Fri 17 Jul</td>
+              <td>Mobile auth, onboarding, tasker upgrade</td>
+              <td>
+                First user-visible demo. Cold-launch the app, see welcome carousel, sign up, verify,
+                become a tasker, complete Stripe Connect, verify ABN.
+              </td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Mon 20 Jul &nbsp;—&nbsp; Fri 31 Jul</td>
+              <td>Task posting, AI extraction, guest mode</td>
+              <td>
+                Browse as a guest, post a task by photo, watch the AI extract category and budget,
+                sign up, and publish — all in one flow.
+              </td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Mon 3 Aug &nbsp;—&nbsp; Fri 14 Aug</td>
+              <td>Discovery, bidding, license verification</td>
+              <td>
+                Tasker sees ranked feed, places bids, license guard enforces trade licences
+                (plumber, electrician, builder over $5K), admin approves licence, poster sees
+                "Verified Plumber" badge.
+              </td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Mon 17 Aug &nbsp;—&nbsp; Fri 28 Aug</td>
+              <td>Messaging, payments core, real OTP</td>
+              <td>
+                Live in-app chat, payment hold via Stripe, and the real SMS provider goes live for
+                phone verification.
+              </td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Mon 31 Aug &nbsp;—&nbsp; Fri 11 Sep</td>
+              <td>Job execution, tax / RCTI / GST / ATO</td>
+              <td>
+                Tasker checks in at the job, uploads completion proof, auto-capture fires, tax
+                invoice and RCTI generated as PDFs.
+              </td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>Mon 14 Sep &nbsp;—&nbsp; Fri 25 Sep</td>
+              <td>Reviews, AI-assisted dispute mediation</td>
+              <td>
+                Both sides leave reviews. A dispute is opened. The AI mediator proposes a resolution
+                that humans can accept, reject, or escalate.
+              </td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Mon 28 Sep &nbsp;—&nbsp; Fri 9 Oct</td>
+              <td>Notifications, trust &amp; safety, privacy</td>
+              <td>
+                Push notifications fire across the lifecycle, content moderation catches suspicious
+                uploads, privacy data-subject requests work end-to-end.
+              </td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>Mon 12 Oct &nbsp;—&nbsp; Fri 23 Oct</td>
+              <td>Admin console</td>
+              <td>
+                Full admin walk-through: today's queue, KYC review, license review, dispute
+                resolution, refund processing, tax reporting.
+              </td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>Mon 26 Oct &nbsp;—&nbsp; Fri 6 Nov</td>
+              <td>Cloud deploy + WAF</td>
+              <td>
+                Same flows running on Azure with Cloudflare protection in front of a public URL. No
+                more localhost.
+              </td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>Mon 9 Nov &nbsp;—&nbsp; Fri 20 Nov</td>
+              <td>TestFlight, bug fix, launch hardening</td>
+              <td>
+                Real iOS and Android devices. App Store / Play Store listings, tooltips, "How it
+                works" page, polish.
+              </td>
+            </tr>
+            <tr class="highlight">
+              <td>12</td>
+              <td>Mon 23 Nov &nbsp;—&nbsp; Fri 4 Dec</td>
+              <td>Soft launch + first real users</td>
+              <td>
+                A real Sydney tasker, in one Sydney suburb, completes a real task posted by a real
+                poster, with real money flowing. The MVP is live.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Plan</span>
+        <span>Page 3</span>
+      </div>
+    </section>
+
+    <!-- ===================== LOCKED + PENDING ===================== -->
+    <section class="page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">MVP Sprint Plan &nbsp;|&nbsp; Jun – Dec 2026</span>
+      </div>
+      <div class="content">
+        <h1>What is already locked in</h1>
+        <p class="muted">
+          These decisions have been made during the foundation sprint. They are not subject to
+          change without an explicit re-plan.
+        </p>
+        <table class="locked">
+          <tbody>
+            <tr>
+              <td>Tasker verification model</td>
+              <td>
+                Stripe Connect handles legal identity. JOBBees verifies ABN via the free ABR API,
+                and checks professional licences (plumber, electrician, builder etc.) manually via
+                an admin queue. No identity-verification vendor.
+              </td>
+            </tr>
+            <tr>
+              <td>Hosting and data residency</td>
+              <td>
+                Microsoft Azure, Australia East region. Cloudflare Pro at the edge for WAF and DDoS
+                protection.
+              </td>
+            </tr>
+            <tr>
+              <td>Payment processor</td>
+              <td>
+                Stripe with Stripe Connect Express. Test mode through Sprint 11, live mode flipped
+                at the start of Sprint 12.
+              </td>
+            </tr>
+            <tr>
+              <td>Auth tokens and edge security</td>
+              <td>
+                Bearer tokens for mobile, HttpOnly cookie + CSRF for the web admin. Cloudflare Pro
+                WAF at $20 per month annually.
+              </td>
+            </tr>
+            <tr>
+              <td>Brand colours and theme</td>
+              <td>Locked from the original prototype with a Material You modernisation pass.</td>
+            </tr>
+            <tr>
+              <td>Stripe / Apple / Google accounts</td>
+              <td>All in place. No enrolment lead-time blockers.</td>
+            </tr>
+            <tr>
+              <td>Map / geocoding provider</td>
+              <td>
+                Google Maps. Best AU coverage including regional NSW and the inner-Sydney suburb mix
+                we are targeting at soft launch.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h1 style="margin-top: 20pt">Decisions still ahead</h1>
+        <p class="muted">
+          These are not blockers today, but each must be resolved before its matching sprint starts.
+          We will surface each one again two weeks before it is needed.
+        </p>
+        <table class="pending">
+          <tbody>
+            <tr>
+              <td>Phone OTP provider</td>
+              <td>Sprint 5 D1 &nbsp;—&nbsp; Mon 17 Aug</td>
+              <td>
+                Choose between Firebase Phone Auth, Notifyre, and Twilio Verify. Recommendation will
+                be presented one sprint earlier.
+              </td>
+            </tr>
+            <tr>
+              <td>Product analytics</td>
+              <td>Sprint 11 D1 &nbsp;—&nbsp; Mon 9 Nov</td>
+              <td>PostHog (self-hostable in Australia) or Mixpanel.</td>
+            </tr>
+            <tr>
+              <td>Tax advisor — formal review</td>
+              <td>Before Sprint 12 launch</td>
+              <td>RFP and shortlist by mid-Sprint 5. Formal paid review in Sprint 11.</td>
+            </tr>
+            <tr>
+              <td>Lawyer review of Terms / Privacy</td>
+              <td>Sprint 11</td>
+              <td>
+                Privacy Policy and Terms drafted in-house during Sprint 8. Lawyer review in Sprint
+                11 before live mode.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Plan</span>
+        <span>Page 4</span>
+      </div>
+    </section>
+
+    <!-- ===================== RISKS + NOT IN SCOPE ===================== -->
+    <section class="page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">MVP Sprint Plan &nbsp;|&nbsp; Jun – Dec 2026</span>
+      </div>
+      <div class="content">
+        <h1>Headline risks and how we manage them</h1>
+
+        <div class="risk-card avoid-break">
+          <p>
+            <span class="label">Risk.</span> Australian tax law (GST + RCTI + ATO sharing-economy
+            reporting) is complex.
+          </p>
+          <p class="mit">
+            <span class="label">Mitigation.</span> A tax advisor will be on retainer-light before
+            Sprint 6 starts, and a formal review happens before launch.
+          </p>
+        </div>
+        <div class="risk-card avoid-break">
+          <p>
+            <span class="label">Risk.</span> Real iOS and Android devices behave differently from
+            simulators.
+          </p>
+          <p class="mit">
+            <span class="label">Mitigation.</span> Sprint 11 is dedicated to TestFlight and Play
+            Store internal testing with a 15-hour buffer for issues found on real devices.
+          </p>
+        </div>
+        <div class="risk-card avoid-break">
+          <p>
+            <span class="label">Risk.</span> Soft launch in one suburb can reveal problems we did
+            not anticipate.
+          </p>
+          <p class="mit">
+            <span class="label">Mitigation.</span> That is exactly why the soft launch is restricted
+            to a single Sydney suburb with 30-50 manually onboarded taskers.
+          </p>
+        </div>
+        <div class="risk-card avoid-break">
+          <p>
+            <span class="label">Risk.</span> AI extraction quality could underperform on real
+            photos.
+          </p>
+          <p class="mit">
+            <span class="label">Mitigation.</span> Sprint 3 includes an evaluation harness with a
+            20-hour buffer in Sprint 4 for prompt refinement.
+          </p>
+        </div>
+        <div class="risk-card avoid-break">
+          <p>
+            <span class="label">Risk.</span> Stripe Connect onboarding requires Australian business
+            test data.
+          </p>
+          <p class="mit">
+            <span class="label">Mitigation.</span> Stripe supports a documented test-mode flow that
+            we already validated.
+          </p>
+        </div>
+
+        <h1 style="margin-top: 16pt">Explicitly not in scope for MVP</h1>
+        <p class="muted">
+          These are deliberately deferred to post-MVP releases. Calling them out so there are no
+          surprises later.
+        </p>
+        <ul>
+          <li>
+            <strong>No multi-state engineering at MVP.</strong> Per-state builder thresholds,
+            per-state licence-register cross-checks, and time-zone-aware UI are deferred. The
+            single-Sydney-suburb soft launch is an operational restriction (so we can monitor
+            closely) and can expand to other Sydney suburbs at any time without code changes.
+          </li>
+          <li>International posters or taskers (Australia only).</li>
+          <li>
+            <strong>Fine-grained admin role enforcement.</strong> The schema and access-control
+            policy already distinguish ADMIN from SUPER_ADMIN; at MVP both share the same
+            permissions in the admin console. When the team grows beyond one admin, separate
+            enforcement is roughly 4-6 hours of work.
+          </li>
+          <li>
+            Police checks / Working-with-Children checks (only if child-related categories are
+            added).
+          </li>
+          <li>Tasker insurance verification (post-MVP).</li>
+          <li>Tasker availability calendar.</li>
+          <li>Counter-offer or back-and-forth negotiation (replaced by public Q&amp;A).</li>
+        </ul>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Plan</span>
+        <span>Page 5</span>
+      </div>
+    </section>
+
+    <!-- ===================== WHAT WE NEED FROM YOU ===================== -->
+    <section class="page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">MVP Sprint Plan &nbsp;|&nbsp; Jun – Dec 2026</span>
+      </div>
+      <div class="content">
+        <h1>What we need from you</h1>
+        <p class="muted">
+          Most of the work happens on our side. These are the things we will ask of you, sprint by
+          sprint, as they come up.
+        </p>
+        <table class="asks">
+          <tbody>
+            <tr>
+              <td>Fri 19 Jun &nbsp;(end of Sprint 0)</td>
+              <td>Sign-off on the foundation demo and the development plan.</td>
+            </tr>
+            <tr>
+              <td>Fri 17 Jul &nbsp;(end of Sprint 2)</td>
+              <td>Sign-off on the first user-visible demo and the mobile look-and-feel.</td>
+            </tr>
+            <tr>
+              <td>Mon 17 Aug &nbsp;(Sprint 5 D1)</td>
+              <td>Phone OTP provider choice and tax advisor shortlist.</td>
+            </tr>
+            <tr>
+              <td>Mid Sep &nbsp;(during Sprint 6)</td>
+              <td>Availability for tax-advisor questions on RCTI / GST logic.</td>
+            </tr>
+            <tr>
+              <td>Mon 9 Nov &nbsp;(Sprint 11 D1)</td>
+              <td>Lawyer engaged for Terms + Privacy Policy review. Analytics provider choice.</td>
+            </tr>
+            <tr>
+              <td>Fri 20 Nov &nbsp;(end of Sprint 11)</td>
+              <td>
+                Sign-off on TestFlight + Play Store builds. Confirm soft-launch suburb and tasker
+                list.
+              </td>
+            </tr>
+            <tr>
+              <td>Mon 23 Nov &nbsp;(Sprint 12 D1)</td>
+              <td>
+                Final go / no-go on switching Stripe from test to live mode. This is a one-way
+                decision.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Plan</span>
+        <span>Page 6</span>
+      </div>
+    </section>
+  </body>
+</html>

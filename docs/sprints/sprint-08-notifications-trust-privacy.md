@@ -1,10 +1,10 @@
 # Sprint 8 — Notifications + Trust/Safety + Privacy
 
-**Dates:** Mon 21 Sep → Fri 2 Oct 2026 (10 working days)
+**Dates:** Mon 28 Sep → Fri 9 Oct 2026 (10 working days)
 **Theme:** Push notifications fire reliably across the lifecycle, content moderation + EXIF detection catch suspicious uploads, rate limits + PII redaction protect the API + AI layer, and DSR endpoints make the Privacy Act story real.
 **Hours budget:** ~85 (25 mobile, 60 backend)
-**Mid-sprint demo:** Fri 25 Sep
-**End-of-sprint demo:** Fri 2 Oct
+**Mid-sprint demo:** Fri 2 Oct
+**End-of-sprint demo:** Fri 9 Oct
 
 ## Goal in one sentence
 
@@ -14,46 +14,46 @@ By Friday 2 Oct, every meaningful event (bid accepted, payment captured, dispute
 
 ### Mobile (apps/mobile)
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 168 | Push notifications (FCM / APNS setup) | IN | 4 | |
-| 169 | In-app notification center | IN | 4 | |
-| 170 | Per-channel toggle (push / email / SMS) | THIN | 2 | |
-| 172 | Email opt-out unsubscribe link (rendering) | IN | 1 | Backend handles token |
-| 173 | SMS opt-out (STOP keyword) | IN | 1 | Mostly backend |
-| 174 | Notification badges | IN | 1 | |
-| 175 | Deep-link from notification → screen | IN | 2 | |
-| 176 | Critical-state SMS/email fallback (mobile handling) | IN | 1 | Mobile receives; backend escalates |
-| 185 | Privacy / data download (DSR access) | IN | 3 | |
-| 186 | Account deletion request | IN | 3 | |
+| ID  | Item                                                | Call | Hrs | Notes                              |
+| --- | --------------------------------------------------- | ---- | --- | ---------------------------------- |
+| 168 | Push notifications (FCM / APNS setup)               | IN   | 4   |                                    |
+| 169 | In-app notification center                          | IN   | 4   |                                    |
+| 170 | Per-channel toggle (push / email / SMS)             | THIN | 2   |                                    |
+| 172 | Email opt-out unsubscribe link (rendering)          | IN   | 1   | Backend handles token              |
+| 173 | SMS opt-out (STOP keyword)                          | IN   | 1   | Mostly backend                     |
+| 174 | Notification badges                                 | IN   | 1   |                                    |
+| 175 | Deep-link from notification → screen                | IN   | 2   |                                    |
+| 176 | Critical-state SMS/email fallback (mobile handling) | IN   | 1   | Mobile receives; backend escalates |
+| 185 | Privacy / data download (DSR access)                | IN   | 3   |                                    |
+| 186 | Account deletion request                            | IN   | 3   |                                    |
 
 **Mobile total: ~22h**
 
 ### Backend (apps/api)
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 341 | Push notification service (FCM + APNS) | IN | 5 | |
-| 342 | Email service (SendGrid) | IN | 4 | |
-| 343 | SMS service (Notifyre) | IN | 4 | |
-| 344 | In-app notification queue / API | IN | 4 | |
-| 345 | User preferences engine (per-channel) | THIN | 3 | |
-| 346 | Notification templates (push / email / SMS) | IN | 4 | |
-| 347 | Critical-state fallback escalation | IN | 4 | push → email → SMS |
-| 348 | Spam Act compliance (opt-out, unsubscribe) | IN | 2 | |
-| 349 | Unsubscribe token endpoint | IN | 2 | |
-| 351 | Image content moderation (Azure Content Safety) | IN | 6 | |
-| 352 | Async moderation queue (borderline confidence) | IN | 3 | |
-| 353 | EXIF tampering / consistency check | IN | 8 | EXIF + GPS + date plausibility |
-| 355 | Rate limiting middleware (per-user + per-endpoint) | IN | 4 | |
-| 356 | LLM cost telemetry + anomaly alerts | IN | 3 | |
-| 357 | Account suspension webhooks | IN | 2 | |
-| 358 | Data inventory + retention schema per table | IN | 5 | |
-| 359 | DSR endpoints (access, delete, correct) | IN | 8 | |
-| 360 | Anonymisation job (financial retained 7y) | IN | 6 | |
-| 361 | Hard delete vs anonymise logic | IN | 3 | |
-| 362 | Consent ledger | IN | 5 | |
-| 364 | PII redaction layer before external LLM calls | IN | 3 | Already exists in skeleton — finalise |
+| ID  | Item                                               | Call | Hrs | Notes                                 |
+| --- | -------------------------------------------------- | ---- | --- | ------------------------------------- |
+| 341 | Push notification service (FCM + APNS)             | IN   | 5   |                                       |
+| 342 | Email service (SendGrid)                           | IN   | 4   |                                       |
+| 343 | SMS service (Notifyre)                             | IN   | 4   |                                       |
+| 344 | In-app notification queue / API                    | IN   | 4   |                                       |
+| 345 | User preferences engine (per-channel)              | THIN | 3   |                                       |
+| 346 | Notification templates (push / email / SMS)        | IN   | 4   |                                       |
+| 347 | Critical-state fallback escalation                 | IN   | 4   | push → email → SMS                    |
+| 348 | Spam Act compliance (opt-out, unsubscribe)         | IN   | 2   |                                       |
+| 349 | Unsubscribe token endpoint                         | IN   | 2   |                                       |
+| 351 | Image content moderation (Azure Content Safety)    | IN   | 6   |                                       |
+| 352 | Async moderation queue (borderline confidence)     | IN   | 3   |                                       |
+| 353 | EXIF tampering / consistency check                 | IN   | 8   | EXIF + GPS + date plausibility        |
+| 355 | Rate limiting middleware (per-user + per-endpoint) | IN   | 4   |                                       |
+| 356 | LLM cost telemetry + anomaly alerts                | IN   | 3   |                                       |
+| 357 | Account suspension webhooks                        | IN   | 2   |                                       |
+| 358 | Data inventory + retention schema per table        | IN   | 5   |                                       |
+| 359 | DSR endpoints (access, delete, correct)            | IN   | 8   |                                       |
+| 360 | Anonymisation job (financial retained 7y)          | IN   | 6   |                                       |
+| 361 | Hard delete vs anonymise logic                     | IN   | 3   |                                       |
+| 362 | Consent ledger                                     | IN   | 5   |                                       |
+| 364 | PII redaction layer before external LLM calls      | IN   | 3   | Already exists in skeleton — finalise |
 
 **Backend total: ~88h** (tight — manage scope carefully)
 
@@ -130,15 +130,15 @@ Same as Sprint 1, plus per skill §F + §J + §K + the privacy audit doc:
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| Azure Content Safety adds cost — small but real | Medium | Low | Budget ~$5-15/mo at MVP scale; document in S10 cost projection |
-| EXIF false positives on legitimate iPhone HEIC photos | Medium | Medium | Test against 100 real iPhone photos; tune confidence thresholds |
-| DSR endpoint exposes other users' PII accidentally | Low | Critical | Manual code review + skill §F4; integration test checks for cross-user leaks |
-| Anonymisation breaks financial reconciliation | Low | High | Test against ATO-sample export; tax advisor sign-off on anonymisation strategy |
-| Push delivery success rate < 95% | Medium | Medium | Monitor in S10 App Insights; escalation cadence covers gaps |
-| LLM cost anomaly false positives | Medium | Low | Alert threshold tunable in admin (S9) |
-| 7-year retention contradicts user's deletion request | Low | Medium | Privacy Policy documents the distinction; admin DSR queue handles edge cases |
+| Risk                                                  | Likelihood | Impact   | Mitigation                                                                     |
+| ----------------------------------------------------- | ---------- | -------- | ------------------------------------------------------------------------------ |
+| Azure Content Safety adds cost — small but real       | Medium     | Low      | Budget ~$5-15/mo at MVP scale; document in S10 cost projection                 |
+| EXIF false positives on legitimate iPhone HEIC photos | Medium     | Medium   | Test against 100 real iPhone photos; tune confidence thresholds                |
+| DSR endpoint exposes other users' PII accidentally    | Low        | Critical | Manual code review + skill §F4; integration test checks for cross-user leaks   |
+| Anonymisation breaks financial reconciliation         | Low        | High     | Test against ATO-sample export; tax advisor sign-off on anonymisation strategy |
+| Push delivery success rate < 95%                      | Medium     | Medium   | Monitor in S10 App Insights; escalation cadence covers gaps                    |
+| LLM cost anomaly false positives                      | Medium     | Low      | Alert threshold tunable in admin (S9)                                          |
+| 7-year retention contradicts user's deletion request  | Low        | Medium   | Privacy Policy documents the distinction; admin DSR queue handles edge cases   |
 
 ## Explicitly NOT in scope
 
@@ -154,18 +154,18 @@ Same as Sprint 1, plus per skill §F + §J + §K + the privacy audit doc:
 
 ## Day-by-day rough plan
 
-| Day | Mobile | Backend |
-| --- | --- | --- |
-| Mon 21 (D1) | FCM/APNS setup + permission priming. | Notification service skeleton + templates. |
-| Tue 22 (D2) | In-app notification center. | Push delivery (FCM/APNS). Email (SendGrid). SMS (Notifyre). |
-| Wed 23 (D3) | Notification preferences UI + per-channel toggle. | Critical-state fallback escalation cron. Spam Act compliance. |
-| Thu 24 (D4) | Deep-link from notification + notification badges. | Unsubscribe token + endpoint. Rate limiting middleware. |
-| Fri 25 (D5) | Mid-sprint demo + catch-up. | Same. |
-| Mon 28 (D6) | DSR access download UI. | Azure Content Safety integration. Async moderation queue. |
-| Tue 29 (D7) | Account deletion request UI. | EXIF tampering check. LLM cost telemetry. |
-| Wed 30 (D8) | Polish + bug fixes. | DSR endpoints (access). Anonymisation job + 7y retention logic. |
-| Thu 1 Oct (D9) | Email opt-out unsubscribe + SMS STOP rendering. | DSR delete + consent ledger. PII redaction layer finalise. |
-| Fri 2 (D10) | End-of-sprint demo + CSV update. | Confirm CI green. Tag `sprint-08-end`. |
+| Day            | Mobile                                             | Backend                                                         |
+| -------------- | -------------------------------------------------- | --------------------------------------------------------------- |
+| Mon 21 (D1)    | FCM/APNS setup + permission priming.               | Notification service skeleton + templates.                      |
+| Tue 22 (D2)    | In-app notification center.                        | Push delivery (FCM/APNS). Email (SendGrid). SMS (Notifyre).     |
+| Wed 23 (D3)    | Notification preferences UI + per-channel toggle.  | Critical-state fallback escalation cron. Spam Act compliance.   |
+| Thu 24 (D4)    | Deep-link from notification + notification badges. | Unsubscribe token + endpoint. Rate limiting middleware.         |
+| Fri 25 (D5)    | Mid-sprint demo + catch-up.                        | Same.                                                           |
+| Mon 28 (D6)    | DSR access download UI.                            | Azure Content Safety integration. Async moderation queue.       |
+| Tue 29 (D7)    | Account deletion request UI.                       | EXIF tampering check. LLM cost telemetry.                       |
+| Wed 30 (D8)    | Polish + bug fixes.                                | DSR endpoints (access). Anonymisation job + 7y retention logic. |
+| Thu 1 Oct (D9) | Email opt-out unsubscribe + SMS STOP rendering.    | DSR delete + consent ledger. PII redaction layer finalise.      |
+| Fri 2 (D10)    | End-of-sprint demo + CSV update.                   | Confirm CI green. Tag `sprint-08-end`.                          |
 
 ## Definition of "shippable"
 

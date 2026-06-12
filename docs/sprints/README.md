@@ -9,22 +9,22 @@ This directory holds the 13-sprint MVP plan (Sprint 0 setup + 12 build sprints).
 
 ## Files
 
-| File | Sprint | Dates | Theme |
-| --- | --- | --- | --- |
-| `PLAN.md` | n/a | Jun 1 – Nov 27 2026 | Master plan |
-| `sprint-00-foundation-and-setup.md` | 0 | Mon 1 Jun → Fri 12 Jun | Foundation + AI setup + security tooling |
-| `sprint-01-onboarding-and-auth.md` | 1 | Mon 15 Jun → Fri 26 Jun | Onboarding & Auth |
-| `sprint-02-kyc-tasker-connect.md` | 2 | Mon 29 Jun → Fri 10 Jul | KYC + Tasker upgrade + Stripe Connect |
-| `sprint-03-task-posting-ai.md` | 3 | Mon 13 Jul → Fri 24 Jul | Task posting + AI extraction |
-| `sprint-04-discovery-bidding.md` | 4 | Mon 27 Jul → Fri 7 Aug | Discovery + Bidding + Q&A |
-| `sprint-05-messaging-payments.md` | 5 | Mon 10 Aug → Fri 21 Aug | Messaging + Payments core |
-| `sprint-06-execution-tax.md` | 6 | Mon 24 Aug → Fri 4 Sep | Job execution + Tax/RCTI/ATO |
-| `sprint-07-reviews-disputes.md` | 7 | Mon 7 Sep → Fri 18 Sep | Reviews + Disputes (Tier-0 mediator) |
-| `sprint-08-notifications-trust-privacy.md` | 8 | Mon 21 Sep → Fri 2 Oct | Notifications + Trust/Safety + Privacy |
-| `sprint-09-admin-console.md` | 9 | Mon 5 Oct → Fri 16 Oct | Admin console end-to-end |
-| `sprint-10-devops-cloud.md` | 10 | Mon 19 Oct → Fri 30 Oct | DevOps + Cloud + WAF |
-| `sprint-11-testflight-bugfix.md` | 11 | Mon 2 Nov → Fri 13 Nov | TestFlight + Bug-fix + Launch hardening |
-| `sprint-12-soft-launch.md` | 12 | Mon 16 Nov → Fri 27 Nov | Soft launch + Retrospective |
+| File                                       | Sprint | Dates                   | Theme                                                                                        |
+| ------------------------------------------ | ------ | ----------------------- | -------------------------------------------------------------------------------------------- |
+| `PLAN.md`                                  | n/a    | Jun 1 – Dec 4 2026      | Master plan                                                                                  |
+| `sprint-00-foundation-and-setup.md`        | 0      | Mon 1 Jun → Fri 19 Jun  | Foundation + AI setup + security tooling (extended 1 week for research catch-up)             |
+| `sprint-01-onboarding-and-auth.md`         | 1      | Mon 22 Jun → Fri 3 Jul  | **Backend Auth Foundation** (backend-only — no mobile this sprint)                           |
+| `sprint-02-kyc-tasker-connect.md`          | 2      | Mon 6 Jul → Fri 17 Jul  | Mobile Auth + Onboarding + Tasker upgrade + Stripe Connect + ABN (first user-visible sprint) |
+| `sprint-03-task-posting-ai.md`             | 3      | Mon 20 Jul → Fri 31 Jul | Task posting + AI extraction + guest mode                                                    |
+| `sprint-04-discovery-bidding.md`           | 4      | Mon 3 Aug → Fri 14 Aug  | Discovery + Bidding + Q&A + **License verification + bid-time guard** (per ADR 005)          |
+| `sprint-05-messaging-payments.md`          | 5      | Mon 17 Aug → Fri 28 Aug | Messaging + Payments core + OTP swap                                                         |
+| `sprint-06-execution-tax.md`               | 6      | Mon 31 Aug → Fri 11 Sep | Job execution + Tax/RCTI/ATO                                                                 |
+| `sprint-07-reviews-disputes.md`            | 7      | Mon 14 Sep → Fri 25 Sep | Reviews + Disputes (Tier-0 mediator)                                                         |
+| `sprint-08-notifications-trust-privacy.md` | 8      | Mon 28 Sep → Fri 9 Oct  | Notifications + Trust/Safety + Privacy                                                       |
+| `sprint-09-admin-console.md`               | 9      | Mon 12 Oct → Fri 23 Oct | Admin console end-to-end (incl. full License Review Queue UI)                                |
+| `sprint-10-devops-cloud.md`                | 10     | Mon 26 Oct → Fri 6 Nov  | DevOps + Cloud + WAF                                                                         |
+| `sprint-11-testflight-bugfix.md`           | 11     | Mon 9 Nov → Fri 20 Nov  | TestFlight + Bug-fix + Launch hardening                                                      |
+| `sprint-12-soft-launch.md`                 | 12     | Mon 23 Nov → Fri 4 Dec  | Soft launch + Retrospective                                                                  |
 
 ## How each sprint doc is structured
 

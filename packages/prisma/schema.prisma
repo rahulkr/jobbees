@@ -405,7 +405,29 @@ model AuditLog {
 // Promo: PromoCode, PromoCodeUsage
 // Tasker profile: ServiceArea (suburb + radius OR postal-code list per tasker)
 // Tasker profile: TaskerPortfolio (previous work photos, optional)
-// Tasker profile: Certification (licenses / certs upload, optional)
+// Tasker verification: License (per-category professional license — manual admin review;
+//   replaces an identity-vendor KYC model per ADR 005). Fields: userId, categoryId,
+//   licenseType, licenseNumber, issuingState, expiresAt, uploadedBlobUrl,
+//   status enum {PENDING, APPROVED, REJECTED, EXPIRED}, reviewerId, reviewerNotes,
+//   reviewedAt, createdAt. Unique on (userId, categoryId). Indexes on userId,
+//   categoryId, status, expiresAt.
+//   licenseType is constrained to slugs in packages/types/src/licenses.ts
+//   ALLOWED_LICENSE_TYPES (NOT a Prisma enum — kept as a TypeScript constant so we can
+//   add new license types without a schema migration). Backend validates on every
+//   insert/update; rejects unknown slugs with 400 INVALID_LICENSE_TYPE. Per ADR 005:
+//   13 slugs total across 8 categories at MVP.
+//   issuingState is constrained to ISSUING_STATES const in the same file (8 AU states).
+// Category.requiresLicense Boolean @default(false) — flips bid-time guard on.
+//   Seed `electrical`, `plumbing`, `gasfitting`, `asbestos`, `refrigerated_ac`,
+//   `pest_control` as `true`.
+// Category.licenseRequiredOverCents Int? — conditional licensing (license required
+//   only when task value >= threshold). At MVP only `builder` uses this, set to
+//   500000 cents ($5,000 AUD) per NSW Fair Trading Home Building Act 1989.
+//   Other AU states have different thresholds — POST-MVP moves to per-state lookup.
+//   Invariant: do NOT set both requiresLicense=true AND licenseRequiredOverCents.
+//   Bid guard (row 532): hourly bids on a conditional category always require
+//   the license; fixed-price bids require it only when bid.totalCents >= threshold.
+// Tasker profile: Certification (non-license certs upload, optional — POST-MVP)
 // Admin auth: AdminTotp (mandatory TOTP secret per admin — admin 2FA is IN)
 // User state: User.suspendedAt / User.suspensionReason fields (or Suspension model
 //   with history) — currently tracked via AuditLog actions, will need queryable flag
