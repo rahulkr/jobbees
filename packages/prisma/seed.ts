@@ -46,6 +46,15 @@ const adapter = new PrismaPg({
 });
 const prisma = new PrismaClient({ adapter });
 
+// ─── DELIBERATE TYPE ERROR — TEMPORARY ─────────────────────────────────
+// This line is here to test the CI gate. It is a string assigned to a
+// `number` typed variable, which tsc must catch on `pnpm --filter
+// @jobbees/prisma run typecheck`. If CI passes with this line in place,
+// the typecheck script is not actually scanning seed.ts.
+// REMOVE THIS BLOCK AFTER VERIFYING CI BLOCKS THE MERGE.
+const _ciGateTest: number = 'this should fail typecheck';
+// ───────────────────────────────────────────────────────────────────────
+
 async function main() {
   console.log('🌱 Seeding JOBBees development database...');
 
