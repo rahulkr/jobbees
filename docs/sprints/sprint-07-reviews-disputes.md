@@ -1,10 +1,10 @@
 # Sprint 7 — Reviews + Disputes (Tier-0 LLM mediator)
 
-**Dates:** Mon 7 Sep → Fri 18 Sep 2026 (10 working days)
+**Dates:** Mon 14 Sep → Fri 25 Sep 2026 (10 working days)
 **Theme:** Both sides leave reviews (blind, timeout-reveal), and when something goes wrong the AI mediator proposes a resolution that humans can accept, reject, or escalate.
 **Hours budget:** ~95 (40 mobile, 55 backend)
-**Mid-sprint demo:** Fri 11 Sep
-**End-of-sprint demo:** Fri 18 Sep
+**Mid-sprint demo:** Fri 18 Sep
+**End-of-sprint demo:** Fri 25 Sep
 
 ## Goal in one sentence
 
@@ -14,44 +14,44 @@ By Friday 18 Sep, after a completed job both parties leave reviews (only reveale
 
 ### Mobile (apps/mobile)
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 150 | Post-completion review prompt (both sides) | IN | 2 | |
-| 151 | Star rating | IN | 1 | |
-| 152 | Text review with min length | IN | 1 | |
-| 153 | Blind review with timeout-reveal | IN | 2 | |
-| 155 | Response to review (one-time, public) | THIN | 2 | |
-| 157 | Report review | IN | 1 | |
-| 158 | Dispute initiation flow | IN | 3 | |
-| 159 | Reason picker | IN | 1 | |
-| 160 | Evidence upload (photos, message screenshots) | IN | 3 | |
-| 161 | Dispute conversation thread | IN | 3 | |
-| 162 | AI-proposed resolution screen | IN★ | 3 | Render proposal from backend |
-| 163 | Accept proposal | IN★ | 1 | |
-| 164 | Reject / escalate to human admin | IN★ | 1 | |
-| 165 | Dispute status tracker | IN | 2 | |
-| 166 | Resolution outcome screen | IN | 2 | |
+| ID  | Item                                          | Call | Hrs | Notes                        |
+| --- | --------------------------------------------- | ---- | --- | ---------------------------- |
+| 150 | Post-completion review prompt (both sides)    | IN   | 2   |                              |
+| 151 | Star rating                                   | IN   | 1   |                              |
+| 152 | Text review with min length                   | IN   | 1   |                              |
+| 153 | Blind review with timeout-reveal              | IN   | 2   |                              |
+| 155 | Response to review (one-time, public)         | THIN | 2   |                              |
+| 157 | Report review                                 | IN   | 1   |                              |
+| 158 | Dispute initiation flow                       | IN   | 3   |                              |
+| 159 | Reason picker                                 | IN   | 1   |                              |
+| 160 | Evidence upload (photos, message screenshots) | IN   | 3   |                              |
+| 161 | Dispute conversation thread                   | IN   | 3   |                              |
+| 162 | AI-proposed resolution screen                 | IN★  | 3   | Render proposal from backend |
+| 163 | Accept proposal                               | IN★  | 1   |                              |
+| 164 | Reject / escalate to human admin              | IN★  | 1   |                              |
+| 165 | Dispute status tracker                        | IN   | 2   |                              |
+| 166 | Resolution outcome screen                     | IN   | 2   |                              |
 
 **Mobile total: ~28h**
 
 ### Backend (apps/api)
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 323 | Review CRUD | IN | 4 | |
-| 324 | Blind review with timeout-reveal | IN | 3 | |
-| 325 | Response-to-review API | THIN | 2 | |
-| 328 | Review removal API (admin-triggered) | IN | 2 | |
-| 329 | Minimum-length enforcement | IN | 1 | |
-| 330 | Dispute CRUD | IN | 4 | |
-| 331 | Dispute state machine | IN | 3 | OPEN/TIER0_PROPOSED/ACCEPTED/ESCALATED/RESOLVED/CLOSED |
-| 332 | Tier-0 LLM mediator agent | IN★ | 14 | Prompt eng, evidence agg, schema validation, cost guard |
-| 333 | Evidence collection API | IN | 3 | |
-| 334 | Resolution proposal generation (full/partial/refund) | IN★ | 4 | |
-| 335 | Tier-0 threshold config (≤ AUD $200) | IN★ | 1 | |
-| 336 | Accept / reject proposal logic | IN★ | 2 | |
-| 337 | Escalation to human admin | IN★ | 2 | |
-| 338 | Admin case brief generation (co-pilot) | IN★ | 8 | Separate prompt, structured output |
+| ID  | Item                                                 | Call | Hrs | Notes                                                   |
+| --- | ---------------------------------------------------- | ---- | --- | ------------------------------------------------------- |
+| 323 | Review CRUD                                          | IN   | 4   |                                                         |
+| 324 | Blind review with timeout-reveal                     | IN   | 3   |                                                         |
+| 325 | Response-to-review API                               | THIN | 2   |                                                         |
+| 328 | Review removal API (admin-triggered)                 | IN   | 2   |                                                         |
+| 329 | Minimum-length enforcement                           | IN   | 1   |                                                         |
+| 330 | Dispute CRUD                                         | IN   | 4   |                                                         |
+| 331 | Dispute state machine                                | IN   | 3   | OPEN/TIER0_PROPOSED/ACCEPTED/ESCALATED/RESOLVED/CLOSED  |
+| 332 | Tier-0 LLM mediator agent                            | IN★  | 14  | Prompt eng, evidence agg, schema validation, cost guard |
+| 333 | Evidence collection API                              | IN   | 3   |                                                         |
+| 334 | Resolution proposal generation (full/partial/refund) | IN★  | 4   |                                                         |
+| 335 | Tier-0 threshold config (≤ AUD $200)                 | IN★  | 1   |                                                         |
+| 336 | Accept / reject proposal logic                       | IN★  | 2   |                                                         |
+| 337 | Escalation to human admin                            | IN★  | 2   |                                                         |
+| 338 | Admin case brief generation (co-pilot)               | IN★  | 8   | Separate prompt, structured output                      |
 
 **Backend total: ~53h**
 
@@ -123,15 +123,15 @@ Same as Sprint 1, plus per `.claude/skills/tier0-dispute/SKILL.md`:
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| Tier-0 proposes biased outcomes (favours one side systematically) | Medium | High | Manual eval on 10 sample disputes before merging; if biased, iterate prompt |
-| Tier-0 cost spikes (long thread + many evidence pieces) | Medium | Medium | Cost guard at $0.50/dispute hard limit, alert at $0.10 average |
-| PII leaks into Tier-0 prompt (skipped redaction) | Low | Critical | Automated test: prompt input must pass through `redactPii()` |
-| Blind review timeout-reveal cron timing edge case | Low | Low | Test with mocked dates; document in code |
-| Disputes < $200 threshold is wrong cutoff | Medium | Low | Admin config (S9) to tune threshold; start at $200 |
-| Review removal admin tool used to delete legitimate negative reviews | Low | Medium | Audit log every removal; tracked in admin audit log viewer (S9) |
-| Evidence upload exceeds size limits | Medium | Low | Size cap at 10MB per file, 50MB per dispute |
+| Risk                                                                 | Likelihood | Impact   | Mitigation                                                                  |
+| -------------------------------------------------------------------- | ---------- | -------- | --------------------------------------------------------------------------- |
+| Tier-0 proposes biased outcomes (favours one side systematically)    | Medium     | High     | Manual eval on 10 sample disputes before merging; if biased, iterate prompt |
+| Tier-0 cost spikes (long thread + many evidence pieces)              | Medium     | Medium   | Cost guard at $0.50/dispute hard limit, alert at $0.10 average              |
+| PII leaks into Tier-0 prompt (skipped redaction)                     | Low        | Critical | Automated test: prompt input must pass through `redactPii()`                |
+| Blind review timeout-reveal cron timing edge case                    | Low        | Low      | Test with mocked dates; document in code                                    |
+| Disputes < $200 threshold is wrong cutoff                            | Medium     | Low      | Admin config (S9) to tune threshold; start at $200                          |
+| Review removal admin tool used to delete legitimate negative reviews | Low        | Medium   | Audit log every removal; tracked in admin audit log viewer (S9)             |
+| Evidence upload exceeds size limits                                  | Medium     | Low      | Size cap at 10MB per file, 50MB per dispute                                 |
 
 ## Explicitly NOT in scope
 
@@ -143,18 +143,18 @@ Same as Sprint 1, plus per `.claude/skills/tier0-dispute/SKILL.md`:
 
 ## Day-by-day rough plan
 
-| Day | Mobile | Backend |
-| --- | --- | --- |
-| Mon 7 (D1) | Review prompt + star rating + text input. | Review CRUD + min-length. Dispute models. |
-| Tue 8 (D2) | Blind review with timeout-reveal UI. | Blind review reveal logic + cron. |
-| Wed 9 (D3) | Response-to-review + report review. | Response API + admin review removal. Dispute state machine. |
-| Thu 10 (D4) | Dispute initiation + reason picker + evidence upload. | Tier-0 mediator prompt v1. Evidence collection. |
-| Fri 11 (D5) | Mid-sprint demo + catch-up. | Tier-0 schema validation + cost guard. |
-| Mon 14 (D6) | AI proposal screen + accept/reject. | Tier-0 resolution proposal generation + threshold. |
-| Tue 15 (D7) | Dispute conversation thread + status tracker. | Accept/reject logic. Escalation flow. |
-| Wed 16 (D8) | Resolution outcome screen. Polish. | Admin co-pilot brief generation. Hand-eval prep. |
-| Thu 17 (D9) | Polish + bug fixes. | Hand-eval 10 disputes. Tune Tier-0 prompt. |
-| Fri 18 (D10) | End-of-sprint demo + CSV update. | Confirm CI green. Tag `sprint-07-end`. |
+| Day          | Mobile                                                | Backend                                                     |
+| ------------ | ----------------------------------------------------- | ----------------------------------------------------------- |
+| Mon 7 (D1)   | Review prompt + star rating + text input.             | Review CRUD + min-length. Dispute models.                   |
+| Tue 8 (D2)   | Blind review with timeout-reveal UI.                  | Blind review reveal logic + cron.                           |
+| Wed 9 (D3)   | Response-to-review + report review.                   | Response API + admin review removal. Dispute state machine. |
+| Thu 10 (D4)  | Dispute initiation + reason picker + evidence upload. | Tier-0 mediator prompt v1. Evidence collection.             |
+| Fri 11 (D5)  | Mid-sprint demo + catch-up.                           | Tier-0 schema validation + cost guard.                      |
+| Mon 14 (D6)  | AI proposal screen + accept/reject.                   | Tier-0 resolution proposal generation + threshold.          |
+| Tue 15 (D7)  | Dispute conversation thread + status tracker.         | Accept/reject logic. Escalation flow.                       |
+| Wed 16 (D8)  | Resolution outcome screen. Polish.                    | Admin co-pilot brief generation. Hand-eval prep.            |
+| Thu 17 (D9)  | Polish + bug fixes.                                   | Hand-eval 10 disputes. Tune Tier-0 prompt.                  |
+| Fri 18 (D10) | End-of-sprint demo + CSV update.                      | Confirm CI green. Tag `sprint-07-end`.                      |
 
 ## Definition of "shippable"
 

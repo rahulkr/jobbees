@@ -13,6 +13,18 @@
  *
  * Do NOT seed prod-like volumes — keep local dev fast. Use Faker for realism.
  */
+// Seed runs as a standalone `tsx` process, so it must load .env files itself —
+// prisma.config.ts only loads them for the prisma CLI process.
+import path from 'node:path';
+import { config as loadEnv } from 'dotenv';
+const repoRoot = path.resolve(__dirname, '..', '..');
+loadEnv({ path: path.join(repoRoot, '.env.local') });
+loadEnv({ path: path.join(repoRoot, '.env') });
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is not set. See prisma.config.ts for env loading.');
+}
+
 import {
   PrismaClient,
   UserRole,
@@ -22,10 +34,17 @@ import {
   KycStatus,
   ConnectStatus,
 } from './generated';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { createId } from '@paralleldrive/cuid2';
 import { faker } from '@faker-js/faker';
 
-const prisma = new PrismaClient();
+// Prisma 7 — PrismaClient takes a driver adapter instead of relying on
+// the datasource URL. The migrate engine uses prisma.config.ts; this
+// adapter is for runtime queries inside the seed.
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🌱 Seeding JOBBees development database...');

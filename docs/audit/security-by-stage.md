@@ -44,21 +44,21 @@ Each stage catches different failure modes. A bug that survives one is likely ca
 
 This is the layer your client is asking about. When Claude Code is editing the codebase, the custom `security-review` skill auto-invokes on changes to sensitive paths and enforces JOBBees-specific rules that no generic tool can know.
 
-| Control                  | What                                                                 | How                                          |
-| ------------------------ | -------------------------------------------------------------------- | -------------------------------------------- |
-| **Input validation**     | Every endpoint has a DTO; no `any` body                              | `.claude/skills/security-review/SKILL.md` §A |
-| **AuthN/AuthZ**          | Guards on every non-public route; role + ownership checks            | §B                                           |
-| **Idempotency**          | Every mutating endpoint requires `Idempotency-Key`                   | §C                                           |
-| **Rate limits**          | Auth / payment / AI endpoints have explicit limits                   | §D                                           |
-| **SQL injection**        | No raw queries with interpolation; soft-delete filter applied        | §E                                           |
-| **PII handling**         | Redaction before LLM calls; no PII in logs; KYC payload minimization | §F                                           |
-| **Secrets**              | No hardcoded keys; Key Vault references in staging/prod              | §G                                           |
-| **Money integrity**      | All amounts in `Int` cents; currency stored; GST via service         | §H                                           |
-| **Webhook signatures**   | Stripe / Didit signatures verified before processing                 | §H5                                          |
-| **Audit trail**          | Money / role / KYC changes write to immutable `AuditLog`             | §I                                           |
-| **LLM cost + injection** | Cost ceilings; prompt-injection defenses                             | §J                                           |
-| **AU compliance**        | Default `AU` country code; ABN validation; sharing-economy fields    | §K                                           |
-| **Test coverage**        | Sensitive routes have 3+ tests including auth-fail                   | §L                                           |
+| Control                  | What                                                                                                                           | How                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| **Input validation**     | Every endpoint has a DTO; no `any` body                                                                                        | `.claude/skills/security-review/SKILL.md` §A |
+| **AuthN/AuthZ**          | Guards on every non-public route; role + ownership checks                                                                      | §B                                           |
+| **Idempotency**          | Every mutating endpoint requires `Idempotency-Key`                                                                             | §C                                           |
+| **Rate limits**          | Auth / payment / AI endpoints have explicit limits                                                                             | §D                                           |
+| **SQL injection**        | No raw queries with interpolation; soft-delete filter applied                                                                  | §E                                           |
+| **PII handling**         | Redaction before LLM calls; no PII in logs; KYC payload minimization                                                           | §F                                           |
+| **Secrets**              | No hardcoded keys; Key Vault references in staging/prod                                                                        | §G                                           |
+| **Money integrity**      | All amounts in `Int` cents; currency stored; GST via service                                                                   | §H                                           |
+| **Webhook signatures**   | Stripe webhook signatures verified before processing (no other webhook providers at MVP — ADR 005 removed identity-vendor KYC) | §H5                                          |
+| **Audit trail**          | Money / role / KYC / License changes write to immutable `AuditLog`                                                             | §I                                           |
+| **LLM cost + injection** | Cost ceilings; prompt-injection defenses                                                                                       | §J                                           |
+| **AU compliance**        | Default `AU` country code; ABN validation; sharing-economy fields                                                              | §K                                           |
+| **Test coverage**        | Sensitive routes have 3+ tests including auth-fail                                                                             | §L                                           |
 
 **Triggers automatically on changes to:** `apps/api/src/modules/{auth,payment,payout,tax,kyc,ai,notification}/**`, controllers, webhook handlers, Prisma schema, env files.
 

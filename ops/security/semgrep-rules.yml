@@ -193,9 +193,11 @@ rules:
   - id: jobbees-stores-government-id-number
     pattern-regex: '(passportNumber|driverLicenseNumber|driversLicenseNumber|ssn|medicareNumber)\s+String'
     message: >
-      Government ID number field detected in schema. JOBBees minimizes KYC PII —
-      Didit holds the document; we store only verification status + session ID.
-      Remove unless explicit business + legal justification exists.
+      Government ID number field detected in schema. JOBBees minimizes identity PII
+      per ADR 005 — Stripe Connect holds the legal-identity document on their side,
+      and JOBBees stores only Stripe's verification status. The License model only
+      stores the public-register licence number (NOT a government ID number).
+      Remove this field unless explicit business + legal justification exists.
     severity: ERROR
     languages: [generic]
     paths:
@@ -268,6 +270,26 @@ rules:
   #   1. `.claude/skills/security-review/SKILL.md` §H5
   #   2. `.github/pull_request_template.md` (Webhook section)
   #   3. Required human review on payment PRs (CLAUDE.md rule 2)
+
+  # ============================================================================
+  # H2. OTP / SMS provider safety
+  # ============================================================================
+
+  - id: jobbees-mock-otp-in-prod-env
+    pattern-regex: '^OTP_PROVIDER=mock'
+    message: >
+      MockOtpService is dev-only — it accepts hardcoded code `000000`.
+      Production deploys MUST use `OTP_PROVIDER=firebase`. App startup
+      will refuse to boot if NODE_ENV=production AND OTP_PROVIDER=mock,
+      but this rule catches the issue earlier in CI / pre-commit.
+      See `docs/sprints/sprint-01-onboarding-and-auth.md` Decision D4.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - '**/.env.production*'
+        - '**/.env.prod*'
+        - '**/.env.staging*'
 
   # ============================================================================
   # I. Audit trail

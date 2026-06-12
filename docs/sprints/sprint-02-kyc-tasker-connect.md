@@ -1,195 +1,269 @@
-# Sprint 2 — KYC + Tasker upgrade + Stripe Connect onboarding
+# Sprint 2 — Mobile Auth + Onboarding + Tasker upgrade + Stripe Connect + ABN
 
-**Dates:** Mon 29 Jun → Fri 10 Jul 2026 (10 working days)
-**Theme:** Get a poster into "verified tasker with held-funds banner, Connect onboarding live" so Sprint 3's first task can earn real money.
-**Hours budget:** ~85 (40 mobile, 40 backend, 5 admin scaffolding)
-**Mid-sprint demo:** Fri 3 Jul
-**End-of-sprint demo:** Fri 10 Jul
+> **Note:** Per the 2026-06-12 plan restructure, Sprint 2 became the **first user-visible sprint**. Mobile auth + onboarding (originally in Sprint 1) move here, integrating against the now-stable Sprint 1 backend. License verification (mobile upload + backend module + bid-time guard + expiry cron + admin review queue scaffold) **deferred to Sprint 4**, where it lives natively with the bidding code.
+
+**Dates:** Mon 6 Jul → Fri 17 Jul 2026 (10 working days)
+**Theme:** First "click through the app" sprint. Mobile lands and integrates against the real backend from Sprint 1. By Friday a user can install the app, sign up, log in, become a tasker, complete Stripe Connect, and verify their ABN.
+**Hours budget:** ~95 (60 mobile, 30 backend, 5 admin scaffolding)
+**Mid-sprint demo:** Fri 10 Jul
+**End-of-sprint demo:** Fri 17 Jul
 
 ## Goal in one sentence
 
-By Friday 10 Jul, a user can sign up as poster → tap "Become a tasker" → complete KYC (via Didit OR via the manual review path) → enter ABN → land in Stripe Connect onboarding → see a persistent held-funds banner until Connect is complete.
+By Friday 17 Jul, a user can cold-launch the app, see the welcome carousel, sign up (email/Google/Apple), verify OTP (against MockOtpService), pick a role, land on poster home, tap "Become a tasker", complete Stripe Connect onboarding (Stripe handles identity KYC), verify their ABN — all against the real Sprint 1 backend, running entirely on local Docker.
+
+## Verification model (per ADR 005)
+
+We are NOT using an identity vendor (Didit / Stripe Identity / similar). Three independent layers:
+
+1. **Stripe Connect Express KYC** — Stripe handles end-to-end during their onboarding flow (this sprint)
+2. **ABN verification** — JOBBees calls free ABR API (checksum + business name) (this sprint)
+3. **Professional license verification** (per category, only for licensed trades) — **deferred to Sprint 4 with bidding**
+
+Most categories (cleaning, gardening, moving, handyman, IT, tutoring, Ikea assembly) require NO license. Licensed trades (electrical, plumbing, gas, asbestos, refrigerated AC, pest control, builder>$5K NSW) need a category-specific license — which lands in Sprint 4 alongside the bidding code that gates on it.
 
 ## Scope — inventory rows
 
-### Mobile (apps/mobile)
+### Mobile (apps/mobile) — auth + onboarding + tasker upgrade
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 15 | Poster → Tasker upgrade flow (one-way only) | IN | 4 | Triggers KYC + Connect onboarding |
-| 21 | ID document upload (license/passport) | IN | 4 | Photo + crop |
-| 22 | Selfie / liveness check | IN | 3 | Didit SDK OR upload only on manual path |
-| 23 | Stripe Identity webview | IN | 3 | Or Didit webview, depending on KYC decision |
-| 24 | ABN entry + ABR lookup UI | IN | 3 | Tasker-only |
-| 25 | KYC status screen (pending/approved/rejected) | IN | 2 | |
-| 26 | Manual review prompt | IN | 1 | |
-| 27 | KYC re-submission flow | IN | 2 | |
-| 35 | Tasker profile setup wizard (multi-step) | IN | 5 | |
-| 36 | Bio / about me | IN | 1 | |
-| 37 | Skills selection (categories + tags) | IN | 3 | |
-| 38 | Service areas (suburb / radius picker) | IN | 3 | |
-| 39 | Hourly rate / minimum task fee | IN | 1 | |
-| 40 | Profile photo + cover image upload | IN | 2 | |
-| 41 | Certifications / licenses upload | THIN | 2 | Optional render only |
-| 44 | Stripe Connect onboarding entry | IN | 2 | |
-| 45 | Held-funds banner | IN | 2 | Persistent until Connect complete |
-| 46 | Connect reminder cadence — mobile rendering | IN | 2 | 24h / 72h / 7d |
-| 47 | Public tasker profile (visible to posters) | IN | 3 | |
-| 48 | Portfolio / previous work photos | THIN | 2 | Upload + render only |
-| 49 | Reviews received display | IN | 2 | Empty state for now |
+| ID  | Item                                                                     | Call | Hrs | Notes                                                                                                                                            |
+| --- | ------------------------------------------------------------------------ | ---- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Splash screen                                                            | IN   | 1   |                                                                                                                                                  |
+| 527 | **Welcome carousel (3 screens — what JOBBees does)**                     | IN   | 4   | First-launch only, skippable, persists "seen" flag locally                                                                                       |
+| 2   | Email signup (first name, last name, email, mobile, location, user type) | IN   | 4   | Single form with validation; hits Sprint 1 `/auth/signup`                                                                                        |
+| 3   | Google signup                                                            | IN   | 3   | Flutter `google_sign_in` package                                                                                                                 |
+| 4   | Apple signup                                                             | IN   | 3   | iOS App Store requirement (if you offer ANY social sign-in, you must offer Apple)                                                                |
+| 5   | Email + password login                                                   | IN   | 2   | Hits Sprint 1 `/auth/login`                                                                                                                      |
+| 6   | Google login                                                             | IN   | 1   | Reuses signup integration                                                                                                                        |
+| 7   | Apple login                                                              | IN   | 1   | Reuses signup integration                                                                                                                        |
+| 9   | Login — biometric (Face ID / Touch ID / fingerprint)                     | IN   | 3   | `local_auth` package + biometric token exchange against Sprint 1 endpoint                                                                        |
+| 10  | Forgot password / reset flow                                             | IN   | 3   | Email reset link from Sprint 1 backend                                                                                                           |
+| 11  | OTP entry screen                                                         | IN   | 2   | Used by phone verify; autofills via Smart Auth (iOS) / SMS Retriever (Android)                                                                   |
+| 12  | Email verification (posters)                                             | IN   | 2   | Click-through link from email                                                                                                                    |
+| 13  | Phone OTP verification (taskers only)                                    | IN   | 3   | Tasker-gated; uses MockOtpService (`000000`) until Sprint 5 OTP swap                                                                             |
+| 14  | Role selection (Poster / Tasker / Decide later) at signup                | IN   | 2   |                                                                                                                                                  |
+| 16  | Permissions priming (location, camera, notifications, photos)            | IN   | 3   | Per-OS handling; show value prop before OS prompt                                                                                                |
+| 18  | Account suspended/banned screen                                          | IN   | 1   |                                                                                                                                                  |
+| 19  | Force logout (session expired)                                           | IN   | 1   |                                                                                                                                                  |
+| 20  | Account deletion confirmation screen                                     | IN   | 2   |                                                                                                                                                  |
+| 28  | Profile setup (name, photo, default address)                             | IN   | 3   | Poster — minimal                                                                                                                                 |
+| 29  | Profile edit                                                             | IN   | 2   |                                                                                                                                                  |
+| 33  | Public profile view (limited fields visible to taskers)                  | IN   | 2   |                                                                                                                                                  |
+| 34  | Verification badges (email, phone, Stripe Connect)                       | THIN | 1   | Just rendering; license badges come in Sprint 4                                                                                                  |
+| 15  | Poster → Tasker upgrade flow (one-way only)                              | IN   | 4   | Triggers Stripe Connect + ABN entry                                                                                                              |
+| 24  | ABN entry + ABR lookup UI                                                | IN   | 3   | Tasker-only; checksum + business name match via ABR API                                                                                          |
+| 25  | Verification status screen (Connect / ABN)                               | IN   | 2   | Replaces old "KYC status screen"; license tab comes in S4                                                                                        |
+| 35  | Tasker profile setup wizard (multi-step)                                 | IN   | 5   |                                                                                                                                                  |
+| 36  | Bio / about me                                                           | IN   | 1   |                                                                                                                                                  |
+| 37  | Skills selection (categories + tags)                                     | IN   | 3   | Flags `requiresLicense` + `licenseRequiredOverCents` categories visually with "License required in S4" chip — sets expectations without blocking |
+| 38  | Service areas (suburb / radius picker)                                   | IN   | 3   |                                                                                                                                                  |
+| 39  | Hourly rate / minimum task fee                                           | IN   | 1   |                                                                                                                                                  |
+| 40  | Profile photo + cover image upload                                       | IN   | 2   |                                                                                                                                                  |
+| 44  | Stripe Connect onboarding entry                                          | IN   | 2   | Stripe handles all identity KYC end-to-end                                                                                                       |
+| 45  | Held-funds banner                                                        | IN   | 2   | Persistent until Connect complete                                                                                                                |
+| 46  | Connect reminder cadence — mobile rendering                              | IN   | 2   | 24h / 72h / 7d                                                                                                                                   |
+| 47  | Public tasker profile (visible to posters)                               | IN   | 3   | Shows Stripe Connect verified badge; license badges come in S4                                                                                   |
+| 48  | Portfolio / previous work photos                                         | THIN | 2   | Upload + render only                                                                                                                             |
+| 49  | Reviews received display                                                 | IN   | 2   | Empty state for now                                                                                                                              |
 
-**Mobile total: ~50h**
+**Mobile total: ~60h**
 
-### Backend (apps/api)
+REMOVED from earlier draft (deferred to Sprint 4 with bidding):
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 240 | KYC orchestration (Didit OR manual queue) | IN | 6 | Implementation forks per ADR 005 |
-| 241 | ABN + ABR lookup integration | IN | 3 | https://abr.business.gov.au/ |
-| 244 | Poster→Tasker upgrade backend (one-way) | IN | 3 | State change, triggers KYC + Connect requirements |
-| 292 | Stripe Connect Express integration | IN | 12 | The big one this sprint |
-| 293 | Connect webhook handlers | IN | 6 | account.updated, account.application.authorized, etc. |
-| 294 | Connect onboarding status tracking | IN | 4 | Pending → restricted → complete state transitions |
-| 295 | Held-funds calculation per tasker | IN | 3 | Sum of captured-but-not-released amounts |
+- ~~Row 41: License upload~~ — deferred to S4
+- ~~Row 531: Licensed-trade category selector~~ — deferred to S4 (skills picker in S2 just flags categories visually)
 
-**Backend total: ~37h**
+### Backend (apps/api) — tasker upgrade + Stripe Connect + ABN
+
+| ID  | Item                                    | Call | Hrs | Notes                                                                                                 |
+| --- | --------------------------------------- | ---- | --- | ----------------------------------------------------------------------------------------------------- |
+| 241 | ABN + ABR lookup integration            | IN   | 3   | https://abr.business.gov.au/ ; 24h local cache                                                        |
+| 244 | Poster→Tasker upgrade backend (one-way) | IN   | 3   | State change, triggers Connect onboarding init                                                        |
+| 292 | Stripe Connect Express integration      | IN   | 12  | Stripe handles identity KYC end-to-end                                                                |
+| 293 | Connect webhook handlers                | IN   | 6   | `account.updated`, `account.application.authorized`, etc. — HMAC signature verified before processing |
+| 294 | Connect onboarding status tracking      | IN   | 4   | Pending → restricted → complete state transitions; mirrors to User.kycStatus                          |
+| 295 | Held-funds calculation per tasker       | IN   | 3   | Sum of captured-but-not-released amounts                                                              |
+
+**Backend total: ~31h**
+
+REMOVED from earlier draft (deferred to Sprint 4):
+
+- ~~Row 240: License verification module~~ — deferred to S4
+- ~~Row 532: Bid-time license guard~~ — deferred to S4 (bidding code's natural home)
+- ~~Row 533: License expiry cron~~ — deferred to S4
 
 ### Admin scaffolding (apps/admin)
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 431 | KYC review queue (scaffold only — full UI in S9) | IN | 4 | Just enough to approve/reject if manual path picked |
-| 432 | Connect onboarding tracker (scaffold) | IN | 3 | List view of Connect statuses |
+| ID  | Item                                     | Call | Hrs | Notes                                                              |
+| --- | ---------------------------------------- | ---- | --- | ------------------------------------------------------------------ |
+| 431 | Stripe Connect status mirror (read-only) | THIN | 2   | Display Connect verification state per tasker; full admin UI in S9 |
+| 432 | Connect onboarding tracker (scaffold)    | IN   | 3   | List view of Connect statuses                                      |
 
-**Admin total: ~7h**
+**Admin total: ~5h**
+
+REMOVED: ~~Row 534 (License review queue scaffold)~~ — deferred to Sprint 4 alongside the License module.
 
 ### Schema additions
 
-- `Didit` path: add to User model: `kycStatus` (enum already exists), `kycSessionId String?`, `kycVerifiedAt DateTime?`, `kycProvider String? // "didit" | "manual"`, `documentType String? // "passport" | "license" — never the number`
-- `Manual` path: add `KycSubmission` model: `id`, `userId`, `documentBlobUrl`, `selfieBlobUrl`, `submittedAt`, `reviewedAt`, `reviewerId`, `decision: enum APPROVED/REJECTED/NEEDS_MORE`, `reviewerNotes`
-- Add to User model: `stripeConnectAccountId String?`, `connectStatus ConnectStatus @default(NOT_STARTED)`, `connectOnboardedAt DateTime?`
-- Add to User model: `abn String?`, `abnVerifiedAt DateTime?`, `noAbnReason String?`
+- Add to User: `stripeConnectAccountId String?`, `connectStatus ConnectStatus @default(NOT_STARTED)`, `connectOnboardedAt DateTime?`
+- Add to User: `abn String?`, `abnVerifiedAt DateTime?`, `abrBusinessName String?`, `noAbnReason String?`
 - New `ServiceArea` model (from FUTURE MODELS): `userId`, `suburb`, `postcode`, `radiusKm Int @default(15)`, composite `@@unique([userId, suburb])`
+- New `Category` seeds: full category catalog including the `requiresLicense Boolean @default(false)` + `licenseRequiredOverCents Int?` fields per ADR 005. Sprint 2 seeds the data; Sprint 4 wires up the bid-time guard that consumes it. Builder seeded with `licenseRequiredOverCents = 500000`, all unconditional licensed trades seeded with `requiresLicense = true`.
+- New shared TypeScript constant **`packages/types/src/licenses.ts`** — `ALLOWED_LICENSE_TYPES` per ADR 005 "Allowed license types per category" section. 13 license type slugs across 8 categories (Electrical, Plumbing, Drainage, Gas fitting, Asbestos, Refrigerated AC, Pest control, Builder). Plus 8-value `ISSUING_STATES` const (`NSW`/`VIC`/`QLD`/`WA`/`SA`/`TAS`/`ACT`/`NT`). Mobile dropdowns + backend bid-time guard (S4) + admin License Review Queue (S4 scaffold, S9 full) all import from this single file. Add the constant in Sprint 2 even though License upload UI lands in Sprint 4 — having it landed early lets the Category seeds reference it.
 
-## Decision gate — Day 1
+REMOVED from earlier draft (deferred to Sprint 4 with bidding):
 
-**KYC vendor: Didit OR manual review.** Defaults to manual if no decision by Day 1 EOD.
+- ~~`License` model~~ — added in Sprint 4
+- ~~`LicenseStatus` enum~~ — added in Sprint 4
 
-Record in `docs/adrs/005-kyc-strategy.md`:
+## Decisions — already locked (no Day 1 gate)
 
-| If Didit | If manual |
-| --- | --- |
-| Integrate Didit Flutter SDK in mobile | Build admin review queue (S9 scaffold this sprint) |
-| Backend handles HMAC webhook from Didit | Backend stores blob URLs + review state machine |
-| Store only `diditSessionId`, status, timestamp, document type | Store blob URLs (Azure Blob in S10, local FS until then) |
-| ~13h savings vs manual | More PII handling — extra audit doc updates needed |
-| 500 free verifications/month | No vendor cost, but admin time per verification |
-| ADR records the choice + reversal cost (~10h) | ADR records the choice + Didit fallback plan |
+Per **ADR 005**: We're NOT using an identity-vendor KYC. Stripe Connect Express handles identity verification end-to-end. JOBBees does:
+
+- **Stripe Connect onboarding** — Stripe webview, Stripe handles legal KYC
+- **ABN verification** — free ABR API call
+- **License verification** (manual, per licensed category) — Sprint 4
+
+No Didit / Stripe Identity / 3rd-party identity vendor. Simpler IT audit, fewer subprocessors.
 
 ## Definition of done
 
 Same as Sprint 1, plus:
 
-- [ ] If Didit path: HMAC signature verified on every Didit webhook (skill §H5)
-- [ ] If manual path: KYC blobs stored with retention policy in `docs/audit/data-retention-policy.md`
-- [ ] No raw government ID numbers persisted on JOBBees side (passport number, license number) — even on manual path, store doc images only, not the typed-in number
-- [ ] AuditLog write on every KYC state transition (skill §I1)
+- [ ] Mobile app cold-launches to splash → welcome carousel → signup screen
+- [ ] Signup, login, OTP, refresh all hit real Sprint 1 backend (no mocks)
+- [ ] Biometric re-login works on iOS simulator + Android emulator
+- [ ] Stripe Connect webhook signature verified BEFORE any DB write (skill §H5)
+- [ ] ABR API lookups cached 24h (rate-limit protection)
 - [ ] AuditLog write on every Connect state transition
+- [ ] All test users use `@example.com` and `+61400000000` test format (no realistic PII per CLAUDE.md)
+- [ ] No raw Stripe `account.update` payload logged (it can contain PII)
+- [ ] Mobile app uses theme tokens from `apps/mobile/lib/theme/` everywhere — no raw `Color(0xFF...)`
+- [ ] All 4 screen states implemented per `apps/mobile/CLAUDE.md` hard rule 3 (loading, error, empty, content)
 
-## Friday demo script (end-of-sprint Fri 10 Jul)
+## Friday demo (Fri 17 Jul) — first "click through the app" demo
 
-3-5 minute screencast:
+5-6 minute screencast:
 
 ```
-00:00 — "Sprint 2 wrap. Goal: poster becomes verified tasker with Connect
-        onboarding running. Here it goes."
-00:15 — Open app as logged-in poster (from Sprint 1).
-00:30 — Tap profile → "Become a tasker" CTA.
-00:50 — One-way confirmation dialog: "This can't be reversed. Continue?"
-01:00 — KYC flow launches. Show doc upload + selfie + liveness (Didit path)
-        OR upload doc + selfie (manual path).
-01:40 — Show "KYC status: pending" screen.
-01:50 — Cut to admin: KYC review queue. Approve the request.
-02:00 — Mobile: pull-to-refresh → "KYC approved" → status updates.
-02:15 — ABN entry screen. Enter test ABN. ABR lookup populates business
-        name. Submit.
-02:35 — Tasker profile wizard: bio, skills (multi-select chips), service
-        areas (suburb picker with radius slider), hourly rate, profile
-        photo upload.
-03:10 — Show held-funds banner appearing at top of tasker home: "$0 held
-        — complete Stripe onboarding to receive payouts" with Continue CTA.
-03:20 — Tap CTA → Stripe Connect webview launches.
-03:30 — Stripe Connect onboarding form (test data). Complete it.
-03:45 — Return to app → Connect status webhook fires → banner updates
-        to "$0 held — onboarding complete".
-04:00 — Show public tasker profile (as a different user would see it):
-        bio, skills, service areas, hourly rate, "Verified" badge,
-        empty reviews section.
-04:20 — Coverage report. Show % done. Show what's still outstanding.
-04:30 — Stoplight + asks. End.
+00:00 — "Sprint 2 wrap. First user-visible demo. From here on, every
+        Friday demo is 'open the app and click through.'"
+
+00:15 — Cold-launch on iOS simulator. Splash → welcome carousel (3 screens)
+        → "Get started".
+
+00:40 — Signup screen. Pick "Sign up with email". Fill form (Rahul Test,
+        rahul@example.com, +61400000000, Sydney, Poster). Submit.
+
+01:00 — OTP entry screen. Enter `000000`. Verify. Banner: "Phone verified."
+        (Server log shows MockOtpService used; AuditLog row created.)
+
+01:20 — Email verification: tap simulated link. Land on role select.
+        Pick "Poster". Land on poster home (empty state — "No tasks yet.
+        Posting comes in Sprint 3.").
+
+01:45 — Hard close app. Reopen. Biometric prompt fires. Touch ID
+        (simulated). Logged back in.
+
+02:10 — Settings → "Become a tasker." One-way confirmation dialog.
+        Continue.
+
+02:30 — Stripe Connect webview launches. Show the Stripe-hosted onboarding
+        form (Stripe handles ALL identity KYC — name, DOB, address,
+        gov ID, selfie, bank). Complete with test data.
+
+03:10 — Return to app → Connect webhook fires → status updates to
+        "Pending Review" then (a few seconds later) "Approved" (test mode
+        is instant). Held-funds banner updates.
+
+03:30 — ABN entry screen. Enter test ABN. ABR API lookup populates
+        business name. Submit.
+
+03:50 — Tasker profile wizard: bio, skills (multi-select chips with
+        "License required in Sprint 4" badge on Plumbing / Electrical etc.),
+        service areas (suburb + 15km), hourly rate, profile photo.
+
+04:30 — Public tasker profile renders: Stripe Connect verified badge,
+        ABN verified badge, empty reviews. (License badges arrive in S4.)
+
+04:50 — Switch to admin: scaffold-level Connect onboarding tracker shows
+        the new tasker in the list with "Approved" status.
+
+05:10 — Coverage report. Stoplight + asks. End.
+
+05:30 — "Sprint 3 starts Monday: task posting + AI extraction + guest mode.
+        Sprint 4 lands bidding + license verification + Verified Plumber
+        badges."
 ```
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| Stripe Connect onboarding requires real AU business details for test | High | High | Use Stripe test data per their docs — they support fully-faked Connect onboarding in test mode |
-| ABR API rate limits (1000/day free) | Low | Medium | Cache ABR lookups for 24h locally |
-| Didit Flutter SDK has version conflicts with Flutter 3.24 | Low | Medium | If conflict — fall back to webview integration (Didit supports both) |
-| Manual KYC review queue takes longer than estimated | Medium | Medium | Cap at "queue exists + approve/reject button works" — full admin UI in S9 |
-| User aborts mid-Connect-onboarding — held funds banner gets stuck | Medium | Medium | Reminder cadence (24h / 72h / 7d) covers this; nudges to complete |
+| Risk                                                                         | Likelihood | Impact | Mitigation                                                                                                                                                  |
+| ---------------------------------------------------------------------------- | ---------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stripe Connect application not approved by Mon 6 Jul                         | Medium     | High   | Started Mon 22 Jun (Sprint 1 D1); 5-10 business day lead time means latest approval Mon 6 Jul. If late, demo a webview placeholder + complete ABN flow only |
+| Stripe Connect onboarding requires real AU business details                  | Medium     | High   | Use Stripe test data per their docs — they support fully-faked Connect onboarding in test mode                                                              |
+| ABR API rate limits (1000/day free tier)                                     | Low        | Medium | 24h local cache; backend rate-limits per user                                                                                                               |
+| Apple Developer Program not approved → can't test Apple Sign-in on simulator | Low        | Medium | iOS simulator + Apple Sign-in works without paid Developer Program for development. Production requires it but that's Sprint 11                             |
+| Mobile dev velocity slower than estimated for first sprint                   | Medium     | Medium | Sprint 1 left ~14h unused (originally 94h budget, backend trimmed to 80). That headroom rolls into Sprint 2                                                 |
+| Apple Sign-in returns name only once and you forgot to capture it            | Medium     | Medium | Capture firstName + lastName on FIRST Apple Sign-In response and persist immediately to backend                                                             |
+| Social-auth users have no password — login fallback misses this              | Low        | High   | Backend allows password-less signup (`User.passwordHash` nullable per Sprint 1 schema); login screen treats "password not set" as social-only               |
 
-## Explicitly NOT in scope
+## Explicitly NOT in scope (deferred to S4 with bidding)
 
-- Full admin KYC dashboard (scaffold only; S9 builds the full UI)
-- Tasker availability calendar — DROPPED (per inventory row 42, 43)
-- Multi-currency support — multi-country ready, AU-only at MVP
-- ABN verification via tax-office side check (just ABR lookup, no deeper validation)
-- Hold-out for a different KYC vendor — decision locked at start of sprint
+- License upload UI (mobile row 41)
+- Licensed-trade category selector (mobile row 531)
+- License module backend (row 240)
+- Bid-time license guard (row 532)
+- License expiry cron (row 533)
+- Admin License Review Queue scaffold (row 534)
+
+S2 just flags `requiresLicense` + `licenseRequiredOverCents` categories visually so taskers know what's coming. The bid-time gating + upload + review queue land natively in S4.
 
 ## Day-by-day rough plan
 
-| Day | Mobile | Backend |
-| --- | --- | --- |
-| Mon 29 (D1) | ADR 005 final, KYC decision locked. Upgrade flow scaffolding. | KYC orchestration scaffolding. Poster→Tasker upgrade endpoint. |
-| Tue 30 (D2) | ID upload + selfie UI (per decision path). | ABR API integration. KYC submission endpoint. |
-| Wed 1 Jul (D3) | KYC status screen + manual review prompt. ABN entry UI. | KYC state machine + audit log. ABR caching. |
-| Thu 2 Jul (D4) | Tasker wizard: bio + skills + service areas. | Connect Express integration start. |
-| Fri 3 Jul (D5) | Mid-sprint demo + catch-up. | Mid-sprint demo + catch-up. Connect webhook handler. |
-| Mon 6 Jul (D6) | Hourly rate + photo upload + portfolio scaffolding. | Connect onboarding status tracking. Held-funds calculation. |
-| Tue 7 Jul (D7) | Held-funds banner + reminder cadence UI. | Connect reminder cadence (cron). |
-| Wed 8 Jul (D8) | Public tasker profile view. KYC re-submission flow. | Connect status webhook → mobile push notification. |
-| Thu 9 Jul (D9) | Admin scaffold: KYC queue + Connect tracker (basic). Polish. | Polish. AuditLog writes. Bug-fix. |
-| Fri 10 Jul (D10) | End-of-sprint demo + CSV update. | Confirm CI green. Tag `sprint-02-end`. |
+| Day          | Mobile                                                                                                                          | Backend                                                             |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Mon 6 (D1)   | Project scaffold (Flutter app + Riverpod + go_router + dio). Splash + welcome carousel.                                         | Stripe Connect Express scaffold. ABR API client + 24h cache.        |
+| Tue 7 (D2)   | Email signup screen → real `/auth/signup`. OTP entry → real `/auth/otp/verify`.                                                 | Stripe Connect onboarding init endpoint. Connect webhook handler.   |
+| Wed 8 (D3)   | Google + Apple signup. Role select. Forgot password.                                                                            | Connect onboarding status tracking. Poster→Tasker upgrade endpoint. |
+| Thu 9 (D4)   | Login + biometric re-login. Email verify. Permissions priming.                                                                  | Held-funds calculation. ABN validation + ABR lookup endpoint.       |
+| Fri 10 (D5)  | **Mid-sprint demo + catch-up.**                                                                                                 | Mid-sprint demo + catch-up. AuditLog wiring complete.               |
+| Mon 13 (D6)  | Account-suspended / force-logout / deletion screens. Profile setup + edit.                                                      | Connect reminder cadence (24h / 72h / 7d cron).                     |
+| Tue 14 (D7)  | Poster→Tasker upgrade entry. ABN entry UI + ABR result screen.                                                                  | Connect status webhook → push notification.                         |
+| Wed 15 (D8)  | Tasker wizard: bio + skills + service areas. Stripe Connect webview entry.                                                      | Admin Connect tracker endpoint.                                     |
+| Thu 16 (D9)  | Tasker wizard: hourly rate + photo + portfolio scaffold. Held-funds banner + reminder cadence rendering. Public tasker profile. | Polish. AuditLog write coverage check.                              |
+| Fri 17 (D10) | End-of-sprint demo + CSV update.                                                                                                | Confirm CI green. Tag `sprint-02-end`.                              |
 
 ## Definition of "shippable"
 
-- [ ] All 21 mobile rows done
-- [ ] All 7 backend rows done
+- [ ] All ~37 mobile rows done
+- [ ] All 6 backend rows done
 - [ ] All 2 admin scaffolds done
 - [ ] CI green on `main` for 24h
-- [ ] ADR 005 (KYC strategy) merged
 - [ ] Test ABN lookup works against ABR test endpoint
 - [ ] Test Stripe Connect onboarding completes end-to-end in test mode
-- [ ] `./scripts/coverage.sh` reports ~25% MVP
+- [ ] `./scripts/coverage.sh` reports ~22% MVP
 - [ ] Sprint 3 detail doc reviewed (already drafted)
+- [ ] Sprint 4 detail doc updated to absorb License module + bid-time guard + license review queue
 - [ ] Demo video uploaded + sent to client
 
-## Expected PRs (~12-15)
+## Expected PRs (~14-18)
 
-- `chore(adrs): 005 KYC strategy`
-- `feat(prisma): KYC fields, ServiceArea, Connect fields on User`
+- `feat(prisma): User.stripeConnect*, User.abn*, ServiceArea model, Category seeds with requiresLicense + licenseRequiredOverCents (Builder $5K)`
 - `feat(api/users): poster→tasker upgrade endpoint + AuditLog`
-- `feat(api/kyc): KYC orchestration (Didit path) OR (manual path)`
-- `feat(api/kyc): KYC webhook with HMAC signature verification`
 - `feat(api/users): ABR lookup integration + ABN validation`
 - `feat(api/connect): Stripe Connect Express integration`
-- `feat(api/connect): Connect webhook handlers + status tracking`
+- `feat(api/connect): Connect webhook handlers + signature verification + status tracking`
 - `feat(api/connect): held-funds calculation per tasker`
-- `feat(mobile): poster→tasker upgrade flow + KYC UI`
+- `feat(api/connect): Connect reminder cadence cron`
+- `feat(mobile): scaffold + splash + welcome carousel`
+- `feat(mobile): email/Google/Apple signup + login + biometric`
+- `feat(mobile): OTP + email verify + role select + permissions priming`
+- `feat(mobile): poster profile + suspend/banned/deletion screens`
+- `feat(mobile): poster→tasker upgrade flow + ABN entry UI`
 - `feat(mobile): tasker profile wizard (bio, skills, service areas, rate, photo)`
-- `feat(mobile): held-funds banner + reminder cadence rendering`
+- `feat(mobile): Stripe Connect webview + held-funds banner + reminder cadence`
 - `feat(mobile): public tasker profile view`
-- `feat(admin): KYC queue scaffold + Connect tracker scaffold`
+- `feat(admin): Connect tracker scaffold + Connect status mirror`
 
 Each PR closes 1-3 inventory rows.

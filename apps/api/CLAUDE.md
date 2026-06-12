@@ -4,8 +4,8 @@ This is the single source of truth for business logic. Mobile, admin, and web ar
 
 ## Stack
 
-- NestJS 10+ on Node 22, TypeScript strict mode
-- Prisma + PostgreSQL 16 (with pgvector)
+- NestJS 11 on Node 24, TypeScript 5.9 strict mode
+- Prisma + PostgreSQL 17 (with pgvector)
 - Redis (sessions, rate limits, idempotency, BullMQ jobs)
 - Socket.IO (single-node at MVP; Redis adapter post-launch)
 - Stripe + Stripe Connect Express + Stripe Identity

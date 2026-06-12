@@ -1,10 +1,10 @@
 # Sprint 6 — Job execution + Completion + Tax/RCTI/GST/ATO
 
-**Dates:** Mon 24 Aug → Fri 4 Sep 2026 (10 working days)
+**Dates:** Mon 31 Aug → Fri 11 Sep 2026 (10 working days)
 **Theme:** A tasker arrives on-site, checks in via geofence, completes the job with proof, auto-capture fires, tax invoice + RCTI generated as PDF, ATO report aggregates monthly.
 **Hours budget:** ~95 (40 mobile, 55 backend)
-**Mid-sprint demo:** Fri 28 Aug
-**End-of-sprint demo:** Fri 4 Sep
+**Mid-sprint demo:** Fri 4 Sep
+**End-of-sprint demo:** Fri 11 Sep
 
 **⚠️ Tax-critical sprint. Tax advisor must be engaged BEFORE start.** CLAUDE.md rule 4 mandates advisor review of every line of RCTI/GST/ATO code before merge. Engage by end of Sprint 5 — too late if you wait until Sprint 6 starts.
 
@@ -16,54 +16,54 @@ By Friday 4 Sep, tasker arrives on-site → geofence check-in records arrival �
 
 ### Mobile (apps/mobile)
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 99 | Accepted task / job-in-progress screen | IN | 3 | |
-| 100 | Status update buttons (en route, arrived, in progress, completed) | IN | 2 | |
-| 101 | Geofenced check-in / arrival proof | IN | 4 | Location permission + geofence logic |
-| 102 | Live location share during active job (opt-in) | IN | 5 | UI; backend in S5 |
-| 103 | Completion proof upload (2 photos + checklist) | IN | 4 | |
-| 104 | Completion proof — optional 30s video | THIN | 3 | |
-| 105 | Time tracking (start / stop / total) | THIN | 2 | |
-| 134 | Receipt PDF view / download | IN | 2 | |
-| 135 | Tax invoice PDF (poster) | IN | 2 | |
-| 136 | Tax invoice / RCTI PDF (tasker) | IN | 2 | |
-| 137 | RCTI agreement screen | IN | 2 | |
-| 138 | Refund request (poster initiates from app) | IN | 3 | |
-| 139 | Re-auth prompt (capture-expiry approaching) | IN | 4 | |
-| 140 | Tip / gratuity option | THIN | 2 | |
-| 141 | Promo code / discount input | IN | 5 | Code entry, validation, applied display |
-| 142 | Cancellation flow with fee preview | IN | 6 | |
-| 143 | Poster-initiated cancel | IN | 1 | |
-| 144 | Tasker-initiated cancel | IN | 1 | |
-| 145 | Mutual cancellation request | THIN | 2 | |
-| 146 | Reason picker | IN | 1 | |
-| 147 | Fee disclosure / confirmation step | IN | 1 | |
-| 148 | No-show reporting (poster / tasker) | IN | 3 | |
+| ID  | Item                                                              | Call | Hrs | Notes                                   |
+| --- | ----------------------------------------------------------------- | ---- | --- | --------------------------------------- |
+| 99  | Accepted task / job-in-progress screen                            | IN   | 3   |                                         |
+| 100 | Status update buttons (en route, arrived, in progress, completed) | IN   | 2   |                                         |
+| 101 | Geofenced check-in / arrival proof                                | IN   | 4   | Location permission + geofence logic    |
+| 102 | Live location share during active job (opt-in)                    | IN   | 5   | UI; backend in S5                       |
+| 103 | Completion proof upload (2 photos + checklist)                    | IN   | 4   |                                         |
+| 104 | Completion proof — optional 30s video                             | THIN | 3   |                                         |
+| 105 | Time tracking (start / stop / total)                              | THIN | 2   |                                         |
+| 134 | Receipt PDF view / download                                       | IN   | 2   |                                         |
+| 135 | Tax invoice PDF (poster)                                          | IN   | 2   |                                         |
+| 136 | Tax invoice / RCTI PDF (tasker)                                   | IN   | 2   |                                         |
+| 137 | RCTI agreement screen                                             | IN   | 2   |                                         |
+| 138 | Refund request (poster initiates from app)                        | IN   | 3   |                                         |
+| 139 | Re-auth prompt (capture-expiry approaching)                       | IN   | 4   |                                         |
+| 140 | Tip / gratuity option                                             | THIN | 2   |                                         |
+| 141 | Promo code / discount input                                       | IN   | 5   | Code entry, validation, applied display |
+| 142 | Cancellation flow with fee preview                                | IN   | 6   |                                         |
+| 143 | Poster-initiated cancel                                           | IN   | 1   |                                         |
+| 144 | Tasker-initiated cancel                                           | IN   | 1   |                                         |
+| 145 | Mutual cancellation request                                       | THIN | 2   |                                         |
+| 146 | Reason picker                                                     | IN   | 1   |                                         |
+| 147 | Fee disclosure / confirmation step                                | IN   | 1   |                                         |
+| 148 | No-show reporting (poster / tasker)                               | IN   | 3   |                                         |
 
 **Mobile total: ~60h**
 
 ### Backend (apps/api)
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 305 | GST calculation on platform fee | IN | 4 | Single AU GST rate (10%) at MVP |
-| 306 | ABN status tracking + re-check cron | IN | 3 | |
-| 307 | RCTI generation + PDF | IN | 8 | pdfkit; tax advisor review required |
-| 308 | RCTI agreement workflow + consent capture | IN | 3 | |
-| 309 | Tax invoice generation + PDF (poster) | IN | 4 | |
-| 310 | Tax invoice / RCTI PDF (tasker) | IN | 3 | |
-| 311 | ATO sharing-economy reporting export (monthly job) | IN | 8 | All mandatory fields, CSV/JSON |
-| 313 | Tax-rate config (single GST rate) | IN | 2 | |
-| 314 | Cancellation engine with fee matrix | IN | 8 | |
-| 315 | Fee calculation logic | IN | 3 | |
-| 316 | No-show detection — poster | IN | 3 | |
-| 317 | No-show detection — tasker | IN | 3 | |
-| 318 | Geofenced check-in verification | IN | 3 | |
-| 319 | Auto-confirm cron job | IN | 4 | 48h dispute window |
-| 320 | Dispute window cron (48h) | IN | 3 | |
-| 321 | Escalating notification cadence | IN | 4 | |
-| 322 | State transitions for all cancel scenarios | IN | 4 | |
+| ID  | Item                                               | Call | Hrs | Notes                               |
+| --- | -------------------------------------------------- | ---- | --- | ----------------------------------- |
+| 305 | GST calculation on platform fee                    | IN   | 4   | Single AU GST rate (10%) at MVP     |
+| 306 | ABN status tracking + re-check cron                | IN   | 3   |                                     |
+| 307 | RCTI generation + PDF                              | IN   | 8   | pdfkit; tax advisor review required |
+| 308 | RCTI agreement workflow + consent capture          | IN   | 3   |                                     |
+| 309 | Tax invoice generation + PDF (poster)              | IN   | 4   |                                     |
+| 310 | Tax invoice / RCTI PDF (tasker)                    | IN   | 3   |                                     |
+| 311 | ATO sharing-economy reporting export (monthly job) | IN   | 8   | All mandatory fields, CSV/JSON      |
+| 313 | Tax-rate config (single GST rate)                  | IN   | 2   |                                     |
+| 314 | Cancellation engine with fee matrix                | IN   | 8   |                                     |
+| 315 | Fee calculation logic                              | IN   | 3   |                                     |
+| 316 | No-show detection — poster                         | IN   | 3   |                                     |
+| 317 | No-show detection — tasker                         | IN   | 3   |                                     |
+| 318 | Geofenced check-in verification                    | IN   | 3   |                                     |
+| 319 | Auto-confirm cron job                              | IN   | 4   | 48h dispute window                  |
+| 320 | Dispute window cron (48h)                          | IN   | 3   |                                     |
+| 321 | Escalating notification cadence                    | IN   | 4   |                                     |
+| 322 | State transitions for all cancel scenarios         | IN   | 4   |                                     |
 
 **Backend total: ~70h**
 
@@ -137,15 +137,15 @@ Same as Sprint 1, plus per skill §H + §K + PR template tax section:
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| Tax advisor unavailable mid-sprint | Medium | Critical | Engage by EOD Fri 21 Aug (Sprint 5 end); confirm availability for daily review during Sprint 6 |
-| RCTI format wrong per ATO requirements | Medium | Critical | Use ATO published RCTI sample as the source of truth; tax advisor reviews template before code |
-| GST rounding edge cases (10c → 10.01c?) | Medium | Medium | Banker's rounding; document in `gst.service.ts` comments; tax advisor signs off |
-| Geofence check-in fails on poor GPS | Medium | Low | Fallback: tasker can manually flag "I'm here" if GPS confidence low; admin reviews if disputed |
-| PDF generation slow under load | Low | Low | Background job; user gets push when ready |
-| ATO export schema changes | Low | High | Wrap schema in `atoExportV1` namespace; if ATO changes, add `atoExportV2` |
-| Cancellation fee matrix disputed by client | Medium | Low | Tax advisor reviews fee structure; recordable in admin config (S9) |
+| Risk                                       | Likelihood | Impact   | Mitigation                                                                                     |
+| ------------------------------------------ | ---------- | -------- | ---------------------------------------------------------------------------------------------- |
+| Tax advisor unavailable mid-sprint         | Medium     | Critical | Engage by EOD Fri 21 Aug (Sprint 5 end); confirm availability for daily review during Sprint 6 |
+| RCTI format wrong per ATO requirements     | Medium     | Critical | Use ATO published RCTI sample as the source of truth; tax advisor reviews template before code |
+| GST rounding edge cases (10c → 10.01c?)    | Medium     | Medium   | Banker's rounding; document in `gst.service.ts` comments; tax advisor signs off                |
+| Geofence check-in fails on poor GPS        | Medium     | Low      | Fallback: tasker can manually flag "I'm here" if GPS confidence low; admin reviews if disputed |
+| PDF generation slow under load             | Low        | Low      | Background job; user gets push when ready                                                      |
+| ATO export schema changes                  | Low        | High     | Wrap schema in `atoExportV1` namespace; if ATO changes, add `atoExportV2`                      |
+| Cancellation fee matrix disputed by client | Medium     | Low      | Tax advisor reviews fee structure; recordable in admin config (S9)                             |
 
 ## Explicitly NOT in scope
 
@@ -157,18 +157,18 @@ Same as Sprint 1, plus per skill §H + §K + PR template tax section:
 
 ## Day-by-day rough plan
 
-| Day | Mobile | Backend |
-| --- | --- | --- |
-| Mon 24 (D1) | Accepted task + status update buttons. | Tax models (TaxInvoice, Rcti, RctiAgreement, AtoExport). |
-| Tue 25 (D2) | Geofence check-in + arrival proof. | GST service. Geofence verification. |
-| Wed 26 (D3) | Completion proof: photo upload + checklist. | RCTI PDF generation (tax advisor review at EOD). |
-| Thu 27 (D4) | Live location share UI + completion proof video. | Tax invoice PDF generation. |
-| Fri 28 (D5) | Mid-sprint demo + catch-up. | Same. Auto-confirm cron + dispute window. |
-| Mon 31 (D6) | Refund request + re-auth prompt UI. | Cancellation engine + fee matrix. |
-| Tue 1 Sep (D7) | Cancellation flow + reason picker + fee preview. | Fee calculation logic. No-show detection (both). |
-| Wed 2 (D8) | Promo code input + validation. RCTI agreement screen. | ATO export job. Escalating notification cadence. |
-| Thu 3 (D9) | Polish + tax invoice + RCTI viewing screens. | Promo code engine. Audit logs. State transitions polish. |
-| Fri 4 (D10) | End-of-sprint demo + CSV update. | Confirm CI green. Tag `sprint-06-end`. |
+| Day            | Mobile                                                | Backend                                                  |
+| -------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| Mon 24 (D1)    | Accepted task + status update buttons.                | Tax models (TaxInvoice, Rcti, RctiAgreement, AtoExport). |
+| Tue 25 (D2)    | Geofence check-in + arrival proof.                    | GST service. Geofence verification.                      |
+| Wed 26 (D3)    | Completion proof: photo upload + checklist.           | RCTI PDF generation (tax advisor review at EOD).         |
+| Thu 27 (D4)    | Live location share UI + completion proof video.      | Tax invoice PDF generation.                              |
+| Fri 28 (D5)    | Mid-sprint demo + catch-up.                           | Same. Auto-confirm cron + dispute window.                |
+| Mon 31 (D6)    | Refund request + re-auth prompt UI.                   | Cancellation engine + fee matrix.                        |
+| Tue 1 Sep (D7) | Cancellation flow + reason picker + fee preview.      | Fee calculation logic. No-show detection (both).         |
+| Wed 2 (D8)     | Promo code input + validation. RCTI agreement screen. | ATO export job. Escalating notification cadence.         |
+| Thu 3 (D9)     | Polish + tax invoice + RCTI viewing screens.          | Promo code engine. Audit logs. State transitions polish. |
+| Fri 4 (D10)    | End-of-sprint demo + CSV update.                      | Confirm CI green. Tag `sprint-06-end`.                   |
 
 ## Definition of "shippable"
 

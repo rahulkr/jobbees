@@ -1,26 +1,26 @@
 # JOBBees — MVP Sprint Plan
 
 **Project kick-off:** Mon 1 Jun 2026
-**Cadence:** 2-week sprints
-**Sprint 0 (setup):** Mon 1 Jun → Fri 12 Jun 2026 (in progress, ends Fri 12 Jun)
-**Sprint 1 (first build sprint):** Mon 15 Jun 2026
-**Sprint 12 (final):** Fri 27 Nov 2026
-**Total delivery: 13 sprints** = 1 setup + 12 production build sprints = 26 weeks
+**Cadence:** 2-week sprints (Sprint 0 is 3 weeks — extended foundation)
+**Sprint 0 (setup):** Mon 1 Jun → Fri 19 Jun 2026 (extended by 1 week to absorb research catch-up — AI skills generation, ADRs 005-008, license verification design, brand lock-in)
+**Sprint 1 (first build sprint):** Mon 22 Jun 2026
+**Sprint 12 (final):** Fri 4 Dec 2026
+**Total delivery: 13 sprints** = 1 setup (3 weeks) + 12 production build sprints (2 weeks each) = 27 weeks
 **Demo cadence:** End-of-sprint Friday afternoon, weekly mid-sprint Friday optional sync
 **Tracker:** `inventory/JOBBees_Feature_Inventory.csv` (gitignored) updated each Friday
 **Coverage script:** `./scripts/coverage.sh` (run before client call)
 
 ## Sprint 0 vs Sprints 1-12
 
-Sprint 0 is the **foundation sprint** — it isn't part of the 12-sprint build budget. It covers everything that has to be in place before feature work starts: monorepo scaffold, schema, ADRs, IT audit documentation, custom AI tooling, security gates, CI, repo on GitHub, plan + coverage tracker. It's been running since Mon 1 Jun and wraps Fri 12 Jun.
+Sprint 0 is the **foundation sprint** — it isn't part of the 12-sprint build budget. It covers everything that has to be in place before feature work starts: monorepo scaffold, schema, ADRs (005-008), IT audit documentation, custom AI tooling, security gates, CI, repo on GitHub, plan + coverage tracker, brand theme lock-in, license verification model design. It's been running since Mon 1 Jun and wraps Fri 19 Jun (extended by one week to absorb the research catch-up: AI skills generation, license verification design, ADR cycles, brand colour lock-in from the RN prototype).
 
 Sprints 1-12 are the **feature build budget** — these consume the ~945-hour estimate from v1.1.
 
-The client gets a Sprint 0 wrap demo on Fri 12 Jun showing: repo layout, plan, security gates, ADRs, audit docs. That demo also surfaces the open decisions that block Sprint 1 (KYC vendor, OAuth client IDs, Notifyre alpha sender, auth-token storage strategy).
+The client gets a Sprint 0 wrap demo on Fri 19 Jun showing: repo layout, plan, security gates, ADRs, audit docs. That demo confirms the locked decisions (verification model — ADR 005, auth-token storage — ADR 006, edge security — ADR 007, OTP pattern — ADR 008) and surfaces only the operational items still in flight (OAuth client IDs, Notifyre alpha sender application).
 
 ## Operating principles
 
-1. **Vertical slices, not horizontal layers.** Every sprint produces something the client can click through on the mobile app or admin console. No "invisible backend" sprints.
+1. **Vertical slices, not horizontal layers — with one deliberate exception (Sprint 1).** From Sprint 2 onwards, every sprint produces something the client can click through on the mobile app or admin console. Sprint 1 is intentionally backend-only — the auth foundation. We accept a "technical demo" (Postman + Swagger + DB queries) for Sprint 1 in exchange for never building mobile against an unstable API. From Sprint 2 onward, no more invisible-backend sprints.
 2. **Local-first dev, infra last.** No Azure spend until Sprint 10. Local Postgres + Redis (Docker), local NestJS dev server, ngrok for Stripe webhooks.
 3. **Weekly Friday demo, biweekly Friday wrap.** Mid-sprint Friday = quick "here's what's working so far" video. End-of-sprint Friday = full demo + scope close-out.
 4. **Zero tolerance for feature loss.** Every IN / IN★ row in the inventory CSV gets marked `done [sprint-N, PR#nn]` as it lands. The coverage script reads the CSV and reports the percentage; you can never accidentally skip a feature.
@@ -39,27 +39,29 @@ Mid-sprint Friday sync (week 1 end) is optional but recommended — 15-min "here
 
 ## The 13 sprints (Sprint 0 + 12 build sprints)
 
-| #   | Dates              | Theme                                                 | Hours | Friday demo (week 2)                                                                                          |
-| --- | ------------------ | ----------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------- |
-| 0   | Mon  1 Jun → Fri 12 Jun | Foundation, AI setup, security tooling, repo, plan | ~70 (already spent — not counted vs v1.1 budget) | Repo walkthrough → ADRs → audit docs → custom skills → security gates → PLAN.md → confirm Sprint 1 readiness |
-| 1   | Mon 15 Jun → Fri 26 Jun | Onboarding & Auth                                | ~90   | Open app → email signup → OTP/verify → role select → poster home → biometric re-login                         |
-| 2   | Mon 29 Jun → Fri 10 Jul | KYC + Tasker upgrade + Stripe Connect onboarding | ~85   | Poster → upgrade to tasker → KYC flow (Didit or manual) → ABN entry → held-funds banner → Connect onboarding  |
-| 3   | Mon 13 Jul → Fri 24 Jul | Task posting + AI extraction                     | ~110  | Poster posts a task with photos → AI auto-categorises + suggests budget → ReAct clarifying questions → publish |
-| 4   | Mon 27 Jul → Fri  7 Aug | Discovery + Bidding + Public Q&A                 | ~100  | Tasker sees ranked feed + map → places a bid → poster sees bid list, sorts, accepts → public Q&A under task   |
-| 5   | Mon 10 Aug → Fri 21 Aug | Messaging + Payments core                        | ~115  | Live chat between poster + tasker → off-platform warning fires → card added → PaymentIntent + SetupIntent     |
-| 6   | Mon 24 Aug → Fri  4 Sep | Job execution + Completion + Tax/RCTI/GST/ATO    | ~95   | Tasker geofence check-in → completion proof upload → auto-capture → tax invoice PDF + RCTI PDF                |
-| 7   | Mon  7 Sep → Fri 18 Sep | Reviews + Disputes (Tier-0 mediator)             | ~95   | Both sides leave reviews (blind, timeout-reveal) → dispute opened → AI proposes resolution → admin co-pilot   |
-| 8   | Mon 21 Sep → Fri  2 Oct | Notifications + Trust/Safety + Privacy           | ~85   | Push fires on bid/accept/dispute → EXIF flags suspicious photo → DSR export download → consent ledger         |
-| 9   | Mon  5 Oct → Fri 16 Oct | Admin console end-to-end                         | ~85   | Admin reviews KYC queue → resolves dispute → processes refund → manages promo codes → exports ATO report     |
-| 10  | Mon 19 Oct → Fri 30 Oct | DevOps + Cloud deploy + WAF                      | ~75   | Same flows running against Azure staging + Cloudflare WAF + private DB endpoints                              |
-| 11  | Mon  2 Nov → Fri 13 Nov | TestFlight + bug fix + soft-launch prep          | ~60   | Client installs the app on their phone via TestFlight + Play Store internal track, full happy path on device  |
-| 12  | Mon 16 Nov → Fri 27 Nov | Soft launch + first real users + retrospective   | ~50   | First real tasker posts a task in one Sydney suburb, end-to-end with real money (test mode → live)            |
+| #   | Dates                   | Theme                                                                                                                                                                                                                                   | Hours                                            | Friday demo (week 2)                                                                                                                                                                                                                                                                                                                                              |
+| --- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | Mon 1 Jun → Fri 19 Jun  | Foundation, AI setup, security tooling, repo, plan (extended +1 week for research catch-up)                                                                                                                                             | ~80 (already spent — not counted vs v1.1 budget) | Repo walkthrough → ADRs 005-008 → audit docs → custom skills → security gates → brand theme → PLAN.md → confirm Sprint 1 readiness                                                                                                                                                                                                                                |
+| 1   | Mon 22 Jun → Fri 3 Jul  | **Backend Auth Foundation (no mobile)** — NestJS scaffold, User/Session/RefreshToken, JWT, MockOtpService, social-auth backend, JwtAuthGuard, RolesGuard, AuditLog scaffold, shared infra (idempotency, rate-limit, pino, error filter) | ~80                                              | **Foundation demo (technical):** Postman collection walkthrough → Swagger UI → live signup/login/refresh/logout calls → DB queries showing User + AuditLog rows → MockOtpService accepting `000000` with 3 safety guards green → CI green + Semgrep + security-review skill output                                                                                |
+| 2   | Mon 6 Jul → Fri 17 Jul  | **First user-visible sprint:** Mobile Auth + Onboarding (welcome carousel) + Poster→Tasker upgrade backend + Stripe Connect + ABN/ABR (License module deferred to S4)                                                                   | ~95                                              | **First "click through the app" demo:** cold-launch → 3-screen welcome → email/Google/Apple signup against real backend → OTP entry → role select → poster home → biometric re-login → "Become a tasker" CTA → Stripe Connect webview → ABN entry + ABR verify → held-funds banner                                                                                |
+| 3   | Mon 20 Jul → Fri 31 Jul | Task posting + AI extraction + **guest mode**                                                                                                                                                                                           | ~130                                             | **Guest** browses feed → posts a task with photos → AI auto-categorises + suggests budget → ReAct clarifying questions → "Sign up to publish" → fresh-user signup → task posts to new account                                                                                                                                                                     |
+| 4   | Mon 3 Aug → Fri 14 Aug  | Discovery + Bidding + Public Q&A + **License verification module + bid-time guard + expiry cron**                                                                                                                                       | ~121                                             | Tasker sees ranked feed + map → places a bid → bid-time guard fires for unlicensed plumbing task → tasker uploads plumbing licence → admin (in admin console scaffold) approves → tasker can now bid → poster sees bid list with "Verified Plumber" badge, accepts. Builder conditional rule demo'd by bidding $4K (no licence needed) vs $7K (licence required). |
+| 5   | Mon 17 Aug → Fri 28 Aug | Messaging + Payments core + **OTP swap to real provider**                                                                                                                                                                               | ~118                                             | Live chat between poster + tasker → off-platform warning fires → card added → PaymentIntent + SetupIntent → mock OTP swapped for real provider before money flows                                                                                                                                                                                                 |
+| 6   | Mon 31 Aug → Fri 11 Sep | Job execution + Completion + Tax/RCTI/GST/ATO                                                                                                                                                                                           | ~95                                              | Tasker geofence check-in → completion proof upload → auto-capture → tax invoice PDF + RCTI PDF                                                                                                                                                                                                                                                                    |
+| 7   | Mon 14 Sep → Fri 25 Sep | Reviews + Disputes (Tier-0 mediator)                                                                                                                                                                                                    | ~95                                              | Both sides leave reviews (blind, timeout-reveal) → dispute opened → AI proposes resolution → admin co-pilot                                                                                                                                                                                                                                                       |
+| 8   | Mon 28 Sep → Fri 9 Oct  | Notifications + Trust/Safety + Privacy                                                                                                                                                                                                  | ~85                                              | Push fires on bid/accept/dispute → EXIF flags suspicious photo → DSR export download → consent ledger                                                                                                                                                                                                                                                             |
+| 9   | Mon 12 Oct → Fri 23 Oct | Admin console end-to-end (incl. License Review Queue full UI)                                                                                                                                                                           | ~85                                              | Admin reviews Stripe Connect status + License queue → resolves dispute → processes refund → manages promo codes → exports ATO report                                                                                                                                                                                                                              |
+| 10  | Mon 26 Oct → Fri 6 Nov  | DevOps + Cloud deploy + WAF                                                                                                                                                                                                             | ~75                                              | Same flows running against Azure staging + Cloudflare WAF + private DB endpoints                                                                                                                                                                                                                                                                                  |
+| 11  | Mon 9 Nov → Fri 20 Nov  | TestFlight + bug fix + soft-launch prep + **onboarding polish**                                                                                                                                                                         | ~69                                              | Client installs via TestFlight + Play Store internal track, full happy path on device; contextual tooltips fire on first use; "How it works" page available                                                                                                                                                                                                       |
+| 12  | Mon 23 Nov → Fri 4 Dec  | Soft launch + first real users + retrospective                                                                                                                                                                                          | ~50                                              | First real tasker posts a task in one Sydney suburb, end-to-end with real money (test mode → live)                                                                                                                                                                                                                                                                |
 
-**Total: ~945 hours** (matches estimate v1.1 within 5%, includes buffer in S11-12).
+**Total: ~1098 hours** across Sprints 1-12 (estimate v1.1 was 945; +20h Sprint 3 guest-mode + deferred-auth, +13h Sprints 2 + 11 onboarding screens, +5h Sprint 5 OTP swap pattern, +21h Sprint 4 License module + bid-time guard + expiry cron per ADR 005, +94h net from the rebalance (Sprint 1 trimmed to backend-only at 80h, Sprint 2 grew to 95h absorbing mobile auth + tasker backend). Sprint 0 is foundation overhead and not counted vs the v1.1 budget.
+
+**Why this restructure (backend-first auth):** Sprint 1 was originally mobile-heavy onboarding which forced building against a non-existent API and refactoring later. Backend-first means: (1) auth API + JWT + RBAC + AuditLog are nailed down before any mobile code, (2) mobile sprints integrate against a real API not mocks, (3) S1 demo is Postman/Swagger/DB — legitimate for a technical client and frames "foundation that saves three weeks of mobile rework", (4) from Sprint 2 onward every Friday demo is "click through the app and see real flows". Tradeoff: Sprint 1 has no user-facing UI. Mitigated by parallel work during S1 — Notifyre alpha sender application (5-7 business day lead time) and tax-advisor RFP (soft-engagement). Stripe, Apple, and Google accounts are already in place; lawyer engagement deferred to Sprint 11 (self-drafted ToS + Privacy Policy in S8 first, lawyer reviews in S11 before live mode).
 
 ## Sprint themes — detailed
 
-### Sprint 0 — Foundation, AI setup, security tooling (Mon 1 Jun → Fri 12 Jun) — IN PROGRESS
+### Sprint 0 — Foundation, AI setup, security tooling (Mon 1 Jun → Fri 19 Jun, extended 1 week) — IN PROGRESS
 
 **Goal:** Everything that must exist before feature work can start. Foundation isn't billable against the v1.1 estimate — it's prerequisite plumbing.
 
@@ -67,7 +69,7 @@ Mid-sprint Friday sync (week 1 end) is optional but recommended — 15-min "here
 
 - Monorepo scaffold: pnpm workspaces + Turborepo, four apps (mobile/api/admin/web), four packages (prisma/types/tsconfig/eslint-config)
 - Prisma schema with 9 models (Country, User, UserSkill, Category, Task, TaskPhoto, TaskQuestion, Bid, Review, AuditLog), cuid2 IDs, integer cents, soft delete, pgvector
-- Migration `000_enable_pgvector` + initial migration applied to local Postgres 16
+- Migration `000_enable_pgvector` + initial migration applied to local Postgres 17
 - 4 ADRs (monorepo & stack, database conventions, multi-country readiness, category types)
 - 19 IT audit docs (encryption, IR, BCP/DR, retention, DSR, access control, vendor list, edge security, security-by-stage, etc.)
 - 6 custom Claude Code skills: `stripe-payment`, `au-tax`, `pgvector-match`, `tier0-dispute`, `multimodal-extraction`, `security-review`
@@ -80,74 +82,95 @@ Mid-sprint Friday sync (week 1 end) is optional but recommended — 15-min "here
 
 **Still to land Sprint 0 (D8-D10):**
 
-- Resolve KYC vendor decision (Didit / manual) → ADR 005
-- Resolve auth-token storage decision → ADR 006
+- ~~Resolve KYC vendor decision~~ ✅ **RESOLVED** — Stripe Connect + ABN + manual per-category license verification. No identity vendor. See ADR 005.
+- ~~Resolve auth-token storage decision~~ ✅ **RESOLVED** — Bearer for mobile, HttpOnly cookie + CSRF for web/admin. See ADR 006.
 - Confirm OAuth client IDs (Google + Apple) and Notifyre alpha sender ID application
-- Tag `sprint-00-end` on `main` after final commit Friday 12 Jun
+- Brand theme locked from RN prototype with Material 3 modernization (`apps/mobile/lib/theme/`, `docs/brand/`)
+- License verification model fully designed (ADR 005 Accepted, conditional Builder rule + schema additions in `packages/prisma/schema.prisma` FUTURE MODELS)
+- Tag `sprint-00-end` on `main` after final commit Friday 19 Jun
 
-**Sprint 0 demo (Fri 12 Jun):** see `docs/sprints/sprint-00-foundation-and-setup.md` for full script.
+**Sprint 0 demo (Fri 19 Jun):** see `docs/sprints/sprint-00-foundation-and-setup.md` for full script.
 
-**Hours spent: ~70** (foundation work, not billed against the 945-hour build budget).
+**Hours spent: ~80** (foundation work, not billed against the 945-hour build budget; +10h vs original estimate due to research catch-up — license verification design, ADRs 005-008 cycles, brand theme lock-in).
 
-### Sprint 1 — Onboarding & Auth (Mon 15 Jun → Fri 26 Jun)
+### Sprint 1 — Backend Auth Foundation (Mon 22 Jun → Fri 3 Jul)
 
-Mobile: splash, signup (email/Google/Apple), login, OTP entry, email verify, biometric, role select, force-logout, account-suspended/deletion screens, basic poster profile.
+**Backend-only. No mobile code in this sprint.** The auth surface is the riskiest foundational piece — getting it solid before any UI work means the mobile sprints (Sprint 2+) integrate against a real API instead of mocks, with zero rework when reality diverges from the mock.
 
-Backend: user CRUD, OAuth providers, JWT + refresh rotation, password hashing/reset, OTP service, role-based permissions, suspension/ban, session revoke.
+Backend: NestJS scaffold (app module, config, pino logger, global exception filter), User + Session + RefreshToken + AuditLog models migrated, JWT (15min access / 30d refresh) with rotation on refresh, password hashing (argon2id), MockOtpService (`000000` in dev, 3 safety guards per ADR 008 — startup assertion + Semgrep rule + AuditLog), social-auth backend (Google + Apple ID token verification, user upsert), email signup/verify, login, logout (server-side session revoke), `/me` endpoint, JwtAuthGuard, RolesGuard, AuditLog interceptor (skill §I), idempotency interceptor (Redis-backed, 24h TTL), per-route rate limit guard, error mapping, OpenAPI/Swagger setup, integration tests covering happy + 401 + 403 + idempotency replay + invalid signature.
 
-Admin: admin login + session timeout (just the gate, the rest comes in S9).
+Admin: admin login + session timeout gate only (just the door — full admin UI comes in S9).
 
-**Inventory IDs:** Mobile 1-7, 9-14, 16, 18-20, 28-34. Backend 228-237, 239, 242, 245-246. Admin 420, 424.
+**Inventory IDs:** Backend 228-237, 239, 242, 245-246. Admin 420, 424. (Mobile 1-7, 9-14, 16, 18-20, 28-34 deferred to Sprint 2.)
 
-**Out of scope (deferred):** KYC (S2), tasker upgrade flow (S2), tasker profile (S2), task posting (S3).
+**Out of scope (deferred):**
 
-**Open decisions before kick-off:**
+- Mobile onboarding + auth screens (S2)
+- Tasker upgrade flow (S2)
+- Tasker profile (S2)
+- KYC / Stripe Connect (S2)
+- Real OTP provider (S5 — MockOtpService keeps Sprint 1-4 dev unblocked)
 
-- OTP provider for SMS: Notifyre confirmed. Email OTP: SendGrid.
-- Auth tokens: JWT in HttpOnly cookie? Or Bearer header for mobile? **Default: Bearer for mobile, HttpOnly cookie for web/admin.** Confirm in S1 day 1.
+**Open decisions before kick-off:** none — ADRs 005-008 locked in Sprint 0. Auth-token strategy already decided (Bearer for mobile, HttpOnly cookie + CSRF for web/admin — ADR 006).
 
-**Friday demo script:** see `sprint-01-onboarding-and-auth.md`.
+**Parallel work during Sprint 1 (non-coding, runs alongside):**
 
-### Sprint 2 — KYC + Tasker upgrade + Stripe Connect onboarding (Mon 29 Jun → Fri 10 Jul)
+- Figma mockups of welcome carousel + auth screens (use `docs/brand/` theme tokens)
+- Stripe Connect AU platform application (5-10 business days lead time)
+- Notifyre `JOBBEES` alpha sender ID application (5-7 business days)
+- Apple Developer Program enrolment
+- Lawyer engagement for ToS + Privacy Policy
+- Tax advisor RFP
 
-Mobile: poster→tasker upgrade entry, KYC flow (whichever path is decided), ID upload, selfie + liveness (Didit path) OR manual document upload (manual path), ABN entry + ABR lookup, KYC status screen, manual review prompt, KYC re-submission, full tasker profile setup wizard, service areas, hourly rate, public tasker profile, Stripe Connect entry, held-funds banner, Connect reminder cadence (UI).
+**Friday demo (Fri 3 Jul) — "Foundation demo":** Postman collection walkthrough (signup → email verify → login → refresh → logout → role grant → `/me`) → Swagger UI live → DB query showing User + Session + AuditLog rows → MockOtpService accepting `000000` in dev with all 3 safety guards green → security-review skill output → CI green. Stoplight: foundation solid, mobile starts Monday. See `sprint-01-onboarding-and-auth.md` (will be renamed `sprint-01-backend-auth-foundation.md`).
 
-Backend: KYC orchestration (Didit webhook OR admin manual review queue), ABR API integration, Stripe Connect Express, Connect webhook handlers, Connect onboarding status tracking, held-funds calculation, poster→tasker upgrade backend.
+### Sprint 2 — Mobile Auth + Onboarding + Tasker upgrade backend + Stripe Connect + ABN (Mon 6 Jul → Fri 17 Jul)
 
-**Inventory IDs:** Mobile 15, 21-27, 35-52. Backend 240-241, 244, 292-295.
+**First user-visible sprint.** Mobile starts here, integrating against the Sprint 1 backend that's already stable. License verification deferred to Sprint 4 (where bidding lives — the bid-time guard belongs in the bidding code).
 
-**⚠️ KYC decision gate — Day 1 of Sprint 2.** Two paths:
+Mobile: splash, 3-screen welcome carousel, email signup, Google signup, Apple signup, login, OTP entry (against MockOtpService), email verification screen, biometric re-login setup, role select (poster / tasker / will-decide), poster home shell, force-logout, account-suspended + deletion screens, basic poster profile, contextual onboarding tooltips. Plus poster→tasker upgrade entry, Stripe Connect onboarding (webview), ABN entry + ABR lookup result screen, full tasker profile setup wizard, service areas, hourly rate, public tasker profile, held-funds banner, Connect reminder cadence (UI). Categories selector flags `requiresLicense: true` and `licenseRequiredOverCents != null` categories visually so taskers know what's coming in S4.
 
-- **Didit** ($0.33/check, 500 free/month, SOC 2 + ISO + iBeta certified) → integration takes ~13-15h, less PII stored on JOBBees side
-- **Manual review queue** → admin builds approval UI, taskers upload docs, JOBBees stores redacted refs only → takes ~24-27h
+Backend: ABR API integration, Stripe Connect Express, Connect webhook handlers, Connect onboarding status tracking, held-funds calculation, poster→tasker upgrade backend. (License module + bid-time guard + expiry cron deferred to S4 with bidding.)
 
-Decision recorded in `docs/adrs/005-kyc-strategy.md` once made. **Status as of today: not decided.**
+Admin: scaffold-level — Stripe Connect status mirror, basic suspend/reinstate buttons. Full admin UI comes in S9.
 
-**Friday demo:** poster opens app → "Become a tasker" CTA → KYC flow runs end-to-end → verified badge appears → Stripe Connect onboarding launches → held-funds banner appears (because Connect not complete yet).
+**Inventory IDs:** Mobile 1-7, 9-14, 16, 18-20, 28-34 (deferred from S1 + new welcome carousel rows), 15, 35-52. Backend 241, 244, 292-295. Admin 431 (Stripe Connect status mirror, read-only thin).
 
-### Sprint 3 — Task posting + AI extraction (Mon 13 Jul → Fri 24 Jul)
+**Out of scope (in Sprint 4 instead):** License module backend, License upload UI (mobile row 41 + new row 531), bid-time guard (row 532), license expiry cron (row 533), admin License review queue (row 534).
 
-Mobile: full task-posting flow — category picker, title + description, AI extraction confirmation screen (single-pass), multi-turn ReAct clarifying loop, photo upload (multi), camera-based task creation (vision model), voice-driven posting, location picker + map, date/time, duration estimate (AI), budget input + nudge, special requirements, review + publish, save as draft, resume draft, schedule >7d, edit/cancel posted task.
+**No Day-1 decision gate — verification model is locked.** Per ADR 005: Stripe Connect KYC + ABN (free ABR API) + per-category license verification (manual admin review). License work happens in S4 alongside bidding.
 
-Backend: task CRUD, AI extraction (Gemini Flash JSON-mode), ReAct multi-turn orchestration, multimodal extraction (Gemini Flash vision → Pro fallback), image upload + Azure Blob (using local filesystem at MVP — Blob swap in S10), geocoding (Mapbox), task state machine, lifecycle audit log, embedding generation on publish (pgvector), task draft persistence, task search endpoint, schedule >7d backend.
+**Friday demo (Fri 17 Jul) — "First click-through demo":** cold-launch on simulator → welcome carousel → email signup against real Sprint 1 backend → OTP entry (`000000`) → email verify link → land on poster home → toggle biometric re-login → tap "Become a tasker" → Stripe Connect onboarding launches in webview → returns to ABN entry → ABR API verifies → tasker profile setup wizard → public tasker profile rendered → held-funds banner appears (no completed jobs). **Note for client:** "Bidding on licensed work like plumbing requires a licence — that ships in Sprint 4 alongside the bidding system."
 
-**Inventory IDs:** Mobile 53-72, 74-75. Backend 246-260.
+### Sprint 3 — Task posting + AI extraction + guest mode (Mon 20 Jul → Fri 31 Jul)
 
-**⚠️ Risk:** vision extraction + ReAct loop are the largest single-feature builds in the inventory (14h each). Allow slippage into S4 if needed; if both done by end of S3, S4 starts early.
+Mobile: full task-posting flow — category picker, title + description, AI extraction confirmation screen (single-pass), multi-turn ReAct clarifying loop, photo upload (multi), camera-based task creation (vision model), voice-driven posting, location picker + map, date/time, duration estimate (AI), budget input + nudge, special requirements, review + publish, save as draft, resume draft, schedule >7d, edit/cancel posted task. **Plus guest-mode shell, read-only browse, "Sign up to publish" bottom sheet, local draft persistence across signup.**
 
-**Friday demo:** poster takes a photo of a broken fence → AI says "This looks like a fence repair, suggested category, estimated budget $200-350, anything else I should know?" → poster answers → publish.
+Backend: task CRUD, AI extraction (Gemini Flash JSON-mode), ReAct multi-turn orchestration, multimodal extraction (Gemini Flash vision → Pro fallback), image upload + Azure Blob (using local filesystem at MVP — Blob swap in S10), geocoding (Google Maps Platform — locked), task state machine, lifecycle audit log, embedding generation on publish (pgvector), task draft persistence, task search endpoint, schedule >7d backend. **Plus public read endpoint with PII filter, anonymous rate limit, and claim-draft-on-signup flow.**
 
-### Sprint 4 — Discovery + Bidding + Public Q&A (Mon 27 Jul → Fri 7 Aug)
+**Inventory IDs:** Mobile 53-72, 74-75, **523, 524 (new)**. Backend 246-260, **525, 526 (new)**.
 
-Mobile: home feed (ranked), vector matching consumer UI, map view of nearby tasks, list view, filters (category/budget/distance/date), sort options, saved tasks, auto-invite push handling, task share link, hide/not-interested, bid placement screen, own bids list, edit/withdraw bid, bid review (poster — list, sort, filter), accept/decline bid, public Q&A under task (replaces negotiation), bid expiry/notifications.
+**Why guest mode is in this sprint:** Industry-standard pattern for AU consumer marketplaces (Airtasker, hipages). ~20-30% lift in signup conversion vs gated-from-start flow. Cheaper to build alongside the posting flow than to retrofit later. See sprint-03 detail doc "Design decision" section.
 
-Backend: bid CRUD + state machine, bid notification triggers, bid expiry cron, bid validation (one active per tasker per task), vector similarity (pgvector cosine top-K), ranked feed algorithm (weighted blend), auto-invite to matched taskers, proximity calculation, category/skill matching, public Q&A backend.
+**⚠️ Risk:** vision extraction + ReAct loop are the largest single-feature builds in the inventory (14h each). Allow slippage into S4 if needed; if both done by end of S3, S4 starts early. Guest mode adds 20h — accommodated by the broader sprint budget.
 
-**Inventory IDs:** Mobile 76-87, 88, 90-94, 96-98. Backend 261-265, 267-268, 270-273, 260.
+**Friday demo:** guest cold-launches app (no account) → browses feed → posts a task with photo → AI extraction + ReAct loop → taps Publish → "Sign up to publish" bottom sheet → completes signup → task lands in their fresh account, status PUBLISHED.
 
-**Friday demo:** tasker opens app → ranked feed shows tasks matched to their skills + location → taps one → places bid → poster (on second device or simulator) sees the bid arrive via push → accepts.
+### Sprint 4 — Discovery + Bidding + Public Q&A + License verification (Mon 3 Aug → Fri 14 Aug)
 
-### Sprint 5 — Messaging + Payments core (Mon 10 Aug → Fri 21 Aug)
+**License verification lands here**, not in S2 — because the bid-time guard is intrinsically tied to the bidding code path. Adding License module to S2 would force splitting it across sprints (upload in S2, guard in S4); landing it all here keeps the work coherent.
+
+Mobile: home feed (ranked), vector matching consumer UI, map view of nearby tasks, list view, filters (category/budget/distance/date), sort options, saved tasks, auto-invite push handling, task share link, hide/not-interested, bid placement screen, own bids list, edit/withdraw bid, bid review (poster — list, sort, filter), accept/decline bid, public Q&A under task (replaces negotiation), bid expiry/notifications. **Plus** license upload UI (photo + license number + issuing state + expiry per ADR 005), license status screen, licensed-trade category selector with "License required" chip + deeplink to upload, "Verified [Trade]" badges on tasker profile + bid lists.
+
+Backend: bid CRUD + state machine, bid notification triggers, bid expiry cron, bid validation (one active per tasker per task), vector similarity (pgvector cosine top-K), ranked feed algorithm (weighted blend), auto-invite to matched taskers, proximity calculation, category/skill matching, public Q&A backend. **Plus** License module (upload + admin approval state machine per ADR 005), bid-time license guard (covers unconditional categories AND conditional Builder rule — license required when fixed-price bid ≥ $5K AUD or any hourly bid on Builder), license expiry cron (daily; 14d/7d/1d reminders + auto-EXPIRED transition).
+
+Admin: License Review Queue scaffold (full UI lands in S9 — this is the minimal "PENDING list with approve/reject buttons" so the S4 demo works).
+
+**Inventory IDs:** Mobile 76-87, 88, 90-94, 96-98, 41 (expanded to IN 5h), 531 (new). Backend 261-265, 267-268, 270-273, 260, 240 (License module), 532 (bid-time guard incl. conditional Builder rule), 533 (license expiry cron). Admin 534 (License review queue scaffold).
+
+**Friday demo (Fri 14 Aug):** tasker opens app → ranked feed shows tasks matched to their skills + location → taps a plumbing task → bid screen blocks with "License required" deeplink → tasker uploads plumbing licence → admin (in scaffold queue) approves → tasker bids → poster sees the bid with "Verified Plumber" badge → accepts. **Then** demo the conditional rule: same tasker (no builder licence) opens a "build me a deck" task → bid $4,000 → goes through → bid $7,000 → blocked with "License required (over $5K NSW threshold)" message.
+
+### Sprint 5 — Messaging + Payments core (Mon 17 Aug → Fri 28 Aug)
 
 Mobile: inbox/thread list, conversation view (text + photo attachment + file/PDF), read receipts, report user/message, block user, off-platform warning, message search, push notifications for messages, thread freeze on dispute, add/remove card, default card, Apple/Google Pay (Stripe-managed), Stripe-hosted onboarding webview, payout history, earnings summary (tasker), transaction history (poster), receipt PDF view.
 
@@ -159,7 +182,7 @@ Backend: Socket.IO single-node + Redis adapter (groundwork only), message persis
 
 **Friday demo:** poster + tasker chat in-app → poster adds a card → places a payment hold on a task → tasker accepts → poster sees "Authorised $250" → demo the re-auth prompt by manually triggering it.
 
-### Sprint 6 — Job execution + Completion + Tax/RCTI/GST/ATO (Mon 24 Aug → Fri 4 Sep)
+### Sprint 6 — Job execution + Completion + Tax/RCTI/GST/ATO (Mon 31 Aug → Fri 11 Sep)
 
 Mobile: accepted-job screen, status update buttons (en route / arrived / in progress / completed), geofenced check-in / arrival proof, live location share during active job, completion proof upload (2 photos + checklist), tax invoice PDF (poster), RCTI PDF (tasker), RCTI agreement screen, refund request, re-auth prompt, promo code input, cancellation flow with fee preview.
 
@@ -171,7 +194,7 @@ Backend: cancellation engine with fee matrix, fee calculation logic, no-show det
 
 **Friday demo:** tasker walks into geofence (simulate) → checks in → marks complete + uploads 2 photos → auto-capture fires → tax invoice generated as PDF → tasker downloads RCTI → poster sees receipt.
 
-### Sprint 7 — Reviews + Disputes (Tier-0 mediator + admin co-pilot) (Mon 7 Sep → Fri 18 Sep)
+### Sprint 7 — Reviews + Disputes (Tier-0 mediator + admin co-pilot) (Mon 14 Sep → Fri 25 Sep)
 
 Mobile: post-completion review prompt (both sides), star rating, text review with min length, blind review with timeout-reveal, response to review, report review, dispute initiation flow, reason picker, evidence upload (photos + message screenshots), dispute conversation thread, AI-proposed resolution screen, accept/reject/escalate, dispute status tracker, resolution outcome screen.
 
@@ -181,7 +204,7 @@ Backend: review CRUD, blind review with timeout-reveal, response-to-review API, 
 
 **Friday demo:** poster completes task → both sides leave reviews → one party opens a dispute → AI mediator analyses thread + evidence + proof → proposes "$50 partial refund because tasker missed one item on checklist" → poster accepts → funds released accordingly.
 
-### Sprint 8 — Notifications + Trust/Safety + Privacy (Mon 21 Sep → Fri 2 Oct)
+### Sprint 8 — Notifications + Trust/Safety + Privacy (Mon 28 Sep → Fri 9 Oct)
 
 Mobile: push (FCM/APNS) setup, in-app notification center, per-channel toggle, email opt-out (unsubscribe), SMS opt-out (STOP), notification badges, deep-link from notification, critical-state fallback, notification history (thin), DSR access/export, account deletion request.
 
@@ -193,7 +216,7 @@ Backend: push notification service, email service (SendGrid), SMS service (Notif
 
 **Friday demo:** demonstrate "Privacy & Data" screen — request data export, see consent history, request deletion → backend anonymises → audit log shows the chain.
 
-### Sprint 9 — Admin console end-to-end (Mon 5 Oct → Fri 16 Oct)
+### Sprint 9 — Admin console end-to-end (Mon 12 Oct → Fri 23 Oct)
 
 Admin: dashboard (today's queue), user list + detail, KYC review queue, Connect onboarding tracker, suspend/reinstate user, DSR request handler, task list + detail + edit/delete, content moderation queue, manual approval, force-cancel, edit AI extraction, bid list per task, public Q&A moderation queue, flagged messages queue, manual message review, thread freeze, payment list + detail, refund processing, manual capture/void, held-funds dashboard, promo code admin, tax invoice listing, RCTI status, ATO report preview/download, ATO submission log, GST rate config, dispute queue, Tier-0 suggestion panel, manual mediation, evidence viewer, resolution actions, admin notes, admin co-pilot brief renderer, review queue (flagged), manual review removal, FAQ CRUD, T&Cs versioned editor, category CRUD, sub-category CRUD, service area CRUD, platform fee config, cancellation fee matrix config, auto-confirm timing config, Tier-0 dispute threshold, manual broadcast tool, admin action audit log viewer, DSR request queue.
 
@@ -201,7 +224,7 @@ Admin: dashboard (today's queue), user list + detail, KYC review queue, Connect 
 
 **Friday demo:** record a "day in the life of admin" — login → check today's queue → approve a KYC → resolve a dispute using Tier-0 suggestion → process a refund → export ATO report.
 
-### Sprint 10 — DevOps + Cloud deploy + WAF (Mon 19 Oct → Fri 30 Oct)
+### Sprint 10 — DevOps + Cloud deploy + WAF (Mon 26 Oct → Fri 6 Nov)
 
 Terraform: Azure App Service (3 apps), Azure Database for PostgreSQL Flexible (with pgvector), Azure Cache for Redis, Azure Blob Storage, Azure Key Vault, Azure Content Safety, Azure App Insights, VNet + private endpoints, NSGs. Cloudflare Pro setup: WAF rules per `docs/audit/edge-security.md`, DDoS, Bot Fight, geo-restrict admin, rate limits at edge. CI/CD: GitHub Actions pipelines (lint/test/typecheck on every PR, deploy to staging on merge to main, deploy to prod on tag), Prisma migrate deploy in CI, blob storage swap in (replace local filesystem with Azure Blob SDK calls), Key Vault references in App Service config, secrets rotation policy, encryption at rest verification, OpenAPI docs generation, health check endpoints, status page (thin).
 
@@ -211,15 +234,15 @@ Terraform: Azure App Service (3 apps), Azure Database for PostgreSQL Flexible (w
 
 **Friday demo:** same end-to-end happy-path flow demoed in Sprint 6 — but now running on Azure staging behind Cloudflare WAF. No localhost. The client sees a public URL.
 
-### Sprint 11 — TestFlight + bug fix + soft-launch prep (Mon 2 Nov → Fri 13 Nov)
+### Sprint 11 — TestFlight + bug fix + soft-launch prep (Mon 9 Nov → Fri 20 Nov)
 
-TestFlight: Apple Developer Program enrolment if not done, signing certificates, App Store Connect setup, TestFlight internal testers (you + client + 2-3 trusted testers), upload first build. Google Play: internal testing track, signing key, upload AAB. Mobile polish: app icon final, splash, launch animation, App Store + Play Store listing screenshots, App Tracking Transparency prompt iOS. Bug fix: every issue surfaced during testing — expect 30-50 small ones in week 1. Final compliance check: re-run `security-review` skill on all code, run Semgrep + CodeQL, run `pnpm audit` for npm CVEs. Documentation pass: PROJECT_CONTEXT.md, README, contributing guide for if another dev joins. 
+TestFlight: Apple Developer Program enrolment if not done, signing certificates, App Store Connect setup, TestFlight internal testers (you + client + 2-3 trusted testers), upload first build. Google Play: internal testing track, signing key, upload AAB. Mobile polish: app icon final, splash, launch animation, App Store + Play Store listing screenshots, App Tracking Transparency prompt iOS. Bug fix: every issue surfaced during testing — expect 30-50 small ones in week 1. Final compliance check: re-run `security-review` skill on all code, run Semgrep + CodeQL, run `pnpm audit` for npm CVEs. Documentation pass: PROJECT_CONTEXT.md, README, contributing guide for if another dev joins.
 
 **Inventory IDs:** Mobile 198-205 (legal pages), 206-227 (cross-cutting), 225-227 (icons, screenshots, ATT prompt). SEO 516-521.
 
 **Friday demo:** client installs the app on their iPhone via TestFlight invite, runs the happy path end-to-end, reports back. We file bugs and fix them next sprint.
 
-### Sprint 12 — Soft launch + first real users + retrospective (Mon 16 Nov → Fri 27 Nov)
+### Sprint 12 — Soft launch + first real users + retrospective (Mon 23 Nov → Fri 4 Dec)
 
 Soft launch logistics: pick a Sydney suburb (Newtown? Surry Hills?), onboard 30-50 taskers via manual outreach + admin invitation tool, switch Stripe from test mode to live mode (one-way decision — set a calendar reminder + checklist), monitor App Insights + Cloudflare logs daily, run a daily "what broke today" 30-min standup with yourself + client.
 
@@ -233,18 +256,18 @@ Retrospective: what went well, what didn't, what's the post-MVP roadmap. Documen
 
 ### Inventory CSV columns
 
-| Col | Name | Role |
-| --- | --- | --- |
-| 1 | ID | Row identifier (referenced from PRs and sprint docs) |
-| 2 | Surface | Mobile / Backend / Admin / SEO |
-| 3 | Section | e.g., "1.1 Onboarding & Auth" |
-| 4 | Item | The feature itself |
-| 5 | Architect Note | Original gap reference from review |
-| 6 | Call | IN / IN★ / THIN / POST / DROP / MANUAL |
-| 7 | Hours | Estimate |
-| 8 | Notes / Reason | Why this scope, why this hours estimate |
+| Col   | Name              | Role                                                                         |
+| ----- | ----------------- | ---------------------------------------------------------------------------- |
+| 1     | ID                | Row identifier (referenced from PRs and sprint docs)                         |
+| 2     | Surface           | Mobile / Backend / Admin / SEO                                               |
+| 3     | Section           | e.g., "1.1 Onboarding & Auth"                                                |
+| 4     | Item              | The feature itself                                                           |
+| 5     | Architect Note    | Original gap reference from review                                           |
+| 6     | Call              | IN / IN★ / THIN / POST / DROP / MANUAL                                       |
+| 7     | Hours             | Estimate                                                                     |
+| 8     | Notes / Reason    | Why this scope, why this hours estimate                                      |
 | **9** | **Your Decision** | **Used as completion marker. Set to `done [sprint-N, PR#nn]` when shipped.** |
-| 10 | Your Comment | Per-row notes / commentary |
+| 10    | Your Comment      | Per-row notes / commentary                                                   |
 
 ### Friday closing ritual
 
@@ -265,32 +288,38 @@ Before declaring MVP done in Sprint 12:
 - [ ] Any remaining IN+IN★ rows have a written justification in `docs/sprints/post-mvp-deferred.md`
 - [ ] Compliance docs (`docs/audit/*.md`) review owners filled in
 - [ ] ADRs 001-004 (and 005 once KYC is decided) reviewed
-- [ ] All custom skills (.claude/skills/*) reviewed for currency
+- [ ] All custom skills (.claude/skills/\*) reviewed for currency
 - [ ] CI pipelines all green on `main` for last 7 days
 - [ ] Pen test booked for post-launch (within 60 days)
 
 ## Open decisions — must be resolved before the sprint that depends on them
 
-| Decision | Needed before | Default if not decided | ADR home |
-| --- | --- | --- | --- |
-| KYC vendor: Didit / manual review | Day 1 of Sprint 2 (29 Jun) | Manual review queue | `docs/adrs/005-kyc-strategy.md` |
-| Auth token storage: HttpOnly cookie / Bearer header (per surface) | Day 1 of Sprint 1 (15 Jun) | Bearer for mobile, HttpOnly for web/admin | `docs/adrs/006-auth-tokens.md` |
-| Edge security vendor: Cloudflare Pro / Azure Front Door Premium | Mid Sprint 9 (so it's procured before Sprint 10) | Cloudflare Pro ($25/mo) | `docs/adrs/007-edge-security.md` |
-| Tax advisor engagement | Mid Sprint 5 (so they're available for Sprint 6 reviews) | Engage anyway | n/a |
-| Apple Developer Program enrolment | Mid Sprint 10 (so TestFlight is ready for Sprint 11) | Enrol anyway ($99/yr) | n/a |
+| Decision                                      | Needed before                                                                                             | Status                                                                                                                                                                                                                                      | ADR / home                          |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| ~~KYC vendor~~                                | n/a                                                                                                       | ✅ RESOLVED — Stripe Connect + ABN + manual license per category. No identity vendor.                                                                                                                                                       | `docs/adrs/005-kyc-strategy.md`     |
+| ~~Auth token storage~~                        | n/a                                                                                                       | ✅ RESOLVED — Bearer for mobile, HttpOnly cookie + CSRF for web/admin.                                                                                                                                                                      | `docs/adrs/006-auth-tokens.md`      |
+| ~~Edge security vendor~~                      | n/a                                                                                                       | ✅ RESOLVED — Cloudflare Pro ($20/mo annual).                                                                                                                                                                                               | `docs/adrs/007-edge-security.md`    |
+| Phone OTP production vendor                   | Sprint 5 D1 (Mon 17 Aug)                                                                                  | Pattern locked (MockOtpService), production vendor TBD: Firebase / Notifyre / Twilio                                                                                                                                                        | `docs/adrs/008-otp-sms-strategy.md` |
+| Tax advisor engagement                        | Soft-engage (RFP, no commitment) by mid-Sprint 5 (Fri 21 Aug); formal paid review Sprint 11 before launch | Pending — high-priority RFP. Reason: Sprint 6 GST/RCTI/ATO code is the highest AI-hallucination-risk area per CLAUDE.md rule 4. Having an advisor lined up means quick clarifications are possible during S6 even if formal review is later | n/a                                 |
+| Lawyer engagement for ToS + Privacy Policy    | Sprint 11 D1 (Mon 9 Nov)                                                                                  | Pending. Strategy: draft Privacy Policy + ToS in Sprint 8 from public templates (Airtasker/hipages style); lawyer in S11 reviews + customizes. Hard deadline: published before Stripe live mode flip in S12                                 | n/a                                 |
+| ~~Apple Developer Program enrolment~~         | n/a                                                                                                       | ✅ Already enrolled                                                                                                                                                                                                                         | n/a                                 |
+| ~~Google Developer / Play Console enrolment~~ | n/a                                                                                                       | ✅ Already enrolled                                                                                                                                                                                                                         | n/a                                 |
+| ~~Stripe account~~                            | n/a                                                                                                       | ✅ Already exists; Connect Express integration uses existing account                                                                                                                                                                        | n/a                                 |
+| ~~Geocoding vendor~~                          | n/a                                                                                                       | ✅ RESOLVED — Google Maps (best AU coverage incl. regional NSW + inner-Sydney suburb mix)                                                                                                                                                   | n/a                                 |
+| Notifyre `JOBBEES` alpha sender ID            | Sprint 1 D1 (Mon 22 Jun)                                                                                  | Apply during S1 — 5-7 business day approval. Needed for S5 OTP swap + S8 notifications                                                                                                                                                      | n/a                                 |
 
 ## Risk register
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| AI extraction quality below acceptable | Medium | High | Sprint 3 includes evaluation harness; budget +20h buffer in S3-S4 for prompt iteration |
-| Stripe Connect setup blocks on AU compliance review by Stripe | Low | High | Initiate Stripe Connect onboarding application in Sprint 1 — review takes 5-10 business days |
-| Didit unavailable / suddenly changes pricing | Low | Medium | Manual KYC path is the fallback; we've already designed both — ADR documents the choice |
-| Vision model cost spike (vision is ~10× text cost) | Medium | Medium | Cost guardrails enforced via `.claude/skills/multimodal-extraction/SKILL.md`; daily cost cap per user + global |
-| Mobile push notifications break on real iOS (sim is forgiving) | Medium | Medium | Sprint 11 TestFlight catches this; budget time in S11 to debug APNS |
-| End-of-MVP soft launch reveals a P0 we missed | High | Medium | Sprints 11-12 ARE the buffer. Don't over-commit them. |
-| Tax/RCTI/ATO interpretation differs from tax advisor | Medium | Critical | Engage advisor BEFORE Sprint 6 starts (mid-S5). Don't merge without sign-off. |
-| Auto-updater bumps a critical dep mid-sprint | Low (now) | High | `.github/dependabot.yml` configured for monthly + minor/patch only; majors require manual ADR |
+| Risk                                                           | Likelihood | Impact   | Mitigation                                                                                                                                                                     |
+| -------------------------------------------------------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| AI extraction quality below acceptable                         | Medium     | High     | Sprint 3 includes evaluation harness; budget +20h buffer in S3-S4 for prompt iteration                                                                                         |
+| Stripe Connect setup blocks on AU compliance review by Stripe  | Low        | High     | Initiate Stripe Connect onboarding application in Sprint 1 — review takes 5-10 business days                                                                                   |
+| License-register cross-check is manual + admin-time intensive  | Medium     | Medium   | Admin queue prioritises licensed-trade categories; recommend `Verified [Trade]` badge displays last-checked timestamp + URL so the audit trail lives in the License row itself |
+| Vision model cost spike (vision is ~10× text cost)             | Medium     | Medium   | Cost guardrails enforced via `.claude/skills/multimodal-extraction/SKILL.md`; daily cost cap per user + global                                                                 |
+| Mobile push notifications break on real iOS (sim is forgiving) | Medium     | Medium   | Sprint 11 TestFlight catches this; budget time in S11 to debug APNS                                                                                                            |
+| End-of-MVP soft launch reveals a P0 we missed                  | High       | Medium   | Sprints 11-12 ARE the buffer. Don't over-commit them.                                                                                                                          |
+| Tax/RCTI/ATO interpretation differs from tax advisor           | Medium     | Critical | Engage advisor BEFORE Sprint 6 starts (mid-S5). Don't merge without sign-off.                                                                                                  |
+| Auto-updater bumps a critical dep mid-sprint                   | Low (now)  | High     | `.github/dependabot.yml` configured for monthly + minor/patch only; majors require manual ADR                                                                                  |
 
 ## What we don't do
 
@@ -306,10 +335,11 @@ Before declaring MVP done in Sprint 12:
 Each sprint has its own detail doc:
 
 - `sprint-00-foundation-and-setup.md` — Sprint 0 (foundation, retrospective)
-- `sprint-01-onboarding-and-auth.md` — Sprint 1 detail
-- `sprint-02-kyc-and-tasker.md` — created end of Sprint 1
-- `sprint-03-task-posting-and-ai.md` — created end of Sprint 2
-- ...etc
+- `sprint-01-onboarding-and-auth.md` — Sprint 1 detail (now backend-only auth foundation — title preserved for file-history continuity; content updated)
+- `sprint-02-kyc-tasker-connect.md` — Sprint 2 detail (now mobile auth + onboarding + tasker backend + Stripe Connect + ABN; License module deferred to S4)
+- `sprint-03-task-posting-ai.md` — Sprint 3 detail (unchanged scope, dates shifted)
+- `sprint-04-discovery-bidding.md` — Sprint 4 detail (now includes License module + bid-time guard + expiry cron per ADR 005)
+- `sprint-05-messaging-payments.md` through `sprint-12-soft-launch.md` — dates shifted, scope unchanged
 
 Each sprint doc includes: inventory IDs in scope, definition of done per feature, demo script for Friday, risk + decision callouts, link to the PRs that landed.
 

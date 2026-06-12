@@ -36,6 +36,9 @@ jobs:
           fetch-depth: 0
 
       - name: Semgrep scan (JOBBees rules + registry)
+        # `--error` was removed in recent Semgrep CLI versions; `semgrep ci` already
+        # exits non-zero on findings by default. Don't add it back.
+        # `--sarif-output=FILE` is the modern flag (replaces older `--sarif --output FILE`).
         run: |
           semgrep ci \
             --config ops/security/semgrep-rules.yml \
@@ -43,16 +46,28 @@ jobs:
             --config p/nestjs \
             --config p/owasp-top-ten \
             --config p/secrets \
-            --sarif --output semgrep.sarif \
-            --error
+            --sarif-output=semgrep.sarif
         env:
           # If/when we sign up for Semgrep AppSec Platform (free tier),
           # this token enables PR commenting + finding triage UI.
           # Until then, the scan runs without it — Semgrep CLI still works.
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
+      - name: Verify SARIF was produced
+        # Guard: if the previous step failed before SARIF emission, the upload step
+        # below will fail with a confusing "Path does not exist" error. Touch an
+        # empty SARIF as a no-op fallback so Code Scanning gets *something*.
+        if: always()
+        run: |
+          if [ ! -s semgrep.sarif ]; then
+            echo "::warning::Semgrep produced no SARIF; emitting empty file so upload-sarif does not fail the run with a misleading error."
+            printf '{"version":"2.1.0","$schema":"https://json.schemastore.org/sarif-2.1.0.json","runs":[{"tool":{"driver":{"name":"semgrep","version":"unknown"}},"results":[]}]}' > semgrep.sarif
+          fi
+
       - name: Upload SARIF to GitHub Code Scanning
         if: always()
+        # CodeQL Action v3 is deprecated December 2026; bump to v4 when GitHub
+        # cuts the stable release. Safe to stay on v3 for the MVP build window.
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif

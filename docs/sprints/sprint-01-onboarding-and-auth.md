@@ -1,73 +1,70 @@
-# Sprint 1 — Onboarding & Auth
+# Sprint 1 — Backend Auth Foundation
 
-**Dates:** Mon 15 Jun → Fri 26 Jun 2026 (10 working days)
-**Theme:** Get a user from "open the app" to "logged in as poster, looking at an empty home screen", then back again via biometric.
-**Hours budget:** ~90 (45 mobile, 40 backend, 5 admin)
-**Mid-sprint demo:** Fri 19 Jun
-**End-of-sprint demo:** Fri 26 Jun
+> **Note:** Filename kept as `sprint-01-onboarding-and-auth.md` for git history continuity, but per the 2026-06-12 plan restructure, Sprint 1 is now **backend-only**. Mobile onboarding + auth screens move to Sprint 2 (where they're built against the now-stable backend). See `PLAN.md` operating principle #1 for the rationale.
+
+**Dates:** Mon 22 Jun → Fri 3 Jul 2026 (10 working days)
+**Theme:** Build the auth API + shared backend infra solid enough that mobile (starting Sprint 2) integrates against a real, secure, tested surface. No mobile code in this sprint.
+**Hours budget:** ~80 (75 backend, 5 admin gate)
+**Mid-sprint demo:** Fri 26 Jun
+**End-of-sprint demo:** Fri 3 Jul
 
 ## Goal in one sentence
 
-By Friday 26 Jun, the client can install a build, sign up as a poster or tasker, log in/out, and update their basic profile — running entirely against local Docker (no Azure spend).
+By Friday 3 Jul, every auth flow the mobile app will need in Sprint 2 — email/Google/Apple signup, login, OTP verify (against MockOtpService), refresh, logout (with server-side session revoke), `/me`, RBAC role grants — works end-to-end via Postman/Swagger against local Postgres + Redis, with AuditLog rows for every state transition and integration tests covering happy + auth + idempotency + signature-fail paths.
+
+## Why backend-first (the deliberate trade-off)
+
+Originally Sprint 1 was mobile-heavy onboarding (welcome carousel, signup forms, OTP UI, biometric). For a solo dev that forces building mobile against a non-existent backend, then refactoring once the backend lands. Backend-first means:
+
+1. The auth API is the riskiest foundational piece — getting it nailed before any UI code reduces rework
+2. Mobile sprints integrate against a real API, not mocks
+3. Sprint 1 demo is technical (Postman + Swagger + DB queries) — the client sees infrastructure, not UI
+4. From Sprint 2 onwards every Friday is "click through the app"
+
+**What we accept:** no mobile UI to demo on Fri 3 Jul. Frame the demo as "the foundation that saves three weeks of mobile rework later." Use the second hour of the demo to walk through Figma mockups for the Sprint 2 mobile work.
 
 ## Scope — inventory rows in this sprint
 
+### Backend (apps/api) — almost the whole sprint
+
+| ID  | Item                                                                                                                                                                                                                  | Call | Hrs | Notes                                                                                        |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | --- | -------------------------------------------------------------------------------------------- |
+| —   | NestJS app scaffold (app module, config, pino logger, global exception filter, OpenAPI/Swagger setup)                                                                                                                 | IN   | 4   | Shared infra; reused by every subsequent sprint                                              |
+| —   | Shared infra: idempotency interceptor (Redis-backed, 24h TTL), per-route rate-limit guard, error mapper, request-ID middleware                                                                                        | IN   | 6   | Shared infra; reused by every subsequent sprint                                              |
+| 228 | User CRUD endpoints                                                                                                                                                                                                   | IN   | 6   |                                                                                              |
+| 229 | OAuth providers (Google, Apple) — server-side ID-token verification + user upsert                                                                                                                                     | IN   | 6   | Token validation, profile merge, account-linking rules                                       |
+| 230 | JWT session (15min access / 30d refresh) + refresh rotation with `revokedAt` write                                                                                                                                    | IN   | 5   | Transactional revoke-then-issue                                                              |
+| 231 | Password hashing (argon2id) + reset tokens                                                                                                                                                                            | IN   | 2   | Per CLAUDE.md security rule (argon2id only)                                                  |
+| 232 | OTP service — `OtpService` interface + `MockOtpService` impl (dev). 3 safety guards per ADR 008: startup assertion (`NODE_ENV !== 'production'`), Semgrep rule blocking commits, AuditLog write on every mock-OTP use | IN   | 5   | Mock accepts `000000` for any phone. Real provider swap in Sprint 5                          |
+| 233 | Email verification flow (mock email link in dev; SendGrid wired in S5)                                                                                                                                                | IN   | 2   |                                                                                              |
+| 234 | Phone OTP verification (gated by `userType === 'tasker'` — posters skip this)                                                                                                                                         | IN   | 3   | Uses MockOtpService                                                                          |
+| 235 | Biometric token exchange endpoint (mobile presents a server-issued token bound to the device's biometric proof)                                                                                                       | IN   | 2   |                                                                                              |
+| 236 | Role-based permissions: `RolesGuard` + `@Roles()` decorator + POSTER/TASKER/ADMIN enum                                                                                                                                | IN   | 4   |                                                                                              |
+| 237 | Account suspension / ban — schema fields + admin-triggered endpoints + session revoke on suspend                                                                                                                      | IN   | 3   |                                                                                              |
+| 239 | Session revocation (logout-all-devices) — Redis JWT denylist with key TTL = refresh token TTL                                                                                                                         | THIN | 2   |                                                                                              |
+| 242 | User profile API — basic profile only this sprint (skills + service areas come in S2)                                                                                                                                 | IN   | 3   |                                                                                              |
+| 245 | Re-auth gate for change-email / change-phone — short-window proof-of-recent-auth                                                                                                                                      | IN   | 3   |                                                                                              |
+| 246 | `/me` endpoint + `JwtAuthGuard` + globally applied                                                                                                                                                                    | IN   | 3   |                                                                                              |
+| —   | AuditLog interceptor — auto-write on every mutating endpoint per skill §I                                                                                                                                             | IN   | 4   | Shared infra                                                                                 |
+| —   | Integration tests covering happy + 401 + 403 + idempotency replay + invalid signature (the L1 + L2 test rules from the security-review skill)                                                                         | IN   | 8   | Every above row gets coverage; bundles the test work that the rest of the project depends on |
+| —   | OpenAPI + Swagger doc generation + Postman collection export                                                                                                                                                          | IN   | 3   | The deliverable that proves the API is callable                                              |
+
+**Backend total: ~74h**
+
+### Admin (apps/admin) — gate only
+
+| ID  | Item                            | Call | Hrs | Notes                                                            |
+| --- | ------------------------------- | ---- | --- | ---------------------------------------------------------------- |
+| 420 | Admin login                     | IN   | 3   | Just the gate — full admin in S9. Uses the same JWT + RBAC infra |
+| 424 | Admin session timeout + re-auth | IN   | 2   |                                                                  |
+
+**Admin total: ~5h**
+
 ### Mobile (apps/mobile)
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 1 | Splash screen | IN | 1 | |
-| 2 | Email signup (first name, last name, email, mobile, location, user type) | IN | 4 | Single form, validation, hand-off to backend |
-| 3 | Google signup | IN | 3 | Flutter `google_sign_in` |
-| 4 | Apple signup | IN | 3 | iOS App Store requirement |
-| 5 | Email + password login | IN | 2 | |
-| 6 | Google login | IN | 1 | Reuses signup integration |
-| 7 | Apple login | IN | 1 | Reuses signup integration |
-| 9 | Login — biometric (Face ID / Touch ID / fingerprint) | IN | 3 | `local_auth` package |
-| 10 | Forgot password / reset flow | IN | 3 | |
-| 11 | OTP entry screen | IN | 2 | Used by mobile-verify (taskers) |
-| 12 | Email verification (posters) | IN | 2 | Click-through link from email |
-| 13 | Phone OTP verification (taskers only) | IN | 3 | Tasker-gated, not poster |
-| 14 | Role selection (Poster / Tasker) at signup | IN | 2 | |
-| 16 | Permissions priming (location, camera, notifications, photos) | IN | 3 | Per-OS handling |
-| 18 | Account suspended/banned screen | IN | 1 | |
-| 19 | Force logout (session expired) | IN | 1 | |
-| 20 | Account deletion confirmation screen | IN | 2 | |
-| 28 | Profile setup (name, photo, default address) | IN | 3 | Poster — minimal |
-| 29 | Profile edit | IN | 2 | |
-| 33 | Public profile view (limited fields visible to taskers) | IN | 2 | |
-| 34 | Verification badges (email, phone, ID) | THIN | 1 | Just rendering, KYC integration in S2 |
+**ZERO in this sprint.** Mobile starts in Sprint 2.
 
-**Mobile total: ~45h**
-
-### Backend (apps/api)
-
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 228 | User CRUD endpoints | IN | 6 | |
-| 229 | OAuth providers (Google, Apple) — server side | IN | 6 | Token validation, profile merge |
-| 230 | JWT session + refresh rotation | IN | 4 | |
-| 231 | Password hashing + reset tokens | IN | 2 | argon2id |
-| 232 | OTP service (Notifyre SMS, SendGrid email) | IN | 5 | |
-| 233 | Email verification (posters) | IN | 2 | |
-| 234 | Phone OTP verification (taskers only) | IN | 3 | Gated by user_type=tasker |
-| 235 | Biometric token exchange | IN | 2 | |
-| 236 | Role-based permissions (poster / tasker / admin) | IN | 4 | RolesGuard + Roles decorator |
-| 237 | Account suspension / ban | IN | 2 | Schema field + admin-triggered |
-| 239 | Session revocation (logout-all) | THIN | 2 | JWT denylist in Redis |
-| 242 | User profile + skills + service areas API | IN (partial) | 3 | Skills + service areas defer to S2; just basic profile this sprint |
-| 245 | Re-auth gate for change-email/phone | IN | 3 | |
-
-**Backend total: ~44h**
-
-### Admin (apps/admin)
-
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 420 | Admin login | IN | 2 | Just the gate — full admin in S9 |
-| 424 | Session timeout + re-auth | IN | 2 | |
-
-**Admin total: ~4h**
+The Sprint 1 hours that "would have" gone to mobile (welcome carousel, signup screens, OTP UI, biometric, role select) move to Sprint 2's budget.
 
 ### Schema additions (packages/prisma)
 
@@ -79,168 +76,136 @@ Already covered in the existing `User` model. Confirm:
 - `User.deletedAt` ✅
 - `User.anonymisedAt` ✅
 
-**New tables needed for S1**: `RefreshToken` (or Redis denylist), `EmailVerificationToken`, `PasswordResetToken`. These are NOT in `FUTURE MODELS` yet — add them in the first PR of the sprint.
+**New tables added in S1:**
 
-## Decision gates (must resolve Day 1)
+- `RefreshToken` — `id` (cuid2), `userId`, `tokenHash`, `issuedAt`, `expiresAt`, `revokedAt DateTime?`, `replacedById String?` (for rotation chain), `userAgent`, `ipAddress`. Indexes on `userId`, `expiresAt`, `revokedAt`.
+- `EmailVerificationToken` — `id`, `userId`, `tokenHash`, `expiresAt`, `usedAt DateTime?`.
+- `PasswordResetToken` — same shape as EmailVerificationToken.
+- `AuditLog` — already exists; this sprint wires up the interceptor that writes to it.
 
-### D1: Auth token storage
+## Decision gates — already resolved (no Day-1 gate)
 
-**Question:** HttpOnly cookie + CSRF token, or Bearer header in Authorization?
+All architectural decisions for this sprint are locked from Sprint 0:
 
-| Option | Pros | Cons |
-| --- | --- | --- |
-| HttpOnly cookie | Mature web pattern, automatic CSRF defenses available, can't be read by JS | Mobile clients need extra plumbing |
-| Bearer header | Mobile-native pattern, simpler dev | Token storage in mobile keychain is your responsibility |
+- **Auth token storage** — ADR 006 ✅ Bearer for mobile (Keychain/Keystore), HttpOnly cookie + CSRF for web/admin. Per-surface.
+- **Refresh token storage** — Postgres (`RefreshToken` model) with Redis denylist for revoked-but-not-expired tokens.
+- **OTP service for dev** — MockOtpService per ADR 008, with 3 safety guards.
+- **Password hashing** — argon2id (CLAUDE.md rule).
 
-**Recommendation:** Bearer in `Authorization` header for mobile clients (stored in iOS Keychain / Android Keystore), HttpOnly cookie for admin + web. Codified per-surface; one endpoint can issue both. ADR: `docs/adrs/006-auth-tokens.md` to be written in PR #1 of Sprint 1.
+No client-facing decisions block this sprint.
 
-### D2: Refresh token storage
+## Definition of done
 
-**Question:** Redis or Postgres?
+Every backend row above:
 
-**Recommendation:** Postgres `RefreshToken` model with `revokedAt` field for audit trail + queryability. Redis as a fast denylist for active sessions if needed later. Don't over-engineer in S1.
+- [ ] Endpoint exists with class-validator DTO (no `body: any`)
+- [ ] `@UseGuards(JwtAuthGuard)` + `@Roles(...)` applied per security-review skill §B1/B2
+- [ ] Mutating endpoints go through `IdempotencyInterceptor`
+- [ ] Auth endpoints have explicit `@RateLimit({ points: 5, duration: 60 })` per skill §D1
+- [ ] AuditLog write on every state transition per skill §I1
+- [ ] Tests: happy path + 401 + 403 + idempotency replay + (where applicable) ownership IDOR
+- [ ] OpenAPI doc generates the endpoint with example request/response
 
-### D3: Password hash
+**Sprint-level:**
 
-**Recommendation:** argon2id (via `argon2` npm package). Not bcrypt — OWASP recommends argon2id since 2021.
+- [ ] MockOtpService startup assertion fires if `NODE_ENV === 'production'`
+- [ ] Semgrep rule `jobbees-mock-otp-in-prod-env` is green
+- [ ] CI green on `main` (lint + test + typecheck + Semgrep + gitleaks)
+- [ ] `pnpm audit` zero high/critical
+- [ ] Postman collection committed to `apps/api/postman/` and pushed
+- [ ] Swagger UI accessible at `localhost:3000/api/docs`
 
-## Definition of done — per feature
+## Friday demo (Fri 3 Jul) — "Foundation demo" script
 
-A feature is "done" when ALL of these are true:
-
-- [ ] Code merged to `main` via a PR (no direct pushes)
-- [ ] CI green: lint, typecheck, test, gitleaks, Semgrep
-- [ ] At least 1 unit test exists for the happy path
-- [ ] At least 1 test exists for an error / unauthorized case
-- [ ] Sensitive endpoints (auth/payment/PII) have `security-review` skill report attached to PR with no CRITICAL findings
-- [ ] PR description references the inventory row ID (e.g., "Closes inventory row #2")
-- [ ] Feature is visible / testable on the mobile app or admin
-- [ ] CSV column 9 updated to `done [sprint-1, PR#nn]`
-
-## Friday client demo script — end of Sprint 1
-
-Record a 3-5 minute screen-cast on your phone running the iOS simulator:
+Roughly 5 minutes, technical-client tone:
 
 ```
-00:00 — "Welcome to Sprint 1 wrap. This is JOBBees as of end of week 2."
-00:10 — Cold-launch the app. Show splash + welcome screen.
-00:30 — Tap "Sign up". Pick "Email". Fill in first name, last name, email,
-        mobile, suburb, role = Poster. Tap Continue.
-01:00 — Show the email-verify screen. Cut to email inbox showing the
-        verify email arrive. Tap the link. Return to app — verified.
-01:20 — App lands on poster home screen (empty state — "Post your first
-        task!" with a placeholder button).
-01:30 — Tap profile icon. Show profile screen with name + avatar
-        placeholder. Tap Edit. Update name. Save.
-01:50 — Tap Logout. Confirm.
-02:00 — On login screen, tap "Sign in with biometric". Face ID prompt.
-        Log in instantly.
-02:15 — Show forgot-password flow (without completing): enter email →
-        "Reset link sent".
-02:30 — Switch device — show iOS simulator for tasker signup. Sign up
-        as tasker. Show that phone OTP is required (it's a 6-digit code
-        from Notifyre — show the test code arriving). Verify.
-02:50 — Show role distinction: tasker home looks different (placeholder
-        for now — actual content arrives Sprint 2-4).
-03:00 — "Here's the coverage report" — run `./scripts/coverage.sh`.
-        Show output: features done this sprint, % complete, hours used.
-03:20 — Stoplight: green (auth, signup, login, biometric); yellow (oauth
-        Google/Apple — works but Apple needs paid developer account
-        finalised); red (none).
-03:40 — "Next sprint starts Monday: KYC + tasker upgrade + Stripe Connect
-        onboarding. We need your KYC vendor decision by Friday 26 Jun
-        EOD." End.
+00:00 — "Sprint 1 wrap. Foundation demo. No UI this sprint — but the
+        next two weeks of mobile work would have taken three weeks
+        without this. Let's see what's there."
+
+00:20 — Open Postman collection. Walk through:
+        - POST /auth/signup (email + password) → 201 + tokens
+        - GET /me (with token) → user profile
+        - POST /auth/refresh (refresh token) → new pair, old one revoked
+        - POST /auth/logout → 204 + DB shows session revoked
+
+01:00 — Switch to psql:
+        SELECT id, email, role, "createdAt" FROM "User" ORDER BY "createdAt" DESC LIMIT 3;
+        SELECT "actorId", action, "targetType", "createdAt" FROM "AuditLog" ORDER BY "createdAt" DESC LIMIT 10;
+        — every signup, login, refresh, logout shows up as an AuditLog row
+
+01:30 — Open Swagger UI at localhost:3000/api/docs. Show:
+        - Every endpoint documented with example request/response
+        - Auth schemes wired up so client devs can self-serve
+
+02:00 — Show MockOtpService:
+        - POST /auth/otp/send → returns 200 with no SMS sent
+        - Show server log line: "[MOCK OTP] phone=+61400000000 code=000000 — production safeguards: { nodeEnv: 'development', auditLogged: true }"
+        - POST /auth/otp/verify with code 000000 → 200 + phoneVerified: true
+        - Demonstrate startup assertion: set NODE_ENV=production and start the app — it refuses to boot with a fatal error
+
+02:40 — Show Semgrep + security-review skill output:
+        - jobbees-mock-otp-in-prod-env: clean
+        - jobbees-stores-government-id-number: clean
+        - security-review skill checklist: all CRITICAL passed
+
+03:10 — Show CI:
+        - GitHub Actions green on the merge commit
+        - Test coverage report
+        - gitleaks clean
+
+03:30 — Stoplight:
+        ✅ Green: auth, MockOtpService, RBAC, AuditLog, idempotency, rate limits, CI gates
+        🟡 Yellow: real OTP provider deferred to S5 (intentional, ADR 008)
+        🔴 Red: none
+
+03:50 — "Sprint 2 starts Monday: mobile app starts here. Every screen
+        will hit the API you just saw. First user-visible demo on
+        Fri 17 Jul."
+
+04:30 — End. Send the Postman collection, Swagger link, and demo
+        recording to the client.
 ```
+
+## What runs in parallel (non-coding work during Sprint 1)
+
+Operational items with lead times:
+
+- **Notifyre `JOBBEES` alpha sender ID** — apply Mon 22 Jun (5-7 business day approval). Needed for Sprint 5 OTP swap + Sprint 8 notifications.
+
+Already in place (no action needed):
+
+- ✅ Stripe account exists — Connect Express integration uses existing account
+- ✅ Apple Developer Program — enrolled
+- ✅ Google Developer / Play Console — enrolled
+
+Deferred to later sprints:
+
+- **Lawyer engagement for ToS + Privacy Policy** — deferred to Sprint 11. Strategy: during Sprint 8 (Notifications + Trust + Privacy), draft Privacy Policy + ToS yourself from a public template (Airtasker / hipages style). Lawyer in Sprint 11 reviews + customizes instead of drafting from scratch. **Hard deadline:** must be published before flipping Stripe to live mode in Sprint 12.
+- **Tax advisor RFP** — soft-engage by mid-Sprint 5 (identify + shortlist, no money committed). Formal paid review in Sprint 11 before Sprint 12 launch. Rationale: Sprint 6 lands GST + RCTI + ATO code which is the highest AI-hallucination-risk area per CLAUDE.md rule 4. Having an advisor lined up means you can ask a quick "is this RCTI logic right?" question when needed.
+
+Skip:
+
+- ~~Figma mockups for Sprint 2 mobile screens~~ — not doing. Direct to Flutter using `docs/brand/` theme tokens.
 
 ## Risks specific to Sprint 1
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| Apple Developer Program not set up — can't test Apple sign-in on real device | Medium | Medium | Test on simulator only; defer real-device validation to Sprint 11; enrol now ($99/yr) so it's ready |
-| Notifyre alpha sender ID not approved yet | Medium | Medium | Apply for `JOBBEES` alpha sender Day 1; use test mode in dev; doesn't block end-of-S1 demo |
-| Email deliverability problems (SendGrid) | Low | Medium | Use SendGrid test sender for dev; warm-up domain in Sprint 10 before launch |
-| Biometric setup needs platform-specific channel code | Medium | Low | `local_auth` Flutter package handles 90%; expect a few hours of native channel debugging |
-| Google + Apple OAuth client IDs missing | High | High | Get OAuth client IDs first day; documented in `.env.example` |
+| Risk                                                            | Likelihood | Impact   | Mitigation                                                                                                                                                                     |
+| --------------------------------------------------------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Client gets nervous about no-UI Sprint 1                        | Medium     | Medium   | Frame upfront: "Foundation demo, then Sprint 2 first click-through." Show Figma mockups in same call. Mid-sprint Friday sync (Fri 26 Jun) shows Postman calls already working. |
+| MockOtpService 3-guard pattern hard to implement                | Low        | High     | All 3 layers documented in ADR 008 with code samples; Semgrep rule already written; the only fresh code is the runtime assertion (5 lines) + the AuditLog write (10 lines)     |
+| Refresh-token rotation race condition                           | Low        | Critical | Wrap revoke + issue in a single Prisma transaction. Integration test asserts old token returns 401 immediately after refresh. Per skill §B4.                                   |
+| Social-auth (Google + Apple) ID token verification subtle bugs  | Medium     | High     | Use official `google-auth-library` + `jose` for Apple JWKS verification. Don't roll our own. Tests cover invalid signature, expired token, mismatched audience                 |
+| Notifyre `JOBBEES` alpha sender ID approval slips past Sprint 5 | Low        | Medium   | Apply Mon 22 Jun (5-7 business day target); follow up if no answer by Wed 1 Jul. If late, Sprint 5 OTP swap can ship with default sender ID and rebrand later                  |
 
-## Things that are explicitly NOT in this sprint
+## End-of-sprint checklist (Fri 3 Jul afternoon)
 
-These go to later sprints — do NOT scope-creep them in:
-
-- KYC document upload + ID verification — **Sprint 2**
-- ABN entry + ABR lookup — **Sprint 2**
-- Stripe Connect onboarding — **Sprint 2**
-- Full tasker profile (skills, service areas, hourly rate, portfolio) — **Sprint 2**
-- Poster→tasker upgrade flow — **Sprint 2**
-- Task posting — **Sprint 3**
-- Discovery / bidding — **Sprint 4**
-- Anything payment-related — **Sprint 5**
-- Magic link login — DROPPED (per inventory row 8)
-- Welcome tour / coach marks — DROPPED (per inventory row 17)
-- Address book — Sprint 2 thin
-- 2FA for users — POST (deferred)
-- Linked accounts unlink — Sprint 2 thin
-
-If something on this list comes up in conversation, response is "noted, queued for Sprint N" — not "let me add it".
-
-## Day-by-day rough plan (you'll adjust)
-
-| Day | Mobile | Backend |
-| --- | --- | --- |
-| Mon 15 (D1) | Splash + signup form scaffolding. ADRs 006 (auth tokens) decided. | Auth module bootstrap. JWT + refresh rotation. `RefreshToken` Prisma model + migration. |
-| Tue 16 (D2) | Signup form validation + submit. | User CRUD. Password hashing (argon2id). Reset token flow. |
-| Wed 17 (D3) | Email/password login. Logout. | OTP service (Notifyre + SendGrid stubs). Email verification flow. |
-| Thu 18 (D4) | Google + Apple signup. OAuth UX. | OAuth providers server-side. Token exchange + profile merge. |
-| Fri 19 (D5) | Mid-sprint demo prep + recording. | Mid-sprint demo prep. Catch up on debt. |
-| Mon 22 (D6) | Biometric login (local_auth). Forgot-password flow UI. | Role-based permissions (RolesGuard). |
-| Tue 23 (D7) | OTP entry screen. Phone OTP (tasker). | Phone OTP backend. Biometric token exchange. |
-| Wed 24 (D8) | Permissions priming. Poster profile setup + edit. | User profile API. Re-auth gate for email/phone change. |
-| Thu 25 (D9) | Public profile view. Verification badges (rendering only). Suspended / force-logout / deletion screens. | Account suspension/ban. Session revocation. Admin login (basic). |
-| Fri 26 (D10) | End-of-sprint demo recording. Bug bash. CSV update. | Same. Confirm CI green. Tag `sprint-01`. |
-
-## Definition of "shippable" at end of Sprint 1
-
-- [ ] All 21 mobile inventory rows in scope are done (mark in CSV)
-- [ ] All 13 backend inventory rows in scope are done (mark in CSV)
-- [ ] All 2 admin inventory rows in scope are done (mark in CSV)
-- [ ] CI on `main` is green for last 24 hours
-- [ ] iOS simulator build runs the entire demo script start-to-finish without crashing
-- [ ] Android emulator build runs the entire demo script start-to-finish without crashing
-- [ ] `./scripts/coverage.sh` reports the 36 features as done out of ~310 total IN/IN★ (~12% MVP)
-- [ ] ADRs 005 (KYC) and 006 (auth tokens) merged
-- [ ] Sprint 2 detail doc (`sprint-02-kyc-and-tasker.md`) drafted and committed
-- [ ] Friday demo video uploaded + sent to client
-
-## Sprint-1 PRs (expected ~10-12)
-
-Estimated PR slicing (small PRs, < 400 LOC each per PR template):
-
-1. `chore(adrs): 006 auth token storage decision`
-2. `feat(prisma): RefreshToken, EmailVerificationToken, PasswordResetToken models`
-3. `feat(api/auth): JWT issue + refresh rotation`
-4. `feat(api/auth): argon2id password hashing + reset token flow`
-5. `feat(api/auth): OAuth Google + Apple server-side`
-6. `feat(api/users): user CRUD + profile + re-auth gate`
-7. `feat(api/auth): role-based permissions guard`
-8. `feat(api/auth): OTP service (Notifyre SMS + SendGrid email)`
-9. `feat(api/auth): phone OTP verification + biometric token exchange`
-10. `feat(api/auth): session revocation + account suspend/ban`
-11. `feat(mobile): splash + signup + login + role select`
-12. `feat(mobile): OAuth providers + biometric + OTP entry`
-13. `feat(mobile): poster profile + permissions priming + suspended/deletion screens`
-14. `feat(admin): admin login + session timeout`
-
-Each PR closes 1-3 inventory rows.
-
-## After end-of-sprint demo
-
-Same Friday afternoon, before the weekend:
-
-1. Update `inventory/JOBBees_Feature_Inventory.csv` column 9 for every done row → `done [sprint-1, PR#nn]`
+1. Update `inventory/JOBBees_Feature_Inventory.csv` column 9 for every backend row → `done [sprint-1, PR#nn]`
 2. Run `./scripts/coverage.sh > /tmp/coverage-s1.txt`
 3. Run `./scripts/coverage.sh --by-section > /tmp/coverage-s1-by-section.txt`
-4. Run `./scripts/coverage.sh --remaining > /tmp/coverage-remaining.txt`
-5. Email client with: demo video link + coverage summary + Sprint 2 decision asks (KYC vendor)
-6. Commit `docs/sprints/sprint-02-kyc-and-tasker.md` (drafted during Sprint 1's last few days)
-7. Tag the merge commit on `main` as `sprint-01-end`
-8. Close the sprint in any project tracker (if you're using one)
-9. Two-day weekend. Don't open the laptop.
+4. Email client: foundation demo video link + Postman collection + Swagger URL + Figma mockup link + Sprint 2 demo script preview
+5. Commit `docs/sprints/sprint-02-kyc-tasker-connect.md` if any updates needed (it's already detailed)
+6. Tag merge commit on `main` as `sprint-01-end`
+7. Close the sprint in tracker
+8. Two-day weekend. Don't open the laptop. Sprint 2 starts Mon 6 Jul.

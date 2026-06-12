@@ -1,10 +1,10 @@
 # Sprint 10 — DevOps + Cloud deploy + WAF
 
-**Dates:** Mon 19 Oct → Fri 30 Oct 2026 (10 working days)
+**Dates:** Mon 26 Oct → Fri 6 Nov 2026 (10 working days)
 **Theme:** Move from "works on my Mac with Docker" to "works on Azure with Cloudflare WAF, private endpoints, CI/CD, Key Vault, App Insights." Same code, real infrastructure, public URL.
 **Hours budget:** ~75 (all infra / DevOps, ~5 backend swap to cloud SDKs)
-**Mid-sprint demo:** Fri 23 Oct
-**End-of-sprint demo:** Fri 30 Oct
+**Mid-sprint demo:** Fri 30 Oct
+**End-of-sprint demo:** Fri 6 Nov
 
 **⚠️ First sprint with real cloud spend.** Budget ~$300-400/mo Azure + $25/mo Cloudflare from this sprint onwards. Track in PROJECT_CONTEXT.md.
 
@@ -16,60 +16,60 @@ By Friday 30 Oct, the same demo flows we've been doing on localhost (poster post
 
 ### Backend cloud swap
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| Storage | Swap local FS → Azure Blob SDK | n/a | 4 | Wrap in adapter; no business-logic changes |
-| Secrets | Swap `.env` reads → ConfigService backed by Key Vault references | n/a | 3 | Already using ConfigService — flip the source |
+| ID      | Item                                                             | Call | Hrs | Notes                                         |
+| ------- | ---------------------------------------------------------------- | ---- | --- | --------------------------------------------- |
+| Storage | Swap local FS → Azure Blob SDK                                   | n/a  | 4   | Wrap in adapter; no business-logic changes    |
+| Secrets | Swap `.env` reads → ConfigService backed by Key Vault references | n/a  | 3   | Already using ConfigService — flip the source |
 
 ### DevOps / Infra
 
-| ID | Item | Call | Hrs | Notes |
-| --- | --- | --- | --- | --- |
-| 403 | Environment management (dev/staging/prod) | IN | 4 | Terraform workspaces or env-suffixed naming |
-| 404 | Database migrations (Prisma) | IN | 3 | Already implemented; wire to CI |
-| 405 | CI/CD basic (lint, test, deploy on main) | THIN→IN | 8 | Promote to IN — needs to be in place for ongoing dev |
-| 406 | PaaS deployment (Azure App Service) | IN | 4 | 3 App Service plans: api, admin, web |
-| 407 | Secrets management (Key Vault) | IN | 3 | |
-| 408 | SSL / TLS | IN | 1 | Cloudflare-managed or App Service-managed |
-| 409 | Backups (Azure auto-only) | THIN | 2 | Built into Azure Postgres Flexible |
-| 413 | Status page | THIN | 2 | Simple status.jobbees.com.au — static hosted |
-| 414 | API versioning | THIN | 1 | `/v1/...` prefix on all routes |
-| 415 | OpenAPI docs | THIN | 3 | NestJS Swagger module — auto-generated |
-| 416 | Health check endpoints | IN | 2 | `/health` (liveness) + `/ready` (readiness) |
-| 417 | Encryption at rest | IN | 1 | Azure-managed (AES-256 default) |
-| 418 | Encryption in transit | IN | 1 | TLS 1.2+ |
-| 419 | Secret rotation policy | THIN | 2 | Document in `docs/audit/encryption-policy.md` |
+| ID  | Item                                      | Call    | Hrs | Notes                                                |
+| --- | ----------------------------------------- | ------- | --- | ---------------------------------------------------- |
+| 403 | Environment management (dev/staging/prod) | IN      | 4   | Terraform workspaces or env-suffixed naming          |
+| 404 | Database migrations (Prisma)              | IN      | 3   | Already implemented; wire to CI                      |
+| 405 | CI/CD basic (lint, test, deploy on main)  | THIN→IN | 8   | Promote to IN — needs to be in place for ongoing dev |
+| 406 | PaaS deployment (Azure App Service)       | IN      | 4   | 3 App Service plans: api, admin, web                 |
+| 407 | Secrets management (Key Vault)            | IN      | 3   |                                                      |
+| 408 | SSL / TLS                                 | IN      | 1   | Cloudflare-managed or App Service-managed            |
+| 409 | Backups (Azure auto-only)                 | THIN    | 2   | Built into Azure Postgres Flexible                   |
+| 413 | Status page                               | THIN    | 2   | Simple status.jobbees.com.au — static hosted         |
+| 414 | API versioning                            | THIN    | 1   | `/v1/...` prefix on all routes                       |
+| 415 | OpenAPI docs                              | THIN    | 3   | NestJS Swagger module — auto-generated               |
+| 416 | Health check endpoints                    | IN      | 2   | `/health` (liveness) + `/ready` (readiness)          |
+| 417 | Encryption at rest                        | IN      | 1   | Azure-managed (AES-256 default)                      |
+| 418 | Encryption in transit                     | IN      | 1   | TLS 1.2+                                             |
+| 419 | Secret rotation policy                    | THIN    | 2   | Document in `docs/audit/encryption-policy.md`        |
 
 ### Cloudflare WAF (or Azure Front Door — per ADR 007)
 
-| ID | Item | Hrs | Notes |
-| --- | --- | --- | --- |
-| Edge | Stand up Cloudflare zone for jobbees.com.au | 2 | DNS migration if needed |
-| Edge | Enable OWASP CRS managed rules | 1 | |
-| Edge | Bot Fight Mode | 1 | |
-| Edge | Custom rules: geo-restrict admin (AU only), rate limit auth/payment/AI | 3 | Per `docs/audit/edge-security.md` |
-| Edge | App Service inbound IP-allowlist Cloudflare IPs | 2 | |
-| Edge | Tune detection mode → prevention mode after 3-day baseline | 2 | |
+| ID   | Item                                                                   | Hrs | Notes                             |
+| ---- | ---------------------------------------------------------------------- | --- | --------------------------------- |
+| Edge | Stand up Cloudflare zone for jobbees.com.au                            | 2   | DNS migration if needed           |
+| Edge | Enable OWASP CRS managed rules                                         | 1   |                                   |
+| Edge | Bot Fight Mode                                                         | 1   |                                   |
+| Edge | Custom rules: geo-restrict admin (AU only), rate limit auth/payment/AI | 3   | Per `docs/audit/edge-security.md` |
+| Edge | App Service inbound IP-allowlist Cloudflare IPs                        | 2   |                                   |
+| Edge | Tune detection mode → prevention mode after 3-day baseline             | 2   |                                   |
 
 ### Azure network segmentation
 
-| | Hrs | Notes |
-| --- | --- | --- |
-| VNet + subnets | 3 | Per `docs/audit/edge-security.md` |
-| Private endpoint: Postgres Flexible | 2 | No public IP |
-| Private endpoint: Redis Cache | 2 | |
-| Private endpoint: Blob Storage | 2 | |
-| Private endpoint: Key Vault | 2 | |
-| NSG rules | 2 | |
+|                                     | Hrs | Notes                             |
+| ----------------------------------- | --- | --------------------------------- |
+| VNet + subnets                      | 3   | Per `docs/audit/edge-security.md` |
+| Private endpoint: Postgres Flexible | 2   | No public IP                      |
+| Private endpoint: Redis Cache       | 2   |                                   |
+| Private endpoint: Blob Storage      | 2   |                                   |
+| Private endpoint: Key Vault         | 2   |                                   |
+| NSG rules                           | 2   |                                   |
 
 ### Admin config endpoints
 
-| ID | Item | Hrs | Notes |
-| --- | --- | --- | --- |
-| 501 | Stripe credentials display (read-only) | 1 | Wire to Key Vault |
-| 502 | LLM provider config + model selection | 2 | Read-only at MVP, runtime tweak post-MVP |
-| 503 | Feature flags (env-based booleans) | 2 | |
-| 504 | Maintenance mode toggle | 1 | |
+| ID  | Item                                   | Hrs | Notes                                    |
+| --- | -------------------------------------- | --- | ---------------------------------------- |
+| 501 | Stripe credentials display (read-only) | 1   | Wire to Key Vault                        |
+| 502 | LLM provider config + model selection  | 2   | Read-only at MVP, runtime tweak post-MVP |
+| 503 | Feature flags (env-based booleans)     | 2   |                                          |
+| 504 | Maintenance mode toggle                | 1   |                                          |
 
 **Sprint total: ~76h**
 
@@ -130,16 +130,16 @@ Same as Sprint 1, plus per `docs/audit/security-by-stage.md`:
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| First Azure deploy reveals env-config bugs | High | High | Stage Mon-Tue, troubleshoot Wed-Thu, demo Fri. Buffer in S11. |
-| Cost overrun (forgot to right-size App Service) | Medium | Medium | Start at Basic B1 tier (~$13/mo); scale up only when needed |
-| WAF false positives block legitimate requests | High | Low | Detection mode for 3 days before prevention; tune custom rules |
-| Cloudflare IP-allowlist rotates → app inaccessible | Medium | High | Cloudflare publishes IPs; cron job updates App Service NSG monthly OR use Cloudflare Tunnel (zero IP exposure) |
-| Postgres connection pool exhaustion under load | Medium | Medium | PgBouncer in front; default pool size 50 |
-| Key Vault rate limits during cold-start | Low | Medium | Cache resolved secrets in app memory; refresh hourly |
-| Stripe webhook URL changes mid-sprint | Low | Medium | Update via Stripe Dashboard; document in runbook |
-| DNS migration breaks email (MX records) | Low | High | Pre-stage all DNS records before flipping; backup current records |
+| Risk                                               | Likelihood | Impact | Mitigation                                                                                                     |
+| -------------------------------------------------- | ---------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| First Azure deploy reveals env-config bugs         | High       | High   | Stage Mon-Tue, troubleshoot Wed-Thu, demo Fri. Buffer in S11.                                                  |
+| Cost overrun (forgot to right-size App Service)    | Medium     | Medium | Start at Basic B1 tier (~$13/mo); scale up only when needed                                                    |
+| WAF false positives block legitimate requests      | High       | Low    | Detection mode for 3 days before prevention; tune custom rules                                                 |
+| Cloudflare IP-allowlist rotates → app inaccessible | Medium     | High   | Cloudflare publishes IPs; cron job updates App Service NSG monthly OR use Cloudflare Tunnel (zero IP exposure) |
+| Postgres connection pool exhaustion under load     | Medium     | Medium | PgBouncer in front; default pool size 50                                                                       |
+| Key Vault rate limits during cold-start            | Low        | Medium | Cache resolved secrets in app memory; refresh hourly                                                           |
+| Stripe webhook URL changes mid-sprint              | Low        | Medium | Update via Stripe Dashboard; document in runbook                                                               |
+| DNS migration breaks email (MX records)            | Low        | High   | Pre-stage all DNS records before flipping; backup current records                                              |
 
 ## Explicitly NOT in scope
 
@@ -152,18 +152,18 @@ Same as Sprint 1, plus per `docs/audit/security-by-stage.md`:
 
 ## Day-by-day rough plan
 
-| Day | Task |
-| --- | --- |
-| Mon 19 (D1) | ADR 007 (edge security vendor). Terraform skeleton (modules: vnet, app-service, postgres, redis, blob, key-vault). |
-| Tue 20 (D2) | Terraform apply: vnet + Postgres Flexible + Redis + Blob + Key Vault (private endpoints). App Service plans. |
-| Wed 21 (D3) | Backend: storage adapter (local FS → Azure Blob SDK). Secrets to Key Vault references. Deploy first staging build. |
-| Thu 22 (D4) | CI/CD pipeline (GitHub Actions): lint/test/typecheck/Semgrep/build/deploy-to-staging on push. |
-| Fri 23 (D5) | Mid-sprint demo + catch-up. Cloudflare zone + DNS migration. WAF detection mode on. |
-| Mon 26 (D6) | App Service inbound IP-allowlist Cloudflare. Health/ready endpoints. OpenAPI docs. |
-| Tue 27 (D7) | WAF custom rules (geo-restrict admin, rate limits, OWASP CRS tuning). 3-day detection-mode baseline begins. |
-| Wed 28 (D8) | API versioning (`/v1` prefix). Status page (static). Secret rotation policy docs. Backup test. |
-| Thu 29 (D9) | WAF detection → prevention mode. Final smoke tests. Cost projection. |
-| Fri 30 (D10) | End-of-sprint demo + CSV update. Tag `sprint-10-end`. |
+| Day          | Task                                                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Mon 19 (D1)  | ADR 007 (edge security vendor). Terraform skeleton (modules: vnet, app-service, postgres, redis, blob, key-vault). |
+| Tue 20 (D2)  | Terraform apply: vnet + Postgres Flexible + Redis + Blob + Key Vault (private endpoints). App Service plans.       |
+| Wed 21 (D3)  | Backend: storage adapter (local FS → Azure Blob SDK). Secrets to Key Vault references. Deploy first staging build. |
+| Thu 22 (D4)  | CI/CD pipeline (GitHub Actions): lint/test/typecheck/Semgrep/build/deploy-to-staging on push.                      |
+| Fri 23 (D5)  | Mid-sprint demo + catch-up. Cloudflare zone + DNS migration. WAF detection mode on.                                |
+| Mon 26 (D6)  | App Service inbound IP-allowlist Cloudflare. Health/ready endpoints. OpenAPI docs.                                 |
+| Tue 27 (D7)  | WAF custom rules (geo-restrict admin, rate limits, OWASP CRS tuning). 3-day detection-mode baseline begins.        |
+| Wed 28 (D8)  | API versioning (`/v1` prefix). Status page (static). Secret rotation policy docs. Backup test.                     |
+| Thu 29 (D9)  | WAF detection → prevention mode. Final smoke tests. Cost projection.                                               |
+| Fri 30 (D10) | End-of-sprint demo + CSV update. Tag `sprint-10-end`.                                                              |
 
 ## Definition of "shippable"
 

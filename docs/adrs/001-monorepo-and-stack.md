@@ -34,7 +34,7 @@ Chose NestJS over Express/Fastify/Hono because:
 - Built-in OpenAPI generation feeds `packages/types` for free
 - Mature production patterns; loads of training data for AI codegen
 
-### Database: PostgreSQL 16 + pgvector + Prisma ORM
+### Database: PostgreSQL 17 + pgvector + Prisma ORM
 
 - PostgreSQL chosen for: maturity, JSON support, pgvector extension, Azure managed offering
 - pgvector for embeddings — no separate vector database; one DB, one connection pool, one backup

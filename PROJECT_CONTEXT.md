@@ -32,7 +32,7 @@ Every choice locked in. Do not re-litigate without an ADR.
 | **Backend language**    | Node.js + TypeScript                                                     | Strong AI codegen support, mature ecosystem, shared types with web clients                                     |
 | **Backend framework**   | NestJS                                                                   | Opinionated structure prevents drift over time; modules map 1:1 to product domains; strong AI-codegen patterns |
 | **ORM**                 | Prisma                                                                   | Schema-as-code, type safety, free migrations, less AI hallucination than raw SQL                               |
-| **Database**            | PostgreSQL 16 + pgvector                                                 | Single DB for relational + vector; no separate vector store                                                    |
+| **Database**            | PostgreSQL 17 + pgvector                                                 | Single DB for relational + vector; no separate vector store                                                    |
 | **Cache / queue**       | Redis                                                                    | Sessions, rate limits, idempotency, BullMQ jobs                                                                |
 | **Job queue**           | BullMQ on Redis                                                          | Native Node, no separate Azure Service Bus needed at MVP                                                       |
 | **Real-time**           | Socket.IO (single-node at MVP)                                           | Sufficient for <3k concurrent; Redis adapter post-launch                                                       |
@@ -52,7 +52,7 @@ Every choice locked in. Do not re-litigate without an ADR.
 | **SMS**                 | Twilio (alternative: Telnyx)                                             | Pending Azure Communication Services check                                                                     |
 | **Email**               | SendGrid (alternative: AWS SES)                                          | Pending Azure Communication Services check                                                                     |
 | **Image moderation**    | Azure Content Safety                                                     | AU region available                                                                                            |
-| **Geocoding**           | Mapbox or Google Maps                                                    | TBD by cost                                                                                                    |
+| **Geocoding**           | Google Maps Platform (locked)                                            | Best AU coverage incl. regional NSW + Sydney suburb mix; $200 free monthly credit                              |
 | **Error tracking**      | Sentry                                                                   | Portable across clouds                                                                                         |
 | **Logs + APM**          | Azure Application Insights                                               | May swap to OpenTelemetry-based later                                                                          |
 | **Hosting**             | Azure (full stack)                                                       | Client preference; portability planned via Terraform                                                           |
@@ -572,21 +572,38 @@ To keep MVP scope tight, certain items are explicitly deferred. Don't accidental
 
 ## 21. Open Decisions (need client sign-off before relevant code)
 
-1. **Cancellation fee matrix** — proposed two-tier: free up to 24h, 100% under 24h. Client legal review.
-2. **Auto-confirm dispute window** — proposed 48h.
-3. **Tier-0 dispute threshold** — proposed AUD $200.
-4. **Connect Express vs Connect Standard** — Express assumed.
-5. **GST architecture** — confirm platform-fee-only with tax advisor before payment code.
-6. **RCTI workflow + agreement copy** — drafted by tax advisor + legal.
-7. **Privacy retention policy per table** — client + counsel sign-off.
-8. **SMS provider** — Twilio assumed, awaiting Azure expert review.
-9. **Email provider** — SendGrid assumed, same.
-10. **Phone OTP** — Firebase Phone Auth (cheap, no branded sender) vs Twilio Verify (~$5/month, branded "JOBBEES" sender). Awaiting decision.
-11. **LLM data-residency** — direct providers (Gemini, Anthropic) with zero-retention for sensitive paths; OpenRouter OK for non-sensitive.
-12. **Linked accounts management UI** — keep THIN (2 hrs) or DROP?
-13. **Branding assets (icon, splash, colours)** — client-supplied.
-14. **App Store + Play Store account ownership** — client.
-15. **Stripe AU entity + Connect platform account** — client.
+**Status update 2026-06-09:** Many decisions originally open in v1 of this doc have now been locked into ADRs. See `docs/adrs/` for the full set.
+
+### ✅ Resolved (recorded in ADRs)
+
+| Decision                                       | Resolution                                                                                                                                                                                                                                                                                                                                                                                                            | ADR                                                                             |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Edge security: Cloudflare vs Azure Front Door  | Cloudflare Pro ($20/mo annual) for production, Cloudflare Free for staging                                                                                                                                                                                                                                                                                                                                            | `007-edge-security.md`                                                          |
+| Auth token storage                             | Bearer for mobile, HttpOnly cookie for web/admin, per-surface                                                                                                                                                                                                                                                                                                                                                         | `006-auth-tokens.md`                                                            |
+| SMS notifications vendor                       | Notifyre with registered alphanumeric sender "JOBBEES" (alpha sender application pending)                                                                                                                                                                                                                                                                                                                             | `vendor-list.md`                                                                |
+| Email vendor                                   | SendGrid (free tier 100/day; SOC 2, GDPR)                                                                                                                                                                                                                                                                                                                                                                             | `vendor-list.md`                                                                |
+| OTP dev workflow                               | `MockOtpService` accepting hardcoded `000000` for Sprint 1-4, swap to real provider in Sprint 5 (safety guards: startup assertion + Semgrep rule + AuditLog)                                                                                                                                                                                                                                                          | `008-otp-sms-strategy.md`                                                       |
+| Sprint plan structure (2026-06-12 restructure) | Sprint 0 extended to Fri 19 Jun; Sprint 1 is backend-only auth foundation (Mon 22 Jun → Fri 3 Jul); Sprint 2 is first user-visible (mobile auth + onboarding + Stripe Connect + ABN, Mon 6 Jul → Fri 17 Jul); License module deferred from S2 to S4 (with bidding); Sprint 12 ends Fri 4 Dec                                                                                                                          | `docs/sprints/PLAN.md`                                                          |
+| **Tasker verification model**                  | Stripe Connect Express KYC (Stripe handles identity) + ABN verify (free ABR API) + per-category license verification (manual admin review against AU state register). NO identity vendor (Didit / Stripe Identity / etc.). License model added to schema; `Category.requiresLicense` field added.                                                                                                                     | `005-kyc-strategy.md`                                                           |
+| **Allowed license types per category**         | 13 license type slugs across 8 licensed-trade categories (Electrical, Plumbing, Drainage, Gas fitting, Asbestos, Refrigerated AC, Pest control, Builder). Stored as shared TypeScript constant `ALLOWED_LICENSE_TYPES` in `packages/types/src/licenses.ts` (added Sprint 2). Mobile dropdowns + backend validator + admin review queue all import from one source. Per-state register cross-check is NSW-only at MVP. | `005-kyc-strategy.md`, `packages/types/src/licenses.README.md`                  |
+| Branding (palette + typography + shape + logo) | Carried forward from React Native prototype: primary `#FF6B2C` (coral), dark `#1A1A2E` (navy), Inter font, generous corners, bee-themed logo. Material 3 layered on top.                                                                                                                                                                                                                                              | `docs/brand/COLORS.md`, `docs/brand/UI-PRINCIPLES.md`, `apps/mobile/lib/theme/` |
+| Guest mode + deferred auth                     | Sprint 3 — anonymous browse home feed, post-then-signup pattern (industry standard, ~20-30% signup lift)                                                                                                                                                                                                                                                                                                              | `sprint-03-task-posting-ai.md`                                                  |
+| Onboarding screens                             | Sprint 2 welcome carousel (3 screens, skippable — moved with mobile auth) + Sprint 11 contextual tooltips (5-6 key moments) + Sprint 11 "How it works" help page + Sprint 11 expanded instructive empty states                                                                                                                                                                                                        | `sprint-02-kyc-tasker-connect.md`, `sprint-11-testflight-bugfix.md`             |
+
+### 🟡 Still pending (must resolve before respective sprint)
+
+1. **Phone OTP production vendor** — Firebase Phone Auth ($0.02/SMS, pooled sender) vs Notifyre direct (~$0.06 AUD/SMS, branded "JOBBEES" sender — recommended) vs Twilio Verify (~$0.05/verif). Decision: **Sprint 5 Day 1 (Mon 17 Aug 2026)**. See `008-otp-sms-strategy.md`.
+2. **Analytics vendor** — PostHog (open-source, self-hostable) vs Mixpanel (commercial). Decision: Sprint 11 D1 (Mon 9 Nov 2026).
+3. ~~**Geocoding vendor**~~ — ✅ RESOLVED: Google Maps. Best AU coverage including regional NSW and the inner-Sydney suburb mix at soft launch.
+4. **Cancellation fee matrix** — proposed two-tier (free up to 24h, 100% under 24h). Client legal review still pending.
+5. **Auto-confirm dispute window** — proposed 48h. Confirm with client + tax advisor.
+6. **Tier-0 dispute threshold** — proposed AUD $200. Admin-tunable in `apps/admin` config.
+7. **GST architecture** — confirm platform-fee-only with tax advisor before payment code (Sprint 6).
+8. **RCTI workflow + agreement copy** — drafted by tax advisor + legal counsel.
+9. **Privacy retention policy per table** — client + counsel sign-off.
+10. **App Store + Play Store account ownership** — client.
+11. **Stripe AU entity + Connect platform account** — client.
+12. **Tax advisor engagement** — must be in place by end of Sprint 5 to support Sprint 6 work.
 
 ---
 

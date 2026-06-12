@@ -1,0 +1,181 @@
+name: CI
+
+# Runs on every PR and on every push to main.
+# Gates: lint + typecheck + test + gitleaks.
+# Semgrep is a separate workflow (.github/workflows/semgrep.yml).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Avoid duplicate work: cancel in-progress runs on the same branch when a new
+# push comes in (a PR receives the same ref).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Secrets — runs first because if there's a leak, the rest of the run is moot
+  # ---------------------------------------------------------------------------
+  secrets:
+    name: Gitleaks (secrets scan)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history so gitleaks can scan the whole tree, not just the PR diff
+          fetch-depth: 0
+
+      - name: Gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # If/when we have a Gitleaks Pro license, set GITLEAKS_LICENSE.
+          # The free OSS scan runs fine without it for OSS repos and personal
+          # accounts; for org-owned private repos a (free) license is required —
+          # see https://gitleaks.io/products.html if CI starts failing here.
+
+  # ---------------------------------------------------------------------------
+  # Node — lint, typecheck, test across the monorepo
+  # ---------------------------------------------------------------------------
+  node:
+    name: Lint / typecheck / test (Node)
+    runs-on: ubuntu-latest
+
+    # Postgres + Redis for integration tests in apps/api.
+    # Versions match the production target (Postgres 16, Redis 7).
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: jobbees
+          POSTGRES_PASSWORD: jobbees_test
+          POSTGRES_DB: jobbees_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jobbees -d jobbees_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      # Match production: Node 22, pnpm 9, Turbo runs from root.
+      DATABASE_URL: postgresql://jobbees:jobbees_test@localhost:5432/jobbees_test
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+      # Belt and suspenders: ensure MockOtpService startup assertion does NOT fire here
+      # (it's only meant to fire when NODE_ENV=production).
+      JWT_ACCESS_SECRET: ci-only-not-a-real-secret-do-not-reuse
+      JWT_REFRESH_SECRET: ci-only-not-a-real-secret-do-not-reuse
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        # Version is sourced from the root package.json `"packageManager"` field
+        # (currently pnpm@9.15.4). Don't add `version:` here — pnpm/action-setup
+        # errors out if it sees both sources.
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        # --frozen-lockfile rejects any drift between package.json and lockfile;
+        # if this fails, the developer forgot to commit a lockfile change.
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        # Several typecheck targets depend on the generated client. Do this once
+        # at the top so each workspace's typecheck doesn't have to.
+        # `prisma` is only installed in @jobbees/prisma (not hoisted), so we have
+        # to run it via the workspace filter. The package.json there has a
+        # `generate` script + a `prisma.schema` field, so no flags needed.
+        run: pnpm --filter @jobbees/prisma run generate
+
+      - name: Lint
+        # --max-warnings=0 — warnings are errors in CI; if a warning appears the
+        # developer must either fix it or suppress with a written justification.
+        run: pnpm exec turbo run lint -- --max-warnings=0
+
+      - name: Typecheck
+        run: pnpm exec turbo run typecheck
+
+      - name: Prisma migrations apply (test DB)
+        # Apply migrations to the empty CI Postgres so integration tests have a
+        # schema. Uses `migrate deploy` (not `migrate dev`) — non-interactive,
+        # exits non-zero on any drift. Same workspace-filter pattern as
+        # `generate` above — prisma binary lives in @jobbees/prisma only.
+        run: pnpm --filter @jobbees/prisma run migrate:deploy
+
+      - name: Test
+        run: pnpm exec turbo run test
+        env:
+          # Forward the service connection strings explicitly to the test
+          # runner; Turbo passes the parent env through but being explicit
+          # makes the failure mode obvious if these get unset.
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+
+  # ---------------------------------------------------------------------------
+  # Flutter — analyze + test the mobile app
+  # ---------------------------------------------------------------------------
+  flutter:
+    name: Analyze / test (Flutter)
+    runs-on: ubuntu-latest
+    # Mobile development starts in Sprint 2; this job is gated to PRs that
+    # touch the mobile workspace. Saves CI minutes on backend-only PRs.
+    if: |
+      github.event_name == 'push' ||
+      contains(github.event.pull_request.title, 'mobile') ||
+      contains(toJson(github.event.pull_request.labels.*.name), 'mobile')
+
+    defaults:
+      run:
+        working-directory: apps/mobile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          # Pin to the same channel used locally. Bump deliberately.
+          flutter-version: '3.44.x'
+          channel: stable
+          cache: true
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Format check
+        # `--set-exit-if-changed` makes CI fail when code isn't formatted.
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        # `flutter analyze` fails on any warning or info — strict because we
+        # want a clean baseline from Sprint 2 onward.
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Test
+        run: flutter test

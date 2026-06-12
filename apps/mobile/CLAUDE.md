@@ -4,7 +4,7 @@ User-facing app for both posters and taskers. Calls the NestJS API for everythin
 
 ## Stack
 
-- Flutter 3.24+ on Dart 3.5+ (iOS + Android)
+- Flutter 3.44+ on Dart 3.9+ (iOS + Android)
 - Riverpod (state management with code generation)
 - go_router (declarative routing)
 - dio (HTTP client with interceptors)
@@ -13,7 +13,7 @@ User-facing app for both posters and taskers. Calls the NestJS API for everythin
 - local_auth (Face ID / Touch ID / fingerprint)
 - Stripe Flutter SDK (payment UI)
 - firebase_messaging (push notifications)
-- google_maps_flutter or mapbox_gl (map view)
+- google_maps_flutter (map view + geocoding — Google Maps Platform locked as the geocoding vendor)
 
 ## Folder structure
 
@@ -76,14 +76,36 @@ apps/mobile/lib/
 - **Strings:** all user-facing strings in `lib/l10n/app_en.arb` (even though we're English-only at MVP — scaffolds i18n cheaply).
 - **Form validation:** use `reactive_forms` package or manual `TextEditingController` + validator functions in providers.
 
-## Theme-ready architecture
+## Theme + brand (locked from RN prototype + Material 3)
 
-Don't ship dark mode at MVP, but make adding it later a config change:
+**Brand colors and theme are locked** in `apps/mobile/lib/theme/`:
 
-- Define semantic colour tokens in `core/theme/color_tokens.dart` (`primary`, `surface`, `onSurface`, `danger`, etc.)
-- Build light theme from these tokens
-- All widgets use `Theme.of(context).colorScheme` — never raw `Color(0xFF...)`
-- Adding dark mode = define dark token set + add theme switcher
+- `colors.dart` — JOBBees palette + light + dark `ColorScheme` (M3-native) + gradient constants
+- `app_theme.dart` — full `ThemeData` (Material 3, Inter font via `google_fonts`, generous corners, spacing/shape/motion tokens)
+
+**Source of truth (do not invent new tokens):**
+
+- Primary: `#FF6B2C` (coral orange) with 9 shades
+- Dark: `#1A1A2E` (deep navy-charcoal) with 9 shades
+- Semantic: `success #22C55E`, `warning #F59E0B`, `error #EF4444`, `info #3B82F6`
+- Font: Inter (Regular/Medium/SemiBold/Bold via `google_fonts`)
+- Border radius scale: 12 / 16 / 24 / 32
+
+**Companion docs:**
+
+- `docs/brand/COLORS.md` — full palette + usage rules + contrast table
+- `docs/brand/UI-PRINCIPLES.md` — Material 3, typography, motion, haptics, accessibility, dark mode strategy
+
+**Don't ship dark mode at MVP** but the dark tokens are defined. Adding dark mode later = flip `themeMode: ThemeMode.system` in `main.dart`. No widget rewrites needed.
+
+**Rules:**
+
+- All widgets use `Theme.of(context).colorScheme.X` — never raw `Color(0xFF...)`
+- Never introduce a new brand color without updating `docs/brand/COLORS.md` + `colors.dart` + the Tailwind tokens in `apps/admin` + `apps/web` together
+- Use the M3 type scale (`Theme.of(context).textTheme.headlineMedium` etc.), not raw `TextStyle`s
+- Use the spacing tokens (`JobbeesSpacing.lg`) for layout — no magic numbers
+- Respect reduced motion: check `MediaQuery.of(context).disableAnimations` before non-essential animations
+- Haptic feedback on key moments (`HapticFeedback.lightImpact()` on bid placed, `heavyImpact()` on task completed)
 
 ## Testing
 
