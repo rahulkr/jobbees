@@ -40,7 +40,7 @@ These targets are MVP-grade. Tighter RPO/RTO requires multi-region active-active
 1. Download latest `pg_dump_YYYYMMDD.sql.gz` from Azure Blob
 2. Spin up a fresh Postgres instance (matching schema version)
 3. `psql -d jobbees < pg_dump.sql`
-4. Verify row counts in 5 critical tables (User, Task, Payment, TaxInvoice, AuditLog)
+4. Verify row counts in 5 critical tables (User, Job, Payment, TaxInvoice, AuditLog)
 5. Swap connection string → restart App Service
 
 ## Quarterly restore drill

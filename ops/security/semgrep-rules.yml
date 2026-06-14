@@ -132,9 +132,9 @@ rules:
       - pattern-either:
           - pattern: $PRISMA.user.findMany($ARGS)
           - pattern: $PRISMA.user.findFirst($ARGS)
-          - pattern: $PRISMA.task.findMany($ARGS)
-          - pattern: $PRISMA.task.findFirst($ARGS)
-          - pattern: $PRISMA.bid.findMany($ARGS)
+          - pattern: $PRISMA.job.findMany($ARGS)
+          - pattern: $PRISMA.job.findFirst($ARGS)
+          - pattern: $PRISMA.offer.findMany($ARGS)
           - pattern: $PRISMA.review.findMany($ARGS)
       - pattern-not: '$PRISMA.$M.$N({..., where: {..., deletedAt: $X, ...}, ...})'
       - pattern-not: '$PRISMA.$M.$N({..., where: {deletedAt: $X, ...}})'

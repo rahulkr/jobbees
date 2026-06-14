@@ -31,7 +31,7 @@ model Country {
 }
 
 model User       { countryCode String @default("AU") country Country @relation(...) }
-model Task       { countryCode String @default("AU") country Country @relation(...) }
+model Job        { countryCode String @default("AU") country Country @relation(...) }
 model Payment    { countryCode String @default("AU") country Country @relation(...) }
 model TaxInvoice { countryCode String @default("AU") country Country @relation(...) }
 ```
@@ -55,7 +55,7 @@ model TaxInvoice { countryCode String @default("AU") country Country @relation(.
 ### What we DO build at MVP
 
 - `Country` table with single AU row
-- `countryCode` columns + foreign keys on User, Task, Payment, TaxInvoice
+- `countryCode` columns + foreign keys on User, Job, Payment, TaxInvoice
 - Currency formatting helper that reads from `country.currencyCode`
 - Tax dispatch in tax service (currently only routes to AU)
 

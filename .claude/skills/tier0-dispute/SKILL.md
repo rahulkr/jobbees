@@ -16,8 +16,8 @@ Any of: dispute, mediator, Tier-0, resolution, escalation, admin co-pilot, case 
 **Agent 1: Tier-0 Mediator (auto-resolution)**
 
 - Triggers on every new dispute where `disputedAmountCents ≤ TIER0_THRESHOLD_CENTS` (default AUD $200 = 20,000 cents — config-driven)
-- Reads the full evidence package: thread messages, completion proof photos (image descriptions, not pixels), task details, cancellation history, payment state
-- Proposes one of three resolutions: `FULL_RELEASE_TO_TASKER`, `PARTIAL_RELEASE` (with split %), `REFUND_TO_POSTER`
+- Reads the full evidence package: thread messages, completion proof photos (image descriptions, not pixels), job details, cancellation history, payment state
+- Proposes one of three resolutions: `FULL_RELEASE_TO_TASKER`, `PARTIAL_RELEASE` (with split %), `REFUND_TO_CLIENT`
 - Output is **structured JSON**, validated against a Zod schema before display to users
 - Both parties see the proposal in the dispute thread; either can `ACCEPT` (auto-resolve) or `ESCALATE` (human admin)
 
@@ -37,7 +37,7 @@ Any of: dispute, mediator, Tier-0, resolution, escalation, admin co-pilot, case 
 
 ```
 disputeId → fetchEvidence() returns:
-  - task: { title, description, budgetCents, status, scheduledAt, completedAt }
+  - job: { title, description, budgetCents, status, scheduledAt, completedAt }
   - thread: [{ ts, fromRole, fromUserId, contentRedacted, hasAttachment }]
   - completionProof: [{ photoUrl, capturedAt, geoVerified, exifVerified }]
   - cancellations: [{ initiatedBy, reason, ts, fee }]
@@ -47,7 +47,7 @@ disputeId → fetchEvidence() returns:
 
 **PII redaction** happens BEFORE the evidence is sent to the LLM:
 
-- User names → `Poster` / `Tasker`
+- User names → `Client` / `Tasker`
 - Phone numbers / emails → `[REDACTED]`
 - Bank details / payment methods → `[REDACTED]`
 - Photos → described in text (e.g., "Photo: outdoor scene with timestamp 2026-03-15 14:23"), never raw pixels
@@ -57,12 +57,12 @@ disputeId → fetchEvidence() returns:
 System prompt loads from `apps/api/src/modules/disputes/prompts/tier0.system.md` (versioned, audit-logged):
 
 ```
-You are a marketplace dispute mediator for an Australian task marketplace.
-Your role is to propose a fair resolution between a poster and a tasker for tasks under AUD $200.
+You are a marketplace dispute mediator for an Australian job marketplace.
+Your role is to propose a fair resolution between a client and a tasker for jobs under AUD $200.
 You have access to the dispute evidence below. You must:
 1. Read all evidence carefully
-2. Determine if the task was completed as agreed
-3. Propose ONE of: FULL_RELEASE_TO_TASKER, PARTIAL_RELEASE (specify %), REFUND_TO_POSTER
+2. Determine if the job was completed as agreed
+3. Propose ONE of: FULL_RELEASE_TO_TASKER, PARTIAL_RELEASE (specify %), REFUND_TO_CLIENT
 4. Justify briefly (max 3 sentences) referencing specific evidence
 5. Rate your confidence: HIGH (clear-cut), MEDIUM (some ambiguity), LOW (recommend escalation)
 
@@ -80,7 +80,7 @@ User prompt: structured evidence JSON.
 
 ```ts
 const Tier0ProposalSchema = z.object({
-  resolution: z.enum(['FULL_RELEASE_TO_TASKER', 'PARTIAL_RELEASE', 'REFUND_TO_POSTER', 'ESCALATE']),
+  resolution: z.enum(['FULL_RELEASE_TO_TASKER', 'PARTIAL_RELEASE', 'REFUND_TO_CLIENT', 'ESCALATE']),
   partialReleasePercent: z.number().min(0).max(100).optional(), // required if PARTIAL_RELEASE
   rationale: z.string().min(40).max(800),
   evidenceReferences: z.array(z.string()), // e.g. ['thread.msg.124', 'completionProof.photo.2']
@@ -114,7 +114,7 @@ const CaseBriefSchema = z.object({
   recommendedAction: z.enum([
     'FULL_RELEASE_TO_TASKER',
     'PARTIAL_RELEASE',
-    'REFUND_TO_POSTER',
+    'REFUND_TO_CLIENT',
     'REQUEST_MORE_INFO',
     'SUSPEND_USER',
   ]),
@@ -153,7 +153,7 @@ const CaseBriefSchema = z.object({
 - `apps/api/src/modules/disputes/precedent.service.ts` — past dispute retrieval
 - `apps/api/src/common/pii/pii-redaction.service.ts` — PII scrubber
 
-## Common tasks
+## Common changes
 
 ### Tuning the Tier-0 prompt
 

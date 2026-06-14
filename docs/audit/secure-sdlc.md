@@ -22,7 +22,7 @@
 ### 3. Test
 
 - Unit tests for services
-- E2E tests for critical flows (signup, post task, bid, pay, complete, dispute, refund)
+- E2E tests for critical flows (signup, post job, offer, pay, complete, dispute, refund)
 - Stripe test mode keys; never live keys in tests
 - Tax test suite with ATO-validated fixtures (`pnpm test:tax`)
 - Tier-0 mediator eval suite with hand-labelled disputes

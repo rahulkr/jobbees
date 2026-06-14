@@ -9,7 +9,7 @@
 
 JOBBees needs SMS for two distinct purposes:
 
-1. **Phone OTP verification** — only for taskers (not posters), fires once at tasker upgrade or signup. Inventory rows 13, 234.
+1. **Phone OTP verification** — only for taskers (not clients), fires once at tasker upgrade or signup. Inventory rows 13, 234.
 2. **SMS notifications** — critical-state fallback (push fails → email fails → SMS), STOP-keyword opt-out, alphanumeric sender for trust. Inventory rows 173, 343, 348.
 
 These are _separable_ concerns. They could be the same vendor or different vendors.

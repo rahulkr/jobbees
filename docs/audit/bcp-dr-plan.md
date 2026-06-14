@@ -5,12 +5,12 @@
 
 ## Continuity objectives
 
-| Service                                       | Acceptable downtime per month | Notes                                                                                       |
-| --------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
-| Marketplace (post task, bid, accept, message) | 4 hours (99.5% uptime)        | MVP target. Industry floor for payments is 99.9% — see roadmap                              |
-| Payment processing                            | 1 hour                        | Stripe handles most of the availability; we just can't process new captures during downtime |
-| Admin operations                              | 8 hours                       | Lower priority; manual workarounds available                                                |
-| Public web (SEO)                              | 4 hours                       | Marketing impact; cached pages on CDN mitigate                                              |
+| Service                                        | Acceptable downtime per month | Notes                                                                                       |
+| ---------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
+| Marketplace (post job, offer, accept, message) | 4 hours (99.5% uptime)        | MVP target. Industry floor for payments is 99.9% — see roadmap                              |
+| Payment processing                             | 1 hour                        | Stripe handles most of the availability; we just can't process new captures during downtime |
+| Admin operations                               | 8 hours                       | Lower priority; manual workarounds available                                                |
+| Public web (SEO)                               | 4 hours                       | Marketing impact; cached pages on CDN mitigate                                              |
 
 ## Disaster scenarios
 

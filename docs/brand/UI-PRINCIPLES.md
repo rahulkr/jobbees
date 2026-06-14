@@ -68,12 +68,12 @@ These map to Material 3 shape tokens (small / medium / large / extra-large) in `
 
 Material 3 uses 6 elevation levels (0-5). For JOBBees we use only 3:
 
-| Level | dp  | Use                                                             |
-| ----- | --- | --------------------------------------------------------------- |
-| `0`   | 0   | Flat — most screens, cards default                              |
-| `1`   | 1   | Subtle lift on cards (light mode), or use 1px border instead    |
-| `2`   | 3   | Modals, bottom sheets, snackbars                                |
-| `3`   | 6   | FAB (Floating Action Button) — used sparingly for "Post a task" |
+| Level | dp  | Use                                                            |
+| ----- | --- | -------------------------------------------------------------- |
+| `0`   | 0   | Flat — most screens, cards default                             |
+| `1`   | 1   | Subtle lift on cards (light mode), or use 1px border instead   |
+| `2`   | 3   | Modals, bottom sheets, snackbars                               |
+| `3`   | 6   | FAB (Floating Action Button) — used sparingly for "Post a job" |
 
 Avoid heavy shadows. Use `dark-100` 1px borders on cards in light mode instead of elevation when possible — looks cleaner.
 
@@ -110,10 +110,10 @@ Subtle haptic feedback at key moments. Use `HapticFeedback` (built into Flutter)
 
 | Moment                                   | Haptic                                                  |
 | ---------------------------------------- | ------------------------------------------------------- |
-| Bid placed                               | `HapticFeedback.lightImpact()`                          |
-| Bid accepted (poster)                    | `HapticFeedback.mediumImpact()`                         |
+| Offer placed                             | `HapticFeedback.lightImpact()`                          |
+| Offer accepted (client)                  | `HapticFeedback.mediumImpact()`                         |
 | Payment authorised                       | `HapticFeedback.mediumImpact()`                         |
-| Task completed                           | `HapticFeedback.heavyImpact()` (the celebration moment) |
+| Job completed                            | `HapticFeedback.heavyImpact()` (the celebration moment) |
 | Error / validation failure               | `HapticFeedback.vibrate()` (the longer feedback)        |
 | Navigation tap (chip select, tab switch) | `HapticFeedback.selectionClick()`                       |
 
@@ -130,7 +130,7 @@ Inventory row 218 commits us to WCAG 2.1 AA basics. Concrete requirements:
 - Contrast ratios pass (see `COLORS.md` contrast table)
 - Dynamic Type / font scaling supported (use `Text.scaler` or `MediaQuery.textScaler` aware widgets)
 - Tab order is logical when using keyboards (Android with external keyboard, iPadOS)
-- Live regions announce changes ("Your bid was accepted")
+- Live regions announce changes ("Your offer was accepted")
 
 Test with: iOS VoiceOver, Android TalkBack, system font size set to largest.
 
@@ -166,8 +166,8 @@ To enable dark mode later: flip `themeMode: ThemeMode.system` (or user preferenc
 Every empty state has:
 
 1. A simple illustration (use heroicons / lucide-flutter — no custom illustrations at MVP)
-2. A title (e.g., "No tasks yet")
-3. A one-line description (e.g., "Tap + to post your first task — the AI does the rest")
+2. A title (e.g., "No jobs yet")
+3. A one-line description (e.g., "Tap + to post your first job — the AI does the rest")
 4. A primary CTA (the action they should take next)
 
 ## Snackbars + toasts
@@ -195,7 +195,7 @@ No fancy toasts. Native snackbar is fine and respects accessibility.
 ## Bottom navigation (mobile)
 
 - Material 3 NavigationBar
-- 5 items max — Home / Bids / Post Task (raised center FAB) / Messages / Profile
+- 5 items max — Home / Offers / Post Job (raised center FAB) / Messages / Profile
 - Active item: `primary` color icon + label
 - Inactive: `dark-400` icon + `dark-600` label
 - Background: white, with subtle 1px top border (`dark-100`)

@@ -54,7 +54,7 @@ Locking database conventions early. These are painful to retrofit and impact eve
 
 ### Soft delete on user-facing entities
 
-- User, Task, Bid, Review, Thread (and similar) have `deletedAt DateTime?`
+- User, Job, Offer, Review, Thread (and similar) have `deletedAt DateTime?`
 - Default filter `where: { deletedAt: null }` via a Prisma extension
 - Hard delete only on ephemeral tables: OTPs, sessions, idempotency keys, drafts never published
 
@@ -85,7 +85,7 @@ When a user requests deletion:
 
 ### Enums for state machines (not strings)
 
-- Use Prisma enums for `UserRole`, `CategoryType`, `TaskStatus`, `BidStatus`, `PaymentState`, `DisputeState`, `KycStatus`, `ConnectStatus`
+- Use Prisma enums for `UserRole`, `CategoryType`, `JobStatus`, `OfferStatus`, `PaymentState`, `DisputeState`, `KycStatus`, `ConnectStatus`
 - Never store status as `String` (typo risk, no compiler check)
 
 ### JSON columns: opaque metadata only
@@ -109,7 +109,7 @@ When a user requests deletion:
 ### Country-aware schema
 
 - `Country` table is the registry
-- `User`, `Task`, `Payment`, `TaxInvoice` all have `countryCode String @default("AU")`
+- `User`, `Job`, `Payment`, `TaxInvoice` all have `countryCode String @default("AU")`
 - Hardcoded to AU at MVP; logic ready for NZ post-launch
 
 ## Consequences

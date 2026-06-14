@@ -33,6 +33,6 @@ Friendly, helpful, energetic — but trustworthy. Examples:
 - ✅ "Found someone nearby — Sarah can start Saturday at 2pm"
 - ❌ "Match found. Tasker available."
 - ✅ "Held safely until you confirm the work is done"
-- ❌ "Funds in escrow pending task completion verification"
+- ❌ "Funds in escrow pending job completion verification"
 
 Write like a friendly local who happens to be helpful, not like a SaaS dashboard.

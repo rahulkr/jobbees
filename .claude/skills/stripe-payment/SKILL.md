@@ -13,19 +13,19 @@ Any of these terms appearing in the user's request: payment, Stripe, PaymentInte
 
 ### Stripe products used
 
-- **PaymentIntent** with manual capture for tasks ≤ 7 days
-- **SetupIntent** + saved PaymentMethod for tasks > 7 days or scheduled-future
+- **PaymentIntent** with manual capture for jobs ≤ 7 days
+- **SetupIntent** + saved PaymentMethod for jobs > 7 days or scheduled-future
 - **Refund** (full + partial — partial refund is supported; partial capture is NOT)
 - **Connect Express** for tasker payouts (bundled KYC + bank + tax)
-- **Stripe Identity** for KYC (separate from Connect; bidding gated on Identity, payout gated on Connect)
+- **Stripe Identity** — NOT used. Per ADR 005, identity verification is handled by Stripe Connect itself; offer acceptance is gated on Connect onboarding, not a separate Identity verification.
 
 ### Capture window rule
 
-Stripe authorisations expire after 7 days. The `transactionType` snapshot on `Task` and the `scheduledAt` field determine the flow:
+Stripe authorisations expire after 7 days. The `transactionType` snapshot on `Job` and the `scheduledAt` field determine the flow:
 
-- Task `scheduledAt` within 7 days AND duration ≤ 7 days → **PaymentIntent + manual capture**
-- Task `scheduledAt` > 7 days in future OR duration > 7 days → **SetupIntent + saved PaymentMethod**, charged at completion
-- If a PaymentIntent task drifts past 7 days mid-flight → **re-authorisation flow**: prompt poster to re-authorise, fall back to SetupIntent path if poster opts in
+- Job `scheduledAt` within 7 days AND duration ≤ 7 days → **PaymentIntent + manual capture**
+- Job `scheduledAt` > 7 days in future OR duration > 7 days → **SetupIntent + saved PaymentMethod**, charged at completion
+- If a PaymentIntent job drifts past 7 days mid-flight → **re-authorisation flow**: prompt client to re-authorise, fall back to SetupIntent path if client opts in
 
 ### Payment state machine (PaymentState enum)
 
@@ -58,7 +58,7 @@ Any other transition throws a state machine error.
 
 ### Held funds
 
-Tasker can bid after Identity KYC passes. **First payout is gated on Connect Express onboarding completion.** Until then, captured funds are "held" — visible in:
+Tasker can make offers after Stripe Connect onboarding starts. **First payout is gated on Connect Express onboarding completion.** Until then, captured funds are "held" — visible in:
 
 - Mobile: persistent banner "Held funds: $X — complete payout setup to receive"
 - Admin: `/payments/held-funds` dashboard listing all taskers with held amounts
@@ -66,15 +66,15 @@ Tasker can bid after Identity KYC passes. **First payout is gated on Connect Exp
 
 ### GST + RCTI triggers
 
-- Every successful capture writes a tax invoice (poster) — synchronous
+- Every successful capture writes a tax invoice (client) — synchronous
 - If tasker has no ABN, also writes an RCTI (Recipient-Created Tax Invoice) — synchronous, requires RCTI agreement consent on file
-- GST calculated on the **platform fee** (the application_fee_amount), not the full task amount
+- GST calculated on the **platform fee** (the application_fee_amount), not the full job amount
 - All tax PDFs stored in Azure Blob, signed URLs to download
 - Monthly ATO sharing-economy reporting export aggregates all transactions
 
 ### Promo codes
 
-- Applied at PaymentIntent creation as a discount (reduces both task amount and platform fee proportionally)
+- Applied at PaymentIntent creation as a discount (reduces both job amount and platform fee proportionally)
 - Single-use vs multi-use, expiry, per-user max — config-driven
 - Audit log entry on every code application
 
@@ -99,7 +99,7 @@ Tasker can bid after Identity KYC passes. **First payout is gated on Connect Exp
 - `apps/api/src/modules/tax/` — GST + RCTI + ATO reporting
 - `packages/prisma/schema.prisma` — Payment, TaxInvoice, Rcti, AuditLog models
 
-## Common tasks
+## Common changes
 
 ### Adding a new payment endpoint
 

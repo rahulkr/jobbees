@@ -58,7 +58,7 @@ By Friday 18 Sep, after a completed job both parties leave reviews (only reveale
 ### Schema additions
 
 - Review: already in schema. Confirm `visibleAt DateTime?` (blind review timeout-reveal) and `response String?`, `responseAt DateTime?` already present
-- New `Dispute` model (from FUTURE MODELS): `id`, `taskId`, `paymentId`, `initiatorId`, `initiatorRole ENUM(POSTER, TASKER)`, `reason`, `state DisputeState`, `tier0ProposalId String?`, `tier0ResolvedAt DateTime?`, `escalatedAt DateTime?`, `escalatedToAdminId String?`, `resolvedAt DateTime?`, `resolutionType ENUM(FULL_RELEASE, PARTIAL_RELEASE, REFUND, NO_ACTION)`, `resolutionAmountCents Int?`, `createdAt`, `updatedAt`
+- New `Dispute` model (from FUTURE MODELS): `id`, `jobId`, `paymentId`, `initiatorId`, `initiatorRole ENUM(CLIENT, TASKER)`, `reason`, `state DisputeState`, `tier0ProposalId String?`, `tier0ResolvedAt DateTime?`, `escalatedAt DateTime?`, `escalatedToAdminId String?`, `resolvedAt DateTime?`, `resolutionType ENUM(FULL_RELEASE, PARTIAL_RELEASE, REFUND, NO_ACTION)`, `resolutionAmountCents Int?`, `createdAt`, `updatedAt`
 - New `DisputeEvidence` model: `id`, `disputeId`, `submitterId`, `type ENUM(PHOTO, MESSAGE_SCREENSHOT, COMPLETION_PROOF, TEXT)`, `blobUrl String?`, `textContent String?`, `submittedAt`
 - New `Tier0Proposal` model: `id`, `disputeId`, `modelUsed`, `proposalType ENUM(FULL_RELEASE, PARTIAL_RELEASE, REFUND)`, `proposalAmountCents Int`, `rationale Text`, `confidenceScore Float`, `tokensUsed Int`, `costUsd Float`, `createdAt`, `acceptedAt DateTime?`, `rejectedAt DateTime?`, `rejectedBy String?`
 - New `AdminCaseBrief` model: `id`, `disputeId`, `summary Text`, `keyMessages Json`, `evidenceSummary Text`, `precedentRefs Json?`, `recommendation Text`, `modelUsed`, `tokensUsed Int`, `costUsd Float`, `createdAt`
@@ -82,17 +82,17 @@ Same as Sprint 1, plus per `.claude/skills/tier0-dispute/SKILL.md`:
 
 ```
 00:00 — "Sprint 7 wrap. Reviews + the AI mediator. Real dispute scenario."
-00:15 — Device A (poster): completed task screen → "Leave a review"
+00:15 — Device A (client): completed job screen → "Leave a review"
         prompt fires. Tap.
 00:30 — Star rating: 4 stars. Text review: "Job was good but tasker
         left some sawdust behind." Submit. Show min-length enforcement.
-00:50 — Device B (tasker): "Leave a review" prompt for the same task.
-        4 stars. Text: "Easy job, poster was helpful." Submit.
+00:50 — Device B (tasker): "Leave a review" prompt for the same job.
+        4 stars. Text: "Easy job, client was helpful." Submit.
 01:05 — Both reviews now visible (blind reveal triggered — both submitted).
         Show on profile.
 01:20 — Demo single-side scenario: only one party reviews, fast-forward
         14d, show timeout-reveal.
-01:40 — Now the dispute scenario: a different (seeded) job where poster
+01:40 — Now the dispute scenario: a different (seeded) job where client
         is unhappy. Device A: tap "Open dispute" on completed job.
 01:55 — Reason picker: "Work not completed to standard".
         Evidence upload: 2 photos + screenshot of last 3 chat messages.
@@ -114,7 +114,7 @@ Same as Sprint 1, plus per `.claude/skills/tier0-dispute/SKILL.md`:
         evidence summary, precedent refs, recommendation. Show how it
         accelerates admin decision.
 03:50 — Admin resolves manually: "Partial release 70% ($140) to tasker,
-        $60 refund to poster". Show the resolution outcome screen
+        $60 refund to client". Show the resolution outcome screen
         propagate to both parties.
 04:10 — Show Tier-0 telemetry: cost per dispute, accuracy on hand-
         graded sample.

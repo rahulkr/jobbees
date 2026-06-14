@@ -7,7 +7,7 @@ description: Use whenever the user works on matching, ranked feed, semantic sear
 
 ## When to invoke
 
-Any of: matching, ranked feed, semantic search, embeddings, vector, pgvector, cosine, top-K, discovery, recommendation, similarity, find-similar-tasks, find-similar-taskers.
+Any of: matching, ranked feed, semantic search, embeddings, vector, pgvector, cosine, top-K, discovery, recommendation, similarity, find-similar-jobs, find-similar-taskers.
 
 ## Architecture facts (locked)
 
@@ -19,17 +19,17 @@ Any of: matching, ranked feed, semantic search, embeddings, vector, pgvector, co
 
 ### What we embed
 
-- **Task:** `title + "\n\n" + description + "\nCategory: " + category.name + "\nSkills: " + skillsList.join(", ")` → 1 embedding per task
+- **Job:** `title + "\n\n" + description + "\nCategory: " + category.name + "\nSkills: " + skillsList.join(", ")` → 1 embedding per job
 - **Tasker profile:** `bio + "\nSkills: " + skills.join(", ") + "\nCompleted: " + recentJobTitles.join(", ")` → 1 embedding per tasker
-- **Recomputed on edit** of any included field (task description change → re-embed task)
+- **Recomputed on edit** of any included field (job description change → re-embed job)
 
 ### Storage
 
-- `Task.embedding` column with `Unsupported("vector(1536)")` in Prisma schema
+- `Job.embedding` column with `Unsupported("vector(1536)")` in Prisma schema
 - `TaskerProfile.embedding` same
 - **HNSW index** on each (not IVFFlat — HNSW is faster for our scale, no re-train needed as data grows):
   ```sql
-  CREATE INDEX task_embedding_hnsw ON "Task" USING hnsw (embedding vector_cosine_ops);
+  CREATE INDEX job_embedding_hnsw ON "Job" USING hnsw (embedding vector_cosine_ops);
   CREATE INDEX tasker_embedding_hnsw ON "TaskerProfile" USING hnsw (embedding vector_cosine_ops);
   ```
 
@@ -38,7 +38,7 @@ Any of: matching, ranked feed, semantic search, embeddings, vector, pgvector, co
 Prisma doesn't support pgvector natively. Use `$queryRaw`:
 
 ```ts
-const matches = await prisma.$queryRaw<TaskMatch[]>`
+const matches = await prisma.$queryRaw<JobMatch[]>`
   SELECT
     id,
     title,
@@ -48,10 +48,10 @@ const matches = await prisma.$queryRaw<TaskMatch[]>`
       ST_MakePoint(longitude, latitude)::geography,
       ST_MakePoint(${userLon}, ${userLat})::geography
     ) AS distance_metres
-  FROM "Task"
+  FROM "Job"
   WHERE
     "deletedAt" IS NULL
-    AND "status" = 'BIDDING'
+    AND "status" = 'OFFERING'
     AND "countryCode" = ${countryCode}
     AND (embedding <=> ${queryEmbedding}::vector) < 0.6  -- distance threshold
   ORDER BY embedding <=> ${queryEmbedding}::vector
@@ -79,13 +79,13 @@ Weights are **config-driven** — admin can adjust in `/admin/config/ranking-wei
 ### Top-K return
 
 - Mobile home feed: return top 20 after re-rank
-- Auto-invite trigger: notify top 10 matched taskers on every task publish
+- Auto-invite trigger: notify top 10 matched taskers on every job publish
 - Search bar: full pgvector index, no rerank, return top 50
 
 ## Hard rules — never violate
 
 1. **Never call the OpenAI embedding API in a request path** (synchronous request from mobile). Always async — write to a BullMQ queue, mobile sees stale data for ~5 seconds.
-2. **Always batch embedding calls when possible.** Single API call for 100 tasks is way cheaper than 100 individual calls.
+2. **Always batch embedding calls when possible.** Single API call for 100 jobs is way cheaper than 100 individual calls.
 3. **Always re-embed on edit of included fields.** Title, description, skills, category — if any change, re-embed.
 4. **Never query embeddings without a filter.** Always include `deletedAt IS NULL` and `countryCode` and a `status` filter.
 5. **Never store the raw API response.** Just the vector + a checksum of the source content (lets us detect when re-embedding is needed).
@@ -100,16 +100,16 @@ Weights are **config-driven** — admin can adjust in `/admin/config/ranking-wei
 - `apps/api/src/modules/matching/match.service.ts` — query + rerank
 - `apps/api/src/modules/matching/match.controller.ts` — REST endpoints
 - `apps/api/src/modules/matching/ranking-weights.config.ts` — config-driven weights
-- `apps/api/src/jobs/embed-task.processor.ts` — BullMQ worker
-- `packages/prisma/schema.prisma` — `Task.embedding`, `TaskerProfile.embedding`
+- `apps/api/src/jobs/embed-job.processor.ts` — BullMQ worker
+- `packages/prisma/schema.prisma` — `Job.embedding`, `TaskerProfile.embedding`
 
-## Common tasks
+## Common changes
 
 ### Adding a new feature to the embedding input
 
-1. Update `formatTaskForEmbedding()` in `embedding.service.ts`
+1. Update `formatJobForEmbedding()` in `embedding.service.ts`
 2. Bump the embedding version (e.g., `embeddingVersion: 2`)
-3. Run a backfill job to re-embed all existing tasks at the new version
+3. Run a backfill job to re-embed all existing jobs at the new version
 4. Old + new versions coexist during migration; query by latest version
 
 ### Tuning ranking weights

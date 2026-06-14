@@ -41,7 +41,7 @@ TODO: insert architecture diagram (PNG / SVG) showing:
 ### Integration layer
 
 - **Stripe** — payments, Connect Express (tasker payouts), Identity (KYC)
-- **Google Gemini** — task extraction, chat policing, support agent, budget nudge
+- **Google Gemini** — job extraction, chat policing, support agent, budget nudge
 - **Anthropic Claude** — dispute mediator, admin co-pilot
 - **OpenAI** — embedding generation
 - **Twilio** — SMS (OTP, critical alerts)
@@ -56,12 +56,12 @@ TODO: insert architecture diagram (PNG / SVG) showing:
 
 ## Data flow at a glance
 
-1. Mobile user posts a task → POST `/tasks` on NestJS API → Postgres write + embedding job enqueued
-2. Embedding worker reads task → OpenAI embedding API → updates Postgres
+1. Mobile user posts a job → POST `/tasks` on NestJS API (URL path unchanged at MVP) → Postgres write + embedding job enqueued
+2. Embedding worker reads job → OpenAI embedding API → updates Postgres
 3. Matching service finds top-K taskers via pgvector cosine similarity + ranked feed weights
 4. Push notification triggers to matched taskers via FCM/APNS
-5. Tasker bids → REST API → Postgres write → notification to poster
-6. Poster accepts → Stripe PaymentIntent authorisation → escrow
+5. Tasker makes an offer → REST API → Postgres write → notification to client
+6. Client accepts → Stripe PaymentIntent authorisation → escrow
 
 See `data-flow-diagram.md` for payment + KYC detail.
 

@@ -42,19 +42,19 @@ Under the Australian Privacy Act, users can request:
 
 ## Data included in an Access request
 
-| Source         | What's included                                                        |
-| -------------- | ---------------------------------------------------------------------- |
-| User profile   | Name, email, phone, address, KYC status, role                          |
-| Tasker profile | Bio, skills, hourly rate, completion stats                             |
-| Tasks posted   | Title, description, status, budget, photos                             |
-| Bids submitted | Amount, message, status                                                |
-| Messages       | Threads, message content (own messages only)                           |
-| Reviews        | Reviews authored, reviews received                                     |
-| Disputes       | Disputes involved in (anonymised counterparty if they've also deleted) |
-| Payments       | Payment history (amount, date, status, NOT card number)                |
-| Tax records    | Tax invoices + RCTIs                                                   |
-| Consent log    | All ConsentRecord entries                                              |
-| Audit log      | Sensitive actions on this user (suspension events, etc.)               |
+| Source           | What's included                                                        |
+| ---------------- | ---------------------------------------------------------------------- |
+| User profile     | Name, email, phone, address, KYC status, role                          |
+| Tasker profile   | Bio, skills, hourly rate, completion stats                             |
+| Jobs posted      | Title, description, status, budget, photos                             |
+| Offers submitted | Amount, message, status                                                |
+| Messages         | Threads, message content (own messages only)                           |
+| Reviews          | Reviews authored, reviews received                                     |
+| Disputes         | Disputes involved in (anonymised counterparty if they've also deleted) |
+| Payments         | Payment history (amount, date, status, NOT card number)                |
+| Tax records      | Tax invoices + RCTIs                                                   |
+| Consent log      | All ConsentRecord entries                                              |
+| Audit log        | Sensitive actions on this user (suspension events, etc.)               |
 
 ## Data NOT included
 

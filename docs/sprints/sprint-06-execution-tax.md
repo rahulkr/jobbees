@@ -10,7 +10,7 @@
 
 ## Goal in one sentence
 
-By Friday 4 Sep, tasker arrives on-site → geofence check-in records arrival → marks job complete with 2 photos + checklist → auto-capture fires (or 48h dispute window starts) → tax invoice PDF generated for poster, RCTI PDF generated for tasker, both downloadable → monthly ATO export job aggregates all completed payments for sharing-economy reporting.
+By Friday 4 Sep, tasker arrives on-site → geofence check-in records arrival → marks job complete with 2 photos + checklist → auto-capture fires (or 48h dispute window starts) → tax invoice PDF generated for client, RCTI PDF generated for tasker, both downloadable → monthly ATO export job aggregates all completed payments for sharing-economy reporting.
 
 ## Scope — inventory rows
 
@@ -18,7 +18,7 @@ By Friday 4 Sep, tasker arrives on-site → geofence check-in records arrival �
 
 | ID  | Item                                                              | Call | Hrs | Notes                                   |
 | --- | ----------------------------------------------------------------- | ---- | --- | --------------------------------------- |
-| 99  | Accepted task / job-in-progress screen                            | IN   | 3   |                                         |
+| 99  | Accepted job / job-in-progress screen                             | IN   | 3   |                                         |
 | 100 | Status update buttons (en route, arrived, in progress, completed) | IN   | 2   |                                         |
 | 101 | Geofenced check-in / arrival proof                                | IN   | 4   | Location permission + geofence logic    |
 | 102 | Live location share during active job (opt-in)                    | IN   | 5   | UI; backend in S5                       |
@@ -26,20 +26,20 @@ By Friday 4 Sep, tasker arrives on-site → geofence check-in records arrival �
 | 104 | Completion proof — optional 30s video                             | THIN | 3   |                                         |
 | 105 | Time tracking (start / stop / total)                              | THIN | 2   |                                         |
 | 134 | Receipt PDF view / download                                       | IN   | 2   |                                         |
-| 135 | Tax invoice PDF (poster)                                          | IN   | 2   |                                         |
+| 135 | Tax invoice PDF (client)                                          | IN   | 2   |                                         |
 | 136 | Tax invoice / RCTI PDF (tasker)                                   | IN   | 2   |                                         |
 | 137 | RCTI agreement screen                                             | IN   | 2   |                                         |
-| 138 | Refund request (poster initiates from app)                        | IN   | 3   |                                         |
+| 138 | Refund request (client initiates from app)                        | IN   | 3   |                                         |
 | 139 | Re-auth prompt (capture-expiry approaching)                       | IN   | 4   |                                         |
 | 140 | Tip / gratuity option                                             | THIN | 2   |                                         |
 | 141 | Promo code / discount input                                       | IN   | 5   | Code entry, validation, applied display |
 | 142 | Cancellation flow with fee preview                                | IN   | 6   |                                         |
-| 143 | Poster-initiated cancel                                           | IN   | 1   |                                         |
+| 143 | Client-initiated cancel                                           | IN   | 1   |                                         |
 | 144 | Tasker-initiated cancel                                           | IN   | 1   |                                         |
 | 145 | Mutual cancellation request                                       | THIN | 2   |                                         |
 | 146 | Reason picker                                                     | IN   | 1   |                                         |
 | 147 | Fee disclosure / confirmation step                                | IN   | 1   |                                         |
-| 148 | No-show reporting (poster / tasker)                               | IN   | 3   |                                         |
+| 148 | No-show reporting (client / tasker)                               | IN   | 3   |                                         |
 
 **Mobile total: ~60h**
 
@@ -51,13 +51,13 @@ By Friday 4 Sep, tasker arrives on-site → geofence check-in records arrival �
 | 306 | ABN status tracking + re-check cron                | IN   | 3   |                                     |
 | 307 | RCTI generation + PDF                              | IN   | 8   | pdfkit; tax advisor review required |
 | 308 | RCTI agreement workflow + consent capture          | IN   | 3   |                                     |
-| 309 | Tax invoice generation + PDF (poster)              | IN   | 4   |                                     |
+| 309 | Tax invoice generation + PDF (client)              | IN   | 4   |                                     |
 | 310 | Tax invoice / RCTI PDF (tasker)                    | IN   | 3   |                                     |
 | 311 | ATO sharing-economy reporting export (monthly job) | IN   | 8   | All mandatory fields, CSV/JSON      |
 | 313 | Tax-rate config (single GST rate)                  | IN   | 2   |                                     |
 | 314 | Cancellation engine with fee matrix                | IN   | 8   |                                     |
 | 315 | Fee calculation logic                              | IN   | 3   |                                     |
-| 316 | No-show detection — poster                         | IN   | 3   |                                     |
+| 316 | No-show detection — client                         | IN   | 3   |                                     |
 | 317 | No-show detection — tasker                         | IN   | 3   |                                     |
 | 318 | Geofenced check-in verification                    | IN   | 3   |                                     |
 | 319 | Auto-confirm cron job                              | IN   | 4   | 48h dispute window                  |
@@ -69,12 +69,12 @@ By Friday 4 Sep, tasker arrives on-site → geofence check-in records arrival �
 
 ### Schema additions
 
-- New `TaxInvoice` model: `id`, `paymentId`, `recipientType ENUM(POSTER, TASKER)`, `recipientUserId`, `amountCents`, `gstCents`, `totalCents`, `pdfBlobUrl`, `invoiceNumber String @unique`, `issuedAt`, `taxPeriod`
+- New `TaxInvoice` model: `id`, `paymentId`, `recipientType ENUM(CLIENT, TASKER)`, `recipientUserId`, `amountCents`, `gstCents`, `totalCents`, `pdfBlobUrl`, `invoiceNumber String @unique`, `issuedAt`, `taxPeriod`
 - New `Rcti` model: `id`, `paymentId`, `taskerId`, `taskerName`, `taskerAbn String?`, `taskerAddress`, `taxiPayerName`, `feeCents`, `gstCents`, `totalCents`, `pdfBlobUrl`, `rctiNumber String @unique`, `issuedAt`, `agreementId`
 - New `RctiAgreement` model: `id`, `taskerId`, `acceptedAt`, `version`, `ipAddress`, `userAgent`
 - New `AtoExport` model: `id`, `period String // "2026-09"`, `recordCount`, `totalGrossCents`, `filePath`, `generatedAt`, `submittedAt DateTime?`
-- New `Cancellation` model: `id`, `taskId`, `initiatorId`, `initiatorRole ENUM(POSTER, TASKER, ADMIN)`, `reason`, `feeCents`, `notes`, `createdAt`
-- New `CompletionProof` model: `id`, `taskId`, `taskerId`, `photoBlobUrls Json`, `videoBlobUrl String?`, `checklistJson Json`, `geofenceVerifiedAt DateTime?`, `latitude`, `longitude`, `createdAt`
+- New `Cancellation` model: `id`, `jobId`, `initiatorId`, `initiatorRole ENUM(CLIENT, TASKER, ADMIN)`, `reason`, `feeCents`, `notes`, `createdAt`
+- New `CompletionProof` model: `id`, `jobId`, `taskerId`, `photoBlobUrls Json`, `videoBlobUrl String?`, `checklistJson Json`, `geofenceVerifiedAt DateTime?`, `latitude`, `longitude`, `createdAt`
 - New `PromoCode` + `PromoCodeUsage` models (from FUTURE MODELS): `PromoCode(id, code @unique, discountType, discountValue, maxUses, expiresAt, isActive)`, `PromoCodeUsage(id, promoCodeId, userId, paymentId, usedAt)`
 
 ## Definition of done
@@ -82,7 +82,7 @@ By Friday 4 Sep, tasker arrives on-site → geofence check-in records arrival �
 Same as Sprint 1, plus per skill §H + §K + PR template tax section:
 
 - [ ] GST calculation lives in `apps/api/src/modules/tax/gst.service.ts` — no inline math anywhere else (skill §H3)
-- [ ] RCTI triggered on payout, NOT on bid accept (skill §H4)
+- [ ] RCTI triggered on payout, NOT on offer accept (skill §H4)
 - [ ] ABN validated via `validateAbn()` before any DB write (skill §K2)
 - [ ] Sharing-economy reporting fields populated for every tasker payment: `taskerName`, `taskerAbn` (or `noAbnReason`), `taskerAddress`, `totalEarningsCents`, period (skill §K3)
 - [ ] **Tax advisor sign-off documented in each tax-related PR description** (CLAUDE.md rule 4)
@@ -96,13 +96,13 @@ Same as Sprint 1, plus per skill §H + §K + PR template tax section:
 
 ```
 00:00 — "Sprint 6 wrap. Job execution + tax. End-to-end with PDFs."
-00:15 — Device B (tasker): open accepted-task screen. Show status:
+00:15 — Device B (tasker): open accepted-job screen. Show status:
         Ready to start.
 00:30 — Walk into the geofence area (simulate via dev tool). Tap
         "I've arrived". Geofence verification fires. Status: Arrived.
 00:45 — Tap "Start job". Show optional live location share toggle.
-        Enable. Show real-time tracking in poster's app.
-01:00 — Switch to A (poster): see tasker's location updating in real
+        Enable. Show real-time tracking in client's app.
+01:00 — Switch to A (client): see tasker's location updating in real
         time.
 01:15 — Time tracker shows elapsed. Mark complete on B.
 01:30 — Completion proof screen: upload 2 photos (before + after).
@@ -112,7 +112,7 @@ Same as Sprint 1, plus per skill §H + §K + PR template tax section:
         AWAITING_AUTO_CONFIRM.
 02:00 — Fast-forward 48h via dev tool: auto-capture fires. Payment
         state: CAPTURED.
-02:15 — Device A (poster): receive notification "Payment captured".
+02:15 — Device A (client): receive notification "Payment captured".
         Open transaction history → tap → view tax invoice PDF.
         Download. Show the rendered PDF.
 02:30 — Device B (tasker): receive notification "RCTI ready". View RCTI
@@ -121,17 +121,17 @@ Same as Sprint 1, plus per skill §H + §K + PR template tax section:
 02:50 — Show RCTI agreement screen for a first-time tasker (consent
         capture flow): "Agree to recipient-created tax invoice"
         → checkbox → accept.
-03:05 — Refund flow: poster requests partial refund. Admin approves.
+03:05 — Refund flow: client requests partial refund. Admin approves.
         Payment state: PARTIAL_REFUNDED. Tax invoice + RCTI adjusted.
-03:20 — Cancellation flow: poster cancels task at 12h before scheduled
+03:20 — Cancellation flow: client cancels job at 12h before scheduled
         time. Fee preview shows "50% tasker compensation".
         Confirm. Cancellation recorded, fee debited.
 03:35 — No-show flow: tasker doesn't check in within X hours. Auto-
-        notification escalates to poster. Tasker penalty applied.
+        notification escalates to client. Tasker penalty applied.
 03:50 — Admin: export ATO report for current month. Download CSV.
         Show preview.
-04:05 — Promo code: poster enters PROMO20 → 20% discount applied to
-        next task payment. Show validation flow.
+04:05 — Promo code: client enters PROMO20 → 20% discount applied to
+        next job payment. Show validation flow.
 04:20 — Coverage report. Stoplight + asks. End.
 ```
 
@@ -151,7 +151,7 @@ Same as Sprint 1, plus per skill §H + §K + PR template tax section:
 
 - Job extension / reschedule request — DROPPED (inventory row 106)
 - In-app voice/video call — DROPPED (inventory row 107)
-- Live location share UI on poster side — Sprint 7 scoping? Actually already in S6 (row 102 covered)
+- Live location share UI on client side — Sprint 7 scoping? Actually already in S6 (row 102 covered)
 - Annual tax summary per user — THIN (inventory row 312) — defer to S9/S11 admin polish
 - Tax adjustment / manual override log — THIN (inventory row 470) — defer to S9 admin
 
@@ -159,7 +159,7 @@ Same as Sprint 1, plus per skill §H + §K + PR template tax section:
 
 | Day            | Mobile                                                | Backend                                                  |
 | -------------- | ----------------------------------------------------- | -------------------------------------------------------- |
-| Mon 24 (D1)    | Accepted task + status update buttons.                | Tax models (TaxInvoice, Rcti, RctiAgreement, AtoExport). |
+| Mon 24 (D1)    | Accepted job + status update buttons.                 | Tax models (TaxInvoice, Rcti, RctiAgreement, AtoExport). |
 | Tue 25 (D2)    | Geofence check-in + arrival proof.                    | GST service. Geofence verification.                      |
 | Wed 26 (D3)    | Completion proof: photo upload + checklist.           | RCTI PDF generation (tax advisor review at EOD).         |
 | Thu 27 (D4)    | Live location share UI + completion proof video.      | Tax invoice PDF generation.                              |
@@ -177,7 +177,7 @@ Same as Sprint 1, plus per skill §H + §K + PR template tax section:
 - [ ] Tax invoice PDF + RCTI PDF generated for a test transaction; both visually validated by tax advisor
 - [ ] ATO export job runs against seeded data; output schema matches ATO spec
 - [ ] GST rounding test passes for 100 representative amounts
-- [ ] Cancellation matrix test passes for all 4 scenarios (early/late, poster/tasker)
+- [ ] Cancellation matrix test passes for all 4 scenarios (early/late, client/tasker)
 - [ ] No-show end-to-end test passes
 - [ ] `./scripts/coverage.sh` reports ~72% MVP
 - [ ] Sprint 7 detail doc reviewed

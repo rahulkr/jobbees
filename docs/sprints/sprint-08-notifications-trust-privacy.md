@@ -8,7 +8,7 @@
 
 ## Goal in one sentence
 
-By Friday 2 Oct, every meaningful event (bid accepted, payment captured, dispute opened, KYC approved) fires a push + optional email/SMS fallback; suspicious task photos get flagged via Azure Content Safety + EXIF analysis; users can export and delete their data via in-app DSR endpoints that honour the 7-year financial retention rule.
+By Friday 2 Oct, every meaningful event (offer accepted, payment captured, dispute opened, KYC approved) fires a push + optional email/SMS fallback; suspicious job photos get flagged via Azure Content Safety + EXIF analysis; users can export and delete their data via in-app DSR endpoints that honour the 7-year financial retention rule.
 
 ## Scope — inventory rows
 
@@ -62,7 +62,7 @@ By Friday 2 Oct, every meaningful event (bid accepted, payment captured, dispute
 - New `NotificationPreference` model (from FUTURE MODELS): `userId`, `pushEnabled Boolean`, `emailEnabled Boolean`, `smsEnabled Boolean`, `criticalSmsFallback Boolean @default(true)`, plus `@@id([userId])`
 - New `NotificationLog` model: `id`, `userId`, `channel ENUM(PUSH, EMAIL, SMS, IN_APP)`, `templateKey`, `subject String?`, `bodyPreview String?`, `eventType`, `sentAt`, `deliveredAt DateTime?`, `failedAt DateTime?`, `failureReason String?`
 - New `UnsubscribeToken` model: `id`, `userId`, `channel`, `tokenHash String @unique`, `createdAt`, `usedAt DateTime?`
-- New `ContentModerationResult` model: `id`, `taskPhotoId String?`, `userId`, `provider String // "azure-content-safety"`, `category ENUM(HATE, VIOLENCE, SEXUAL, SELF_HARM, OK)`, `confidence Float`, `flaggedForReview Boolean`, `createdAt`, `reviewedAt DateTime?`, `reviewerDecision ENUM?`
+- New `ContentModerationResult` model: `id`, `jobPhotoId String?`, `userId`, `provider String // "azure-content-safety"`, `category ENUM(HATE, VIOLENCE, SEXUAL, SELF_HARM, OK)`, `confidence Float`, `flaggedForReview Boolean`, `createdAt`, `reviewedAt DateTime?`, `reviewerDecision ENUM?`
 - New `RateLimitBucket` model? No — keep in Redis
 - New `ConsentRecord` model: `id`, `userId`, `consentType ENUM(MARKETING, TOS, PRIVACY_POLICY, RCTI_AGREEMENT)`, `version`, `acceptedAt`, `ipAddress`, `userAgent`, `withdrawnAt DateTime?`
 - New `DsrRequest` model: `id`, `userId`, `type ENUM(ACCESS, DELETE, CORRECT)`, `status ENUM(PENDING, IN_PROGRESS, COMPLETED, REJECTED)`, `submittedAt`, `completedAt DateTime?`, `exportBlobUrl String?` (for ACCESS requests)
@@ -80,7 +80,7 @@ Same as Sprint 1, plus per skill §F + §J + §K + the privacy audit doc:
 - [ ] DSR access endpoint returns ALL user data in a structured JSON within 24h (Privacy Act compliance)
 - [ ] DSR delete endpoint anonymises user; financial records retained 7 years per ATO requirement
 - [ ] Consent ledger captures every consent transition with version + IP + UA (skill §K)
-- [ ] Acceptance test: insert 100 task photos with various EXIF anomalies, ≥80% caught by EXIF check
+- [ ] Acceptance test: insert 100 job photos with various EXIF anomalies, ≥80% caught by EXIF check
 
 ## Friday demo script (end-of-sprint Fri 2 Oct)
 
@@ -90,8 +90,8 @@ Same as Sprint 1, plus per skill §F + §J + §K + the privacy audit doc:
 00:00 — "Sprint 8 wrap. Notifications, trust + safety, privacy. The
         plumbing that makes everything else compliant."
 00:15 — Notification demo: trigger 4 lifecycle events back-to-back on
-        Device A (poster):
-          - Bid received
+        Device A (client):
+          - Offer received
           - Payment captured
           - Dispute opened
           - KYC approved (admin-triggered)
@@ -107,16 +107,16 @@ Same as Sprint 1, plus per skill §F + §J + §K + the privacy audit doc:
         Verify subsequent events don't email this user.
 02:00 — SMS STOP: reply "STOP" to a test SMS → backend records opt-out
         → subsequent events don't SMS.
-02:20 — Content moderation: poster posts a task with a problematic
+02:20 — Content moderation: client posts a job with a problematic
         image (e.g., a clearly-faked AI image) → Azure Content Safety
         flags → admin moderation queue receives the flag.
-02:40 — EXIF tampering: poster posts a task with photo modified in
+02:40 — EXIF tampering: client posts a job with photo modified in
         Photoshop. EXIF analysis flags "edited by Adobe Photoshop"
         → admin queue receives it.
 03:00 — Switch to admin: review the moderation queue, approve/reject.
 03:15 — DSR access: switch back to user. Settings → Privacy & data
         → Download my data → wait 60s → file ready → download. Show
-        the structured JSON content (all bids, tasks, messages, payments,
+        the structured JSON content (all offers, jobs, messages, payments,
         reviews — but no other users' PII).
 03:40 — DSR delete: Settings → Privacy & data → Delete my account.
         Confirmation flow. Backend anonymises user (financial rows

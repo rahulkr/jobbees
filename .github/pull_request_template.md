@@ -65,7 +65,7 @@ Walk through every box that applies. Tick **only** what you've actually verified
 - [ ] N/A
 - [ ] **Reviewed every line by hand** (CLAUDE.md rule 4)
 - [ ] No inline GST math — all calculation goes through `gst.service.ts`
-- [ ] RCTI triggered on payout (not on bid accept)
+- [ ] RCTI triggered on payout (not on offer accept)
 - [ ] ABN validated via `validateAbn(...)` before storage
 - [ ] Sharing-economy reporting fields populated (name, ABN or `noAbnReason`, address)
 - [ ] Tax-advisor review required if this changes RCTI / ATO logic — flagged in PR description
@@ -75,7 +75,7 @@ Walk through every box that applies. Tick **only** what you've actually verified
 Per **ADR 005**: no identity-vendor KYC. Verification = Stripe Connect (Stripe handles) + ABN (ABR API) + License (manual admin review).
 
 - [ ] N/A
-- [ ] Bid-time guard: tasker without APPROVED + non-expired License for a `requiresLicense: true` Category cannot bid (403 with actionable message)
+- [ ] Offer-time guard: tasker without APPROVED + non-expired License for a `requiresLicense: true` Category cannot make an offer (403 with actionable message)
 - [ ] License expiry cron: APPROVED licenses with `expiresAt < now()` auto-transition to EXPIRED + email tasker; 14d/7d/1d advance reminders fire
 - [ ] License blobs stored under retention policy in `docs/audit/data-retention-policy.md` (7 years)
 - [ ] AuditLog write on every License status transition (PENDING → APPROVED / REJECTED / EXPIRED), with admin `actorId` for manual decisions

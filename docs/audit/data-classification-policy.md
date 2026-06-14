@@ -9,7 +9,7 @@
 | -------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **PII (Personal)**         | Name, email, phone, address, profile photo, KYC documents, IP address, device ID                    | Encrypted at rest + in transit. Access logged. Anonymisable on DSR request.                                           |
 | **Financial**              | Payment amounts, Stripe customer ID, Stripe Connect account ID, payout history, tax invoices, RCTIs | Encrypted at rest + in transit. **Retained 7 years per ATO** even after user deletion. Anonymised at user-link level. |
-| **Operational**            | Task content, bids, messages, reviews, disputes                                                     | Encrypted at rest + in transit. Soft-deleted with user. Retained 2 years for support purposes.                        |
+| **Operational**            | Job content, offers, messages, reviews, disputes                                                    | Encrypted at rest + in transit. Soft-deleted with user. Retained 2 years for support purposes.                        |
 | **Anonymous / Aggregated** | Analytics events (no user ID), counts, metrics                                                      | No encryption requirement. Retained indefinitely.                                                                     |
 | **Secret**                 | Passwords (hashed), JWT secrets, Stripe keys, LLM API keys, DB connection strings                   | Hashed (passwords) or encrypted in Azure Key Vault. Never logged. Never sent to LLMs.                                 |
 
@@ -23,8 +23,8 @@ TODO: map every Postgres table to a classification. Format:
 | Payment       | Financial         | Retained 7 years                          |
 | TaxInvoice    | Financial         | Retained 7 years                          |
 | Rcti          | Financial         | Retained 7 years                          |
-| Task          | Operational       | Soft-deleted, retained 2 years            |
-| Bid           | Operational       | Cascaded delete with Task                 |
+| Job           | Operational       | Soft-deleted, retained 2 years            |
+| Offer         | Operational       | Cascaded delete with Job                  |
 | Review        | Operational       | Anonymised on user delete                 |
 | Dispute       | Operational + PII | Anonymised on user delete                 |
 | AuditLog      | Operational       | Retained 7 years (audit obligation)       |

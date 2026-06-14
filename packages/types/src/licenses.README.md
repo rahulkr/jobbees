@@ -4,7 +4,7 @@
 **Consumed by:** Sprint 4 License module (mobile + backend + admin scaffold).
 **Authoritative spec:** `docs/adrs/005-kyc-strategy.md` → "Allowed license types per category (MVP seed data)".
 
-This file is the **single source of truth** for which license types the JOBBees app accepts. Mobile dropdowns, backend bid-time guard, and admin License Review Queue all import from here. Do not duplicate this list anywhere.
+This file is the **single source of truth** for which license types the JOBBees app accepts. Mobile dropdowns, backend offer-time guard, and admin License Review Queue all import from here. Do not duplicate this list anywhere.
 
 ## What lives in this file
 

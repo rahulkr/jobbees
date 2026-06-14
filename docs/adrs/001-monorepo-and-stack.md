@@ -6,7 +6,7 @@
 
 ## Context
 
-Australian peer-to-peer task marketplace with payments, AI-native matching, and multi-platform clients (Flutter mobile, Next.js admin + web). Tight initial timeline, max-AI coding workflow (Claude Code primary).
+Australian peer-to-peer job marketplace with payments, AI-native matching, and multi-platform clients (Flutter mobile, Next.js admin + web). Tight initial timeline, max-AI coding workflow (Claude Code primary).
 
 Need to lock the stack and structure on day one so the codebase doesn't drift as it scales.
 
@@ -29,7 +29,7 @@ One git repository containing:
 Chose NestJS over Express/Fastify/Hono because:
 
 - Opinionated structure prevents drift as the codebase grows
-- Module pattern maps 1:1 to product domains (auth, tasks, bids, payments...)
+- Module pattern maps 1:1 to product domains (auth, jobs, offers, payments...)
 - Decorators + DI generate dense, consistent AI code with low hallucination
 - Built-in OpenAPI generation feeds `packages/types` for free
 - Mature production patterns; loads of training data for AI codegen

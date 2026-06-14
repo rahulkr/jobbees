@@ -46,22 +46,28 @@ datasource db {
 // ENUMS
 // =============================================================================
 
+// Terminology note: this project uses the original JOBBees RN app's vocabulary
+// (Job / Client / Offer / Tasker) to avoid trademark overlap with Airtasker
+// (Task / Poster / Bid). Schema, code, and UI all use the JOBBees terms.
+// "Tasker" is kept because the original RN app used it too; it is a common
+// English word, and standalone (not paired with "Task") it is defensible.
+
 enum UserRole {
-  POSTER
-  TASKER
+  CLIENT       // the person posting a job (old name: POSTER)
+  TASKER       // the person doing the job
   ADMIN
   SUPER_ADMIN
 }
 
 enum CategoryType {
   TRANSACTIONAL // payment flows through platform (default; only type at MVP)
-  LEAD          // poster→tasker intro, payment off-platform (post-MVP)
+  LEAD          // client→tasker intro, payment off-platform (post-MVP)
 }
 
-enum TaskStatus {
+enum JobStatus {
   DRAFT
   PUBLISHED
-  BIDDING
+  OFFERING      // accepting offers (old: BIDDING)
   ACCEPTED
   IN_PROGRESS
   COMPLETED
@@ -69,7 +75,7 @@ enum TaskStatus {
   DISPUTED
 }
 
-enum BidStatus {
+enum OfferStatus {
   ACTIVE
   WITHDRAWN
   ACCEPTED
@@ -129,7 +135,7 @@ model Country {
   updatedAt     DateTime @updatedAt
 
   users     User[]
-  tasks     Task[]
+  jobs      Job[]
 }
 
 // =============================================================================
@@ -154,11 +160,11 @@ model User {
   kycStatus       KycStatus  @default(NOT_STARTED)
   connectStatus   ConnectStatus @default(NOT_STARTED)
 
-  // Profile fields (poster + tasker)
+  // Profile fields (client + tasker)
   avatarUrl       String?
   defaultAddress  String?
 
-  // Tasker-only fields (null for posters)
+  // Tasker-only fields (null for clients)
   bio             String?    @db.Text
   hourlyRateCents Int?
   abn             String?    // 11-digit Australian Business Number
@@ -174,11 +180,12 @@ model User {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
-  postedTasks     Task[]     @relation("PosterTasks")
-  bids            Bid[]
+  postedJobs      Job[]      @relation("ClientJobs")
+  offers          Offer[]
   reviewsGiven    Review[]   @relation("ReviewerReviews")
   reviewsReceived Review[]   @relation("RevieweeReviews")
   skills          UserSkill[]
+  jobQuestions    JobQuestion[] @relation("AskerQuestions")
 
   @@index([countryCode])
   @@index([role])
@@ -219,20 +226,20 @@ model Category {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  tasks         Task[]
+  jobs          Job[]
 
   @@index([parentId])
   @@index([isActive])
 }
 
 // =============================================================================
-// TASKS
+// JOBS  (old name in pre-rename schema: Task)
 // =============================================================================
 
-model Task {
+model Job {
   id              String       @id // cuid2
-  posterId        String
-  poster          User         @relation("PosterTasks", fields: [posterId], references: [id], onDelete: Restrict)
+  clientId        String
+  client          User         @relation("ClientJobs", fields: [clientId], references: [id], onDelete: Restrict)
   categoryId      String
   category        Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
@@ -242,7 +249,7 @@ model Task {
   countryCode     String       @default("AU")
   country         Country      @relation(fields: [countryCode], references: [code])
 
-  // Snapshot from Category.type at creation; immutable per task
+  // Snapshot from Category.type at creation; immutable per job
   transactionType CategoryType
 
   budgetCents     Int
@@ -257,15 +264,15 @@ model Task {
 
   scheduledAt     DateTime?
   durationHours   Int?
-  status          TaskStatus   @default(DRAFT)
+  status          JobStatus    @default(DRAFT)
 
   // Vector embedding for matching — pgvector via raw migration
   embedding       Unsupported("vector(1536)")?
   embeddingHash   String?      // content hash for cache validation
 
-  // Photos stored separately in TaskPhoto
+  // Photos stored separately in JobPhoto
   // AI extraction metadata
-  extractedFields Json?        // poster's raw input vs structured AI extraction
+  extractedFields Json?        // client's raw input vs structured AI extraction
 
   publishedAt     DateTime?
   acceptedAt      DateTime?
@@ -277,11 +284,11 @@ model Task {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
-  bids            Bid[]
-  photos          TaskPhoto[]
-  questions       TaskQuestion[]
+  offers          Offer[]
+  photos          JobPhoto[]
+  questions       JobQuestion[]
 
-  @@index([posterId])
+  @@index([clientId])
   @@index([categoryId])
   @@index([countryCode])
   @@index([status])
@@ -290,10 +297,10 @@ model Task {
   @@index([publishedAt])
 }
 
-model TaskPhoto {
+model JobPhoto {
   id          String   @id // cuid2
-  taskId      String
-  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  jobId       String
+  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
   blobUrl     String
   altText     String?
   width       Int?
@@ -302,49 +309,50 @@ model TaskPhoto {
   moderation  String?   // "approved", "flagged", "rejected"
   createdAt   DateTime @default(now())
 
-  @@index([taskId])
+  @@index([jobId])
 }
 
-// Public Q&A under task — replaces counter-offer negotiation
-model TaskQuestion {
+// Public Q&A under job — replaces counter-offer negotiation
+model JobQuestion {
   id        String   @id // cuid2
-  taskId    String
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
   askedById String   // a tasker
+  asker     User     @relation("AskerQuestions", fields: [askedById], references: [id], onDelete: Restrict)
   question  String   @db.Text
-  answer    String?  @db.Text  // poster's answer
+  answer    String?  @db.Text  // client's answer
   answeredAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([taskId])
+  @@index([jobId])
   @@index([askedById])
 }
 
 // =============================================================================
-// BIDS
+// OFFERS  (old name in pre-rename schema: Bid)
 // =============================================================================
 
-model Bid {
-  id            String    @id // cuid2
-  taskId        String
-  task          Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+model Offer {
+  id            String      @id // cuid2
+  jobId         String
+  job           Job         @relation(fields: [jobId], references: [id], onDelete: Cascade)
   taskerId      String
-  tasker        User      @relation(fields: [taskerId], references: [id], onDelete: Restrict)
+  tasker        User        @relation(fields: [taskerId], references: [id], onDelete: Restrict)
 
   amountCents   Int
-  message       String?   @db.Text
-  estimatedAt   DateTime? // when the tasker could start
-  status        BidStatus @default(ACTIVE)
+  message       String?     @db.Text
+  estimatedAt   DateTime?   // when the tasker could start
+  status        OfferStatus @default(ACTIVE)
 
   expiresAt     DateTime?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
-  @@unique([taskId, taskerId]) // one active bid per task per tasker
-  @@index([taskId])
+  @@unique([jobId, taskerId]) // one active offer per job per tasker
+  @@index([jobId])
   @@index([taskerId])
   @@index([status])
   @@index([expiresAt])
@@ -356,7 +364,7 @@ model Bid {
 
 model Review {
   id            String   @id // cuid2
-  taskId        String
+  jobId         String   // old: taskId
   reviewerId    String
   reviewer      User     @relation("ReviewerReviews", fields: [reviewerId], references: [id], onDelete: Restrict)
   revieweeId    String
@@ -374,8 +382,8 @@ model Review {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  @@unique([taskId, reviewerId])
-  @@index([taskId])
+  @@unique([jobId, reviewerId])
+  @@index([jobId])
   @@index([reviewerId])
   @@index([revieweeId])
   @@index([deletedAt])
@@ -389,7 +397,7 @@ model AuditLog {
   id            String   @id // cuid2
   actorId       String?
   action        String   // "user.suspend", "payment.refund", "dispute.resolve", etc.
-  resourceType  String   // "User", "Task", "Payment", "Dispute"
+  resourceType  String   // "User", "Job", "Payment", "Dispute"
   resourceId    String
   diffJson      Json?
   ipAddress     String?
@@ -416,7 +424,7 @@ model AuditLog {
 // Messaging: Thread, Message, ReadReceipt
 // Promo: PromoCode, PromoCodeUsage
 // Tasker profile: ServiceArea (suburb + radius OR postal-code list per tasker)
-// Tasker profile: TaskerPortfolio (previous work photos, optional)
+// Tasker profile: Portfolio (previous work photos, optional)
 // Tasker verification: License (per-category professional license — manual admin review;
 //   replaces an identity-vendor KYC model per ADR 005). Fields: userId, categoryId,
 //   licenseType, licenseNumber, issuingState, expiresAt, uploadedBlobUrl,
@@ -437,8 +445,8 @@ model AuditLog {
 //   500000 cents ($5,000 AUD) per NSW Fair Trading Home Building Act 1989.
 //   Other AU states have different thresholds — POST-MVP moves to per-state lookup.
 //   Invariant: do NOT set both requiresLicense=true AND licenseRequiredOverCents.
-//   Bid guard (row 532): hourly bids on a conditional category always require
-//   the license; fixed-price bids require it only when bid.totalCents >= threshold.
+//   Offer guard (row 532): hourly offers on a conditional category always require
+//   the license; fixed-price offers require it only when offer.totalCents >= threshold.
 // Tasker profile: Certification (non-license certs upload, optional — POST-MVP)
 // Admin auth: AdminTotp (mandatory TOTP secret per admin — admin 2FA is IN)
 // User state: User.suspendedAt / User.suspensionReason fields (or Suspension model

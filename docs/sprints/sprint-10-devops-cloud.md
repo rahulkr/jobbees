@@ -10,7 +10,7 @@
 
 ## Goal in one sentence
 
-By Friday 30 Oct, the same demo flows we've been doing on localhost (poster posts task → tasker bids → payment → completion → tax invoice → dispute) all work against a public URL `api.jobbees.com.au` behind Cloudflare WAF, with Postgres + Redis + Blob + Key Vault on private endpoints (no public IPs), and every PR auto-deploys to a staging environment.
+By Friday 30 Oct, the same demo flows we've been doing on localhost (client posts job → tasker makes an offer → payment → completion → tax invoice → dispute) all work against a public URL `api.jobbees.com.au` behind Cloudflare WAF, with Postgres + Redis + Blob + Key Vault on private endpoints (no public IPs), and every PR auto-deploys to a staging environment.
 
 ## Scope — inventory rows
 
@@ -105,7 +105,7 @@ Same as Sprint 1, plus per `docs/audit/security-by-stage.md`:
 ```
 00:00 — "Sprint 10 wrap. Same flows you've seen before — now on Azure."
 00:15 — Show app.jobbees.com.au resolving. Show DNS at Cloudflare.
-00:30 — Demo a previously-recorded flow (e.g., Sprint 6 task completion
+00:30 — Demo a previously-recorded flow (e.g., Sprint 6 job completion
         with tax invoice) — but the app is hitting api.jobbees.com.au,
         not localhost. Network tab shows real domain.
 01:00 — Show Cloudflare dashboard: live traffic, WAF events, bot block
