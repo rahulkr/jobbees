@@ -13,16 +13,16 @@ TODO: link to the live policy URL once published.
 
 Each section of the policy must be supported by a code reference.
 
-| Policy claim                                                                | System behaviour                                                    | Code reference                                     |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------- |
-| "We collect your name, email, phone, and address"                           | User table fields                                                   | `packages/prisma/schema.prisma`                    |
-| "Payment card data is processed by Stripe; we never store it"               | Stripe Elements iframe; PaymentIntent stores only `paymentMethodId` | `apps/api/src/modules/payments/stripe.service.ts`  |
-| "We send your task description to AI services to extract structured fields" | Gemini Flash via `TaskExtractionService`, with PII redaction        | `apps/api/src/modules/tasks/extraction.service.ts` |
-| "We share your information with Stripe for payments"                        | See `vendor-list.md`                                                | `vendor-list.md`                                   |
-| "You can request access to your data"                                       | DSR access endpoint                                                 | `apps/api/src/modules/privacy/dsr.controller.ts`   |
-| "You can request deletion of your data"                                     | DSR delete endpoint + anonymisation pipeline                        | `apps/api/src/modules/privacy/dsr.service.ts`      |
-| "We retain financial records for 7 years"                                   | TaxInvoice/Rcti/Payment retention policy                            | `data-retention-policy.md`                         |
-| "Children under 18 are not permitted on the platform"                       | TODO: age verification at signup                                    | TODO                                               |
+| Policy claim                                                               | System behaviour                                                    | Code reference                                    |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------- |
+| "We collect your name, email, phone, and address"                          | User table fields                                                   | `packages/prisma/schema.prisma`                   |
+| "Payment card data is processed by Stripe; we never store it"              | Stripe Elements iframe; PaymentIntent stores only `paymentMethodId` | `apps/api/src/modules/payments/stripe.service.ts` |
+| "We send your job description to AI services to extract structured fields" | Gemini Flash via `JobExtractionService`, with PII redaction         | `apps/api/src/modules/jobs/extraction.service.ts` |
+| "We share your information with Stripe for payments"                       | See `vendor-list.md`                                                | `vendor-list.md`                                  |
+| "You can request access to your data"                                      | DSR access endpoint                                                 | `apps/api/src/modules/privacy/dsr.controller.ts`  |
+| "You can request deletion of your data"                                    | DSR delete endpoint + anonymisation pipeline                        | `apps/api/src/modules/privacy/dsr.service.ts`     |
+| "We retain financial records for 7 years"                                  | TaxInvoice/Rcti/Payment retention policy                            | `data-retention-policy.md`                        |
+| "Children under 18 are not permitted on the platform"                      | TODO: age verification at signup                                    | TODO                                              |
 
 ## Consent management
 

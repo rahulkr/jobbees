@@ -2,7 +2,7 @@
 name: security-review
 description: Project-specific security review for JOBBees. Auto-invoke on changes to auth, payment, tax, license verification, AI, webhooks, controllers, Prisma schema, and env/config. Enforces JOBBees-specific rules (idempotency, money-in-cents, PII redaction, AU compliance) that generic SAST cannot know.
 version: 1.1.0
-last_reviewed: 2026-06-10
+last_reviewed: 2026-06-14
 ---
 
 # Security Review (JOBBees)
@@ -54,28 +54,28 @@ The skill produces a structured report:
 
 Files reviewed: N
 Checks run: M
-Status: ✅ PASS  /  ⚠️ WARN  /  ❌ FAIL
+Status: PASS  /  WARN  /  FAIL
 
 ### Findings
 
-❌ CRITICAL — <category> — <file:line>
+CRITICAL — <category> — <file:line>
    <issue>
    Fix: <suggested change>
 
-⚠️ HIGH — <category> — <file:line>
+HIGH — <category> — <file:line>
    <issue>
    Fix: <suggested change>
 
-ℹ️ INFO — <category> — <file:line>
+INFO — <category> — <file:line>
    <note>
 
 ### Stage coverage
 
-- Pre-commit:  ✅ enforced by lefthook
-- Code:        ✅ N checks passed, M flagged
-- App layer:   ✅ N checks passed
-- Data layer:  ✅ N checks passed
-- Compliance:  ✅ N checks passed
+- Pre-commit:  enforced by lefthook
+- Code:        N checks passed, M flagged
+- App layer:   N checks passed
+- Data layer:  N checks passed
+- Compliance:  N checks passed
 
 ### Sign-off required
 
@@ -121,7 +121,7 @@ Checks are grouped by category. Each check has: id, severity, what to verify, ho
 
 **B2 — CRITICAL — every mutating endpoint has role check**
 
-- Verify: `POST`/`PUT`/`PATCH`/`DELETE` routes have `@Roles(Role.POSTER | Role.TASKER | Role.ADMIN)` matching intent
+- Verify: `POST`/`PUT`/`PATCH`/`DELETE` routes have `@Roles(Role.CLIENT | Role.TASKER | Role.ADMIN)` matching intent
 - Fix: add `@Roles(...)` + `RolesGuard`
 
 **B3 — CRITICAL — resource ownership check on `/me/*` and `/users/:id/*` patterns**
@@ -200,11 +200,16 @@ Checks are grouped by category. Each check has: id, severity, what to verify, ho
 - Verify: when returning user data, no `password*`, `*Hash`, `*Secret`, `refreshToken*`, `embedding` (1536 floats = noise)
 - Fix: use explicit `select: {...}` or define a Prisma `omit` extension
 
-**E5 — HIGH — bid-time license guard runs server-side, not client-side**
+**E5 — HIGH — offer-time license guard runs server-side, not client-side**
 
-- Verify: `POST /bids` checks `Category.requiresLicense` and that the bidding user has an APPROVED + non-expired `License` for that category (ADR 005)
+- Verify: `POST /offers` runs the full License guard from ADR 005, covering both unconditional and conditional categories:
+  - Unconditional: `Category.requiresLicense === true` → license always required
+  - Conditional: `Category.licenseRequiredOverCents != null` → license required when (a) the offer is hourly, OR (b) `offer.totalCents >= licenseRequiredOverCents`
+  - Otherwise: no license needed
+- Verify: when license is required, lookup is `License where userId = offerer AND categoryId = job.category AND status = APPROVED AND expiresAt > now()`
 - Verify: the guard is in the backend, not just a mobile UI hide — never trust the client
-- Fix: add the guard; return 403 with `code: 'LICENSE_REQUIRED'` and the category name
+- Verify: the 403 response includes structured `reason` (`ALWAYS_REQUIRED` / `OVER_THRESHOLD` / `HOURLY_ON_CONDITIONAL_CATEGORY`) + `licenseRequiredOverCents` + `offerTotalCents` so mobile can render context-specific copy
+- Fix: add the guard; return 403 with `code: 'LICENSE_REQUIRED'` and the structured reason payload
 
 ### F. PII handling
 
@@ -277,9 +282,9 @@ Per **ADR 005**: no identity-vendor KYC. Stripe Connect handles legal identity o
 - Verify: no inline `* 0.1` or `* 1.1` math
 - Fix: call the service; it handles rounding + edge cases
 
-**H4 — HIGH — RCTI generation triggered on payout, not on bid acceptance**
+**H4 — HIGH — RCTI generation triggered on payout, not on offer acceptance**
 
-- Verify: state machine `Bid.accepted → Task.completed → Payment.captured → Payout.released → RCTI.issued`
+- Verify: state machine `Offer.accepted → Job.completed → Payment.captured → Payout.released → RCTI.issued`
 - Fix: refactor trigger location; reference `.claude/skills/au-tax/SKILL.md`
 
 **H5 — CRITICAL — webhook signature verification before processing**
@@ -351,7 +356,7 @@ Per **ADR 005**: no identity-vendor KYC. Stripe Connect handles legal identity o
   - unauthorized role (expect 403)
   - ownership violation where applicable (expect 403)
   - replay with same idempotency key (expect cached response, not duplicate effect)
-- Verify: license bid-guard test — tasker without APPROVED license on a `requiresLicense: true` category cannot bid (expect 403 with `code: 'LICENSE_REQUIRED'`)
+- Verify: license offer-guard test — tasker without APPROVED license on a `requiresLicense: true` category cannot make an offer (expect 403 with `code: 'LICENSE_REQUIRED'`)
 - Fix: add missing tests
 
 **L2 — HIGH — webhook handler has signature-fail test**
@@ -410,7 +415,7 @@ Escalate to **human review required** (do not auto-fix) when:
 - Any new external vendor SDK added
 - Any new webhook endpoint
 - Any change to PII redaction logic in `apps/api/src/modules/ai/pii.ts`
-- Any change to the License bid-time guard or expiry cron (ADR 005 enforcement points)
+- Any change to the License offer-time guard or expiry cron (ADR 005 enforcement points)
 
 These are the **biggest blast-radius** areas. Skill flags; human signs off.
 

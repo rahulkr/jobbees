@@ -15,7 +15,7 @@ That framing was wrong. There are actually **three different verification concer
 2. **ABN verification** — required by ATO sharing-economy reporting. Tasker provides ABN, JOBBees calls the free ABR API to confirm.
 3. **Professional license** — required by AU state regulators (Fair Trading) for certain trades: electrical, plumbing, gas fitting, building (over $5K NSW), asbestos, refrigerated air-con, pest control. Most JOBBees categories DON'T require any professional license.
 
-What posters actually care about for trust signals is:
+What clients actually care about for trust signals is:
 
 - The tasker has a license to do this category of work (when applicable)
 - The tasker has been paid out before successfully (Stripe Connect green)
@@ -28,19 +28,19 @@ Adding an identity-vendor KYC on top of Stripe Connect would be duplicative — 
 
 **Three-layer trust model. No identity vendor at MVP.**
 
-| Layer                               | Required for                                      | How                                                                            | Cost                   |
-| ----------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------- |
-| **Email + phone verified**          | All taskers (and posters)                         | Email link + phone OTP (mock dev → real Sprint 5 per ADR 008)                  | $0                     |
-| **Stripe Connect Express KYC**      | All taskers receiving payouts                     | Stripe handles end-to-end in their onboarding flow                             | $0 to JOBBees          |
-| **ABN verified**                    | All taskers                                       | ABR API call (free) — checksum + business name match                           | $0                     |
-| **License verified** (per category) | Only taskers bidding on licensed-trade categories | Tasker uploads license image, admin manually reviews against AU state register | Free (admin time only) |
+| Layer                               | Required for                                       | How                                                                            | Cost                   |
+| ----------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------- |
+| **Email + phone verified**          | All taskers (and clients)                          | Email link + phone OTP (mock dev → real Sprint 5 per ADR 008)                  | $0                     |
+| **Stripe Connect Express KYC**      | All taskers receiving payouts                      | Stripe handles end-to-end in their onboarding flow                             | $0 to JOBBees          |
+| **ABN verified**                    | All taskers                                        | ABR API call (free) — checksum + business name match                           | $0                     |
+| **License verified** (per category) | Only taskers offering on licensed-trade categories | Tasker uploads license image, admin manually reviews against AU state register | Free (admin time only) |
 
 **Insurance verification** is POST (post-MVP). Adds an "Insured" badge for premium taskers. Defer.
 
 ## Why we skip Didit / Stripe Identity / similar
 
 - Stripe Connect already does the legal identity check for payouts. Adding another identity vendor is wearing two belts.
-- Posters care about "can this person do plumbing legally" — not "is this person real". Stripe + reviews + completion history cover the latter.
+- Clients care about "can this person do plumbing legally" — not "is this person real". Stripe + reviews + completion history cover the latter.
 - Identity vendors cost $0.33 - $1.50 per check. For MVP scale that's small money — but the build effort (vendor integration + webhook handling + KYC data minimisation rules) is real (~13-15 hours).
 - Removing one vendor relationship simplifies IT audit + Privacy Act subprocessor disclosure.
 - License verification is what genuinely differentiates "real verified tasker" from "scammer" for licensed trades — and that has to be manual regardless.
@@ -68,7 +68,7 @@ Per NSW Fair Trading (other AU states broadly similar — `state` recorded per l
 In the `Category` Prisma model, add **two** fields:
 
 - `requiresLicense: Boolean @default(false)` — license always required for this category.
-- `licenseRequiredOverCents: Int?` — license required only when the task value is at or above this cents threshold. `null` means no conditional rule.
+- `licenseRequiredOverCents: Int?` — license required only when the job value is at or above this cents threshold. `null` means no conditional rule.
 
 A category may set `requiresLicense: true` (unconditional) OR `licenseRequiredOverCents: <N>` (conditional). Both can be `false`/`null` (never required). It's nonsensical to set `requiresLicense: true` AND `licenseRequiredOverCents` — the unconditional flag wins, but seed data should avoid this combination.
 
@@ -125,7 +125,7 @@ When a tasker picks a licensed-trade category and taps "Add a licence", the app 
 | ---------------------------- | ---------------------------------- | -------------------------- |
 | `pest-management-technician` | Pest Management Technician Licence | NSW Fair Trading / NSW EPA |
 
-### Building / construction (conditional — bid ≥ $5K AUD or any hourly bid)
+### Building / construction (conditional — offer ≥ $5K AUD or any hourly offer)
 
 | Slug               | Display label                                        | Issuing authority |
 | ------------------ | ---------------------------------------------------- | ----------------- |
@@ -141,7 +141,7 @@ The dropdown is enforced by a shared constant exported from `packages/types/src/
 ```ts
 // packages/types/src/licenses.ts
 // Single source of truth for allowed license types per category.
-// Mobile dropdowns + backend bid-time guard + admin review queue all import this.
+// Mobile dropdowns + backend offer-time guard + admin review queue all import this.
 
 export const ALLOWED_LICENSE_TYPES = {
   electrical: [
@@ -215,7 +215,7 @@ At MVP we display all 8 in the dropdown but only NSW-issued licences will be cro
 ### Excluded by design at MVP
 
 - **Owner-builder permits** — not allowed. These authorise work on your own home only, not paid work for others.
-- **Trade certificates / Cert III qualifications** — these are training credentials, not legal-practice licences. Don't gate bidding.
+- **Trade certificates / Cert III qualifications** — these are training credentials, not legal-practice licences. Don't gate offering.
 - **Apprentice / restricted-supervised licences** — too narrow at MVP; reject and request a full licence.
 - **Combined licences from VIC / QLD / etc. that bundle differently from NSW** — admins approve case-by-case; no special dropdown handling.
 
@@ -225,7 +225,7 @@ At MVP we display all 8 in the dropdown but only NSW-issued licences will be cro
 model Category {
   // existing fields...
   requiresLicense           Boolean   @default(false)
-  // Conditional licensing — license required only when task value >= threshold (cents).
+  // Conditional licensing — license required only when job value >= threshold (cents).
   // null = not conditional. Only used at MVP for Builder (500000 = $5,000 AUD,
   // NSW Fair Trading Home Building Act 1989). Other AU states have different
   // thresholds — POST-MVP we'll move this to a per-state lookup table.
@@ -269,14 +269,14 @@ enum LicenseStatus {
 
 User model: keep existing `kycStatus` field but it now reflects Stripe Connect state (NOT_STARTED → PENDING → APPROVED via Stripe Connect webhooks). Remove `kycProvider` field (no longer needed).
 
-## Bid logic
+## Offer logic
 
-Backend: `POST /bids` runs the License guard as follows. Pseudocode:
+Backend: `POST /offers` runs the License guard as follows. Pseudocode:
 
 ```ts
 function checkLicenseRequired(
-  bid: { totalCents: number; isHourly: boolean },
-  task: { categoryId: string },
+  offer: { totalCents: number; isHourly: boolean },
+  job: { categoryId: string },
   category: { requiresLicense: boolean; licenseRequiredOverCents: number | null },
 ): { required: true; reason: string } | { required: false } {
   // Unconditional license category (plumbing, electrical, etc.)
@@ -286,13 +286,13 @@ function checkLicenseRequired(
 
   // Conditional license category (Builder).
   if (category.licenseRequiredOverCents != null) {
-    // Hourly bids on a conditional category: we cannot pre-determine
+    // Hourly offers on a conditional category: we cannot pre-determine
     // total spend, so conservatively require the license.
-    if (bid.isHourly) {
+    if (offer.isHourly) {
       return { required: true, reason: 'HOURLY_ON_CONDITIONAL_CATEGORY' };
     }
-    // Fixed-price bid: compare bid total to threshold.
-    if (bid.totalCents >= category.licenseRequiredOverCents) {
+    // Fixed-price offer: compare offer total to threshold.
+    if (offer.totalCents >= category.licenseRequiredOverCents) {
       return { required: true, reason: 'OVER_THRESHOLD' };
     }
   }
@@ -301,7 +301,7 @@ function checkLicenseRequired(
 }
 ```
 
-If a license is required, look up `License where userId = bidder.id AND categoryId = task.categoryId AND status = APPROVED AND expiresAt > now()`. If no row, return 403 with a structured error:
+If a license is required, look up `License where userId = offerer.id AND categoryId = job.categoryId AND status = APPROVED AND expiresAt > now()`. If no row, return 403 with a structured error:
 
 ```json
 {
@@ -310,27 +310,27 @@ If a license is required, look up `License where userId = bidder.id AND category
   "categoryName": "Building",
   "reason": "OVER_THRESHOLD",
   "licenseRequiredOverCents": 500000,
-  "bidTotalCents": 750000,
-  "message": "This task requires a licensed builder because your bid of $7,500 is over the $5,000 NSW Fair Trading threshold. Add your builder licence under Profile → Licences to bid."
+  "offerTotalCents": 750000,
+  "message": "This job requires a licensed builder because your offer of $7,500 is over the $5,000 NSW Fair Trading threshold. Add your builder licence under Profile → Licences to make an offer."
 }
 ```
 
 Mobile uses `reason` + `licenseRequiredOverCents` to render a context-specific message:
 
-- `ALWAYS_REQUIRED` → "This task requires a licensed plumber/electrician/etc."
-- `OVER_THRESHOLD` → "This task requires a licensed builder because the job is over $5,000."
-- `HOURLY_ON_CONDITIONAL_CATEGORY` → "Hourly bids on Builder jobs require a licensed builder regardless of estimated value."
+- `ALWAYS_REQUIRED` → "This job requires a licensed plumber/electrician/etc."
+- `OVER_THRESHOLD` → "This job requires a licensed builder because the job is over $5,000."
+- `HOURLY_ON_CONDITIONAL_CATEGORY` → "Hourly offers on Builder jobs require a licensed builder regardless of estimated value."
 
-### Why we check the bid amount, not the poster's budget
+### Why we check the offer amount, not the client's budget
 
-The poster's budget is an estimate; the bidder's actual bid is the contractual amount. Using the bid amount means: an honest tasker stays within their license, a dishonest tasker would have to commit fraud (bidding low then padding the invoice) to evade the guard. The guard catches the easy case; AML/insurance catches the rest.
+The client's budget is an estimate; the offerer's actual offer is the contractual amount. Using the offer amount means: an honest tasker stays within their license, a dishonest tasker would have to commit fraud (offering low then padding the invoice) to evade the guard. The guard catches the easy case; AML/insurance catches the rest.
 
-### Hourly bids on Builder
+### Hourly offers on Builder
 
-Hourly bids have no fixed total, so we cannot algorithmically tell whether the job will land above $5,000. Two safe options:
+Hourly offers have no fixed total, so we cannot algorithmically tell whether the job will land above $5,000. Two safe options:
 
-1. **Require the license on all hourly Builder bids** (current default — captured in the guard above).
-2. **Block hourly entirely for Builder** (forces fixed-price bidding).
+1. **Require the license on all hourly Builder offers** (current default — captured in the guard above).
+2. **Block hourly entirely for Builder** (forces fixed-price offering).
 
 Option 1 is the gentler UX and is what the guard implements. We can switch to option 2 if abuse is observed.
 
@@ -339,7 +339,7 @@ Option 1 is the gentler UX and is what the guard implements. We can switch to op
 Daily cron job:
 
 - Find all `License` rows with `status = APPROVED` AND `expiresAt < now() + 14 days`
-- Email tasker: "Your plumbing license expires in 14 days. Upload renewal to keep bidding on plumbing jobs."
+- Email tasker: "Your plumbing license expires in 14 days. Upload renewal to keep offering on plumbing jobs."
 - Find all `License` rows with `status = APPROVED` AND `expiresAt < now()`
 - Transition status to `EXPIRED`
 - AuditLog entry
@@ -358,16 +358,16 @@ Daily cron job:
 
 - **Sprint 2 scope changes** (~85h budget stays the same):
   - REMOVE: Didit SDK integration + KYC vendor webhook handler (~13h freed)
-  - ADD: License upload UI (mobile) + admin license review queue scaffold + License Prisma model + bid-time guard (~13h)
+  - ADD: License upload UI (mobile) + admin license review queue scaffold + License Prisma model + offer-time guard (~13h)
   - Net effort: same total. Less external dependency.
 - **Sprint 9 admin scope** gains a License Review queue (~4h)
 - **No identity vendor relationship** — simplifies subprocessor disclosure
-- **Posters get a more useful trust signal** — "Verified Plumber" badge means "we've checked your licence is valid", not just "we've checked you're a real person"
+- **Clients get a more useful trust signal** — "Verified Plumber" badge means "we've checked your licence is valid", not just "we've checked you're a real person"
 
 ## What we DON'T do at MVP
 
 - Auto-verification against state registers (no unified API exists in AU). Admin manually cross-checks.
-- Insurance verification (`Insurance` model) — POST, only build if posters specifically demand it.
+- Insurance verification (`Insurance` model) — POST, only build if clients specifically demand it.
 - Police / WWCC (Working with Children Check) — POST, only if we add child-related categories.
 - Driver-license-grade identity check beyond Stripe Connect — not needed.
 

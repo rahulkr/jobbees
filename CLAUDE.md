@@ -1,6 +1,6 @@
 # CLAUDE.md — root
 
-JOBBees: Australian peer-to-peer task marketplace. Mobile-first, Node/NestJS backend, Next.js admin + web, Postgres + pgvector, Redis, Stripe Connect.
+JOBBees: Australian peer-to-peer job marketplace. Mobile-first, Node/NestJS backend, Next.js admin + web, Postgres + pgvector, Redis, Stripe Connect.
 
 ## Read these before doing any real work
 
@@ -41,7 +41,7 @@ JOBBees: Australian peer-to-peer task marketplace. Mobile-first, Node/NestJS bac
 
 - Branch per work item: `feat/<short-name>` (e.g. `feat/ranked-feed`)
 - Conventional Commits: `feat:`, `fix:`, `chore:`, etc.
-- Use **plan mode** (`Shift+Tab` or `/plan`) for any task above ~30 minutes. Review the plan before writing code.
+- Use **plan mode** (`Shift+Tab` or `/plan`) for any work above ~30 minutes. Review the plan before writing code.
 - Run tests after edits. Configure auto-test in `.claude/settings.json`.
 - Run the `security-review` skill on every PR touching auth, payments, or PII.
 
@@ -51,7 +51,7 @@ JOBBees: Australian peer-to-peer task marketplace. Mobile-first, Node/NestJS bac
 - `au-tax` — invoked when touching tax / RCTI / ATO / GST. **High AI-hallucination risk — review every line.**
 - `pgvector-match` — invoked for matching / ranking. Embedding model, cosine queries, ranked-feed weighted blend.
 - `tier0-dispute` — invoked for dispute mediator work. System prompt, evidence aggregation, output schema, escalation rules.
-- `multimodal-extraction` — invoked for vision-based task extraction from poster photos. Model tier (Flash → Pro fallback, never Opus), preprocessing, schema, cost guardrails.
+- `multimodal-extraction` — invoked for vision-based job extraction from client photos. Model tier (Flash → Pro fallback, never Opus), preprocessing, schema, cost guardrails.
 
 ## Pointers
 
@@ -100,7 +100,7 @@ These distil the rules above into a scannable form. When in doubt, prefer the mo
 - ✅ Keep functions small (< 50 lines), single-purpose
 - ✅ Use early returns over deeply nested `if/else`
 - ✅ Prefer composition over inheritance
-- ✅ Name variables for what they hold (`acceptedBid`, not `b`)
+- ✅ Name variables for what they hold (`acceptedOffer`, not `b`)
 - ✅ Comment WHY, not WHAT — code shows what, comments explain why
 - ✅ Write tests in the same PR as the code they cover
 - ✅ Use `const` over `let`, never `var`
@@ -127,7 +127,7 @@ These distil the rules above into a scannable form. When in doubt, prefer the mo
 - ✅ Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, etc.
 - ✅ Small PRs (< 400 LOC ideal, 800 max)
 - ✅ One feature per PR, no drive-by refactors
-- ✅ Use **plan mode** for any task above ~30 minutes (`Shift+Tab` or `/plan`)
+- ✅ Use **plan mode** for any work above ~30 minutes (`Shift+Tab` or `/plan`)
 - ✅ Run the security-review skill on sensitive paths
 - ✅ Reference the inventory row ID in the PR description ("Closes inventory row #234")
 - ✅ Update the inventory CSV column 9 to `done [sprint-N, PR#nn]` after merge
@@ -148,7 +148,7 @@ These distil the rules above into a scannable form. When in doubt, prefer the mo
 ### AI assistant behaviour ✅ Do (applies to Claude Code AND human)
 
 - ✅ Read `PROJECT_CONTEXT.md` + current sprint doc + this file before any non-trivial work
-- ✅ Use plan mode for tasks > 30 min — review the plan before writing code
+- ✅ Use plan mode for work > 30 min — review the plan before writing code
 - ✅ Invoke the appropriate skill (stripe-payment, au-tax, pgvector-match, tier0-dispute, multimodal-extraction, security-review) when touching the matching domain
 - ✅ Refuse to bump major dependency versions
 - ✅ Surface any uncertainty rather than guess (e.g., AU tax law, Stripe Connect specifics)

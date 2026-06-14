@@ -52,8 +52,8 @@ The API issues both representations from the same `/v1/auth/login` endpoint, dep
 ### Per-API-call authorization
 
 - Every mutating endpoint guarded by `@UseGuards(JwtAuthGuard)` + `@Roles(...)`
-- Role-based access (POSTER / TASKER / ADMIN / SUPER_ADMIN) on every route
-- Ownership check on resource-scoped routes (e.g., `/me/*`, `/tasks/:id/*`)
+- Role-based access (CLIENT / TASKER / ADMIN / SUPER_ADMIN) on every route
+- Ownership check on resource-scoped routes (e.g., `/me/*`, `/jobs/:id/*`)
 
 ## Consequences
 

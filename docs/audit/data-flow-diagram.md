@@ -30,7 +30,7 @@ TODO: insert payment data flow diagram showing:
 
 TODO: insert AI data flow showing:
 
-- User content (task description, messages, dispute evidence)
+- User content (job description, messages, dispute evidence)
 - PII redaction step
 - LLM provider (Gemini Flash, Claude Sonnet)
 - Response back through the API to the client

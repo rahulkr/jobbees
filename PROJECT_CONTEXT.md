@@ -6,11 +6,11 @@
 
 ## 1. What is JOBBees?
 
-JOBBees is an **Australian peer-to-peer task marketplace** (think Airtasker / hipages / Oneflare for the AU market). Posters post tasks ("clean my gutters", "move a couch", "fix a leaky tap"), taskers bid on them, the platform handles payments via Stripe Connect, and the marketplace takes a fee per transaction.
+JOBBees is an **Australian peer-to-peer job marketplace** (think Airtasker / hipages / Oneflare for the AU market). Clients post jobs ("clean my gutters", "move a couch", "fix a leaky tap"), taskers make offers on them, the platform handles payments via Stripe Connect, and the marketplace takes a fee per transaction.
 
 The product is mobile-first (Flutter for iOS + Android), with a Next.js admin console for internal operations and a minimal Next.js public web layer for SEO. All clients talk to a single Node.js backend (NestJS).
 
-Differentiating bets for v1: vector-based matching, ranked discovery feed, autonomous Tier-0 dispute triage, and voice-driven task posting. The first three are AI-native marketplace features delivered at launch.
+Differentiating bets for v1: vector-based matching, ranked discovery feed, autonomous Tier-0 dispute triage, and voice-driven job posting. The first three are AI-native marketplace features delivered at launch.
 
 ---
 
@@ -108,16 +108,16 @@ Note: an `inventory/` folder may exist locally (gitignored) — it holds the int
 Three clients, one backend. Next.js (admin + web) and Flutter (mobile) are all _clients_ of the NestJS API — they do not contain business logic.
 
 **`apps/api/` (NestJS) — the real backend.**
-All business logic, Stripe, Prisma/Postgres, BullMQ, Socket.IO, LLM calls, embeddings. Exposes REST endpoints + WebSocket for messaging and live location. NestJS feature-module pattern: one module per domain (auth, users, tasks, bids, payments, tax, cancellation, reviews, disputes, notifications, trust-safety, privacy, ai, admin).
+All business logic, Stripe, Prisma/Postgres, BullMQ, Socket.IO, LLM calls, embeddings. Exposes REST endpoints + WebSocket for messaging and live location. NestJS feature-module pattern: one module per domain (auth, users, jobs, offers, payments, tax, cancellation, reviews, disputes, notifications, trust-safety, privacy, ai, admin).
 
 **`apps/mobile/` (Flutter) — user-facing app.**
-Both poster and tasker flows. Feature-first folders: `features/<name>/{screens, widgets, providers, models}`. Riverpod for state. Calls the NestJS API.
+Both client and tasker flows. Feature-first folders: `features/<name>/{screens, widgets, providers, models}`. Riverpod for state. Calls the NestJS API.
 
 **`apps/admin/` (Next.js) — internal operations.**
 Manual-heavy by design. KYC queue, dispute mediator UI, payment refunds, RCTI status, content moderation, FAQ CRUD. Server Components by default, `'use client'` only when needed for interactivity. Calls the NestJS API (no direct DB access).
 
 **`apps/web/` (Next.js) — public + SEO.**
-Single landing page + task detail public pages for SEO. Server-rendered. Reads from NestJS API.
+Single landing page + job detail public pages for SEO. Server-rendered. Reads from NestJS API.
 
 ---
 
@@ -144,7 +144,7 @@ Single landing page + task detail public pages for SEO. Server-rendered. Reads f
 These four are non-negotiable per direct client direction. Tagged `IN★` in the feature inventory.
 
 **1. Vector-based matching.**
-On every task publish, generate embedding (OpenAI text-embedding-3-small, 1536 dims) from title + description + skills. Store in `pgvector` column on Task. Same for tasker profiles (bio + skills + completed-job history). When a tasker opens the home feed, query top-K semantically matched tasks using cosine similarity, combined with proximity and category filters.
+On every job publish, generate embedding (OpenAI text-embedding-3-small, 1536 dims) from title + description + skills. Store in `pgvector` column on Job. Same for tasker profiles (bio + skills + completed-job history). When a tasker opens the home feed, query top-K semantically matched jobs using cosine similarity, combined with proximity and category filters.
 
 **2. Ranked feed.**
 Replaces map-only browse. Deterministic weighted blend: vector similarity × distance × category fit × recency × budget alignment. Hand-tuned weights, config-driven (admin can adjust). LightGBM ranker deferred post-launch when there's training data.
@@ -152,8 +152,8 @@ Replaces map-only browse. Deterministic weighted blend: vector similarity × dis
 **3. Autonomous dispute triage (Tier-0).**
 When a dispute opens, if the disputed amount is ≤ AUD $200, an LLM agent (Claude Sonnet) reads the full thread + evidence + completion proof and proposes a resolution: full release / partial release / refund. Either party accepts → resolved. Either party escalates → admin handles with the help of an admin co-pilot brief (also LLM-generated: timeline, key messages highlighted, evidence summary, precedent from similar past disputes, recommended action with confidence score).
 
-**4. Voice-driven task posting.**
-Poster taps mic, speaks task description ("Need someone to mow my lawn this Saturday afternoon, around sixty dollars"). Speech-to-text via Gemini audio or Whisper-equivalent. Transcript fed into the AI extraction pipeline. Poster confirms parsed fields before publish.
+**4. Voice-driven job posting.**
+Client taps mic, speaks job description ("Need someone to mow my lawn this Saturday afternoon, around sixty dollars"). Speech-to-text via Gemini audio or Whisper-equivalent. Transcript fed into the AI extraction pipeline. Client confirms parsed fields before publish.
 
 ---
 
@@ -164,7 +164,7 @@ These cannot be skipped or deferred without legal exposure. All `IN` in the inve
 **Tax:**
 
 - ABN collection at tasker signup with ABR (Australian Business Register) lookup
-- GST calculation on the platform fee (confirm with tax advisor; not on full task amount)
+- GST calculation on the platform fee (confirm with tax advisor; not on full job amount)
 - RCTI (Recipient-Created Tax Invoice) generation for taskers without ABN, with consent workflow
 - Tax invoice PDFs to both sides on every transaction
 - Monthly ATO sharing-economy reporting export with all mandatory fields
@@ -172,11 +172,11 @@ These cannot be skipped or deferred without legal exposure. All `IN` in the inve
 
 **Stripe payments:**
 
-- Stripe Connect Express onboarding as a separate flow from KYC. Bidding allowed after KYC; first payout gated on Connect completion.
+- Stripe Connect Express onboarding as a separate flow from KYC. Offering allowed after KYC; first payout gated on Connect completion.
 - Held funds banner + reminder cadence (24h / 72h / 7d) until Connect complete
-- Manual capture for tasks ≤7 days
-- **SetupIntent + saved PaymentMethod for tasks >7 days** (because Stripe authorisation expires after 7 days)
-- **Re-authorisation flow** when capture is approaching expiry on a long-running task
+- Manual capture for jobs ≤7 days
+- **SetupIntent + saved PaymentMethod for jobs >7 days** (because Stripe authorisation expires after 7 days)
+- **Re-authorisation flow** when capture is approaching expiry on a long-running job
 - Partial refund supported. Partial capture is NOT.
 - Idempotency on every mutating endpoint
 - Stripe idempotency key pass-through
@@ -198,7 +198,7 @@ These cannot be skipped or deferred without legal exposure. All `IN` in the inve
 - Escalating notification cadence: at submission, 24h, 36h, 12h pre-expiry
 - Image content moderation (Azure Content Safety) on every upload
 - Real-time per-message chat policing classifier (Gemini Flash)
-- EXIF tampering check on completion-proof and task photos
+- EXIF tampering check on completion-proof and job photos
 
 **Spam Act:**
 
@@ -220,15 +220,15 @@ Lock these in the first Prisma migration. Painful to retrofit.
 
 **Timestamps:** Every table has `createdAt` (`@default(now())`) and `updatedAt` (`@updatedAt`).
 
-**Soft delete:** User-facing entities (User, Task, Bid, Review, Thread) have `deletedAt DateTime?`. Wrap a Prisma extension to filter `where: { deletedAt: null }` by default. Hard delete for ephemeral tables (OTPs, sessions, idempotency keys, drafts never published).
+**Soft delete:** User-facing entities (User, Job, Offer, Review, Thread) have `deletedAt DateTime?`. Wrap a Prisma extension to filter `where: { deletedAt: null }` by default. Hard delete for ephemeral tables (OTPs, sessions, idempotency keys, drafts never published).
 
-**Enums:** Use Prisma enums for all state machines (TaskStatus, BidStatus, PaymentState, DisputeState, CategoryType, etc.). Never strings.
+**Enums:** Use Prisma enums for all state machines (JobStatus, OfferStatus, PaymentState, DisputeState, CategoryType, etc.). Never strings.
 
 **Foreign keys:** Always declare with explicit `onDelete` behaviour (`Cascade`, `Restrict`, `SetNull`, `NoAction`). Decide per FK.
 
-**Indexes on foreign keys:** Prisma does NOT auto-index FKs. Add `@@index([userId])`, `@@index([taskId])` etc. manually. Without these, joins go to sequential scans at scale.
+**Indexes on foreign keys:** Prisma does NOT auto-index FKs. Add `@@index([userId])`, `@@index([jobId])` etc. manually. Without these, joins go to sequential scans at scale.
 
-**JSONB:** Use for opaque metadata only (e.g., `Task.extractedFields`). Never for things you `WHERE` on — model those as real columns.
+**JSONB:** Use for opaque metadata only (e.g., `Job.extractedFields`). Never for things you `WHERE` on — model those as real columns.
 
 **Audit log table:** Append-only. Schema: `id, actorId, action, resourceType, resourceId, diffJson, ipAddress, userAgent, createdAt`. Every sensitive write (suspension, refund, KYC override, dispute resolution) writes one row. Index `(resourceType, resourceId, createdAt)`.
 
@@ -254,7 +254,7 @@ model Country {
 }
 
 model User       { countryCode String @default("AU") }
-model Task       { countryCode String @default("AU") }
+model Job        { countryCode String @default("AU") }
 model Payment    { countryCode String @default("AU") }
 model TaxInvoice { countryCode String @default("AU") }
 ```
@@ -268,7 +268,7 @@ In MVP: hardcode `"AU"` everywhere. Don't build country selector UI. Don't write
 ```prisma
 enum CategoryType {
   TRANSACTIONAL  // payment flows through platform (default; only type at MVP)
-  LEAD           // poster→tasker intro, payment off-platform (post-MVP)
+  LEAD           // client→tasker intro, payment off-platform (post-MVP)
 }
 
 model Category {
@@ -279,15 +279,15 @@ model Category {
   // ...
 }
 
-model Task {
+model Job {
   // ...
-  transactionType CategoryType  // snapshot from Category at creation; immutable per task
+  transactionType CategoryType  // snapshot from Category at creation; immutable per job
 }
 ```
 
 In MVP code:
 
-- Payment, dispute, RCTI, cancellation services assert `task.transactionType === 'TRANSACTIONAL'` and throw if not
+- Payment, dispute, RCTI, cancellation services assert `job.transactionType === 'TRANSACTIONAL'` and throw if not
 - LEAD flow doesn't exist yet — it's documented as post-MVP work
 
 When LEAD categories arrive: new payment flow (tasker pays lead fee to unlock contact), no escrow, no RCTI, different review trigger. ADR: `docs/adrs/004-category-types.md`.
@@ -298,18 +298,18 @@ When LEAD categories arrive: new payment flow (tasker pays lead fee to unlock co
 
 **Stripe products used:**
 
-- PaymentIntent (manual capture for ≤7d tasks)
-- SetupIntent (saved PaymentMethod for >7d / scheduled-future tasks)
+- PaymentIntent (manual capture for ≤7d jobs)
+- SetupIntent (saved PaymentMethod for >7d / scheduled-future jobs)
 - Refund (full + partial supported)
 - Connect Express (tasker payouts; KYC/identity bundled)
-- Stripe Identity (separate KYC for posters and bidders)
+- Stripe Identity (separate KYC for clients and offerers)
 
 **State machine:**
 
 ```
-authorised → captured        // happy path, ≤7d task
-authorised → re-auth-required → authorised  // long task crossing 7d
-setup-only → captured        // scheduled-future task; PM stored, charged at completion
+authorised → captured        // happy path, ≤7d job
+authorised → re-auth-required → authorised  // long job crossing 7d
+setup-only → captured        // scheduled-future job; PM stored, charged at completion
 authorised → voided          // cancelled before capture
 captured → refunded          // full refund
 captured → partial-refunded  // partial refund
@@ -323,22 +323,22 @@ Required `Idempotency-Key` header on every mutating endpoint. Redis-backed cache
 Engine supports CRUD, single-use vs multi-use, expiry, applied at PaymentIntent creation, audit log.
 
 **Application fee:**
-Platform fee config per category, GST calculated on the platform fee (not the full task amount).
+Platform fee config per category, GST calculated on the platform fee (not the full job amount).
 
 ---
 
 ## 13. AI Usage
 
-**Where AI is used per task lifecycle:**
+**Where AI is used per job lifecycle:**
 
 | Touchpoint                                               | Model                                     |
 | -------------------------------------------------------- | ----------------------------------------- |
-| Task extraction (text → structured fields)               | Gemini Flash                              |
+| Job extraction (text → structured fields)                | Gemini Flash                              |
 | Multi-turn clarifying questions (when confidence is low) | Gemini Flash                              |
-| Multimodal image extraction (when poster uploads photos) | Gemini 1.5 Pro vision                     |
+| Multimodal image extraction (when client uploads photos) | Gemini 1.5 Pro vision                     |
 | Voice transcription                                      | Gemini audio / Whisper                    |
 | Budget AI nudge                                          | Gemini Flash                              |
-| Task + tasker profile embeddings                         | OpenAI text-embedding-3-small (1536 dims) |
+| Job + tasker profile embeddings                          | OpenAI text-embedding-3-small (1536 dims) |
 | Real-time per-message chat policing                      | Gemini Flash                              |
 | EXIF tampering check (deterministic, no LLM)             | n/a                                       |
 | Tier-0 dispute mediator                                  | Claude Sonnet                             |
@@ -393,7 +393,7 @@ Claude Code auto-loads CLAUDE.md from the working directory upward. Place contex
 
 - "Same Next.js stack as admin"
 - "Public read-only; no auth-gated content"
-- "Server-render task detail pages for SEO"
+- "Server-render job detail pages for SEO"
 
 ---
 
@@ -409,7 +409,7 @@ Install in `.claude/skills/`. Each is a folder with a `SKILL.md`.
 
 **4. `tier0-dispute`** — invoked for dispute mediator work. Contains: system prompt, evidence aggregation pattern, output schema, threshold rules, when to escalate.
 
-**5. `multimodal-extraction`** — invoked for image-to-task vision extraction. Contains: model tier selection (Flash primary, Pro fallback — never Opus), image preprocessing pipeline (resize/EXIF/hash), Zod schema, prompt structure, merging with text extraction, cost guardrails.
+**5. `multimodal-extraction`** — invoked for image-to-job vision extraction. Contains: model tier selection (Flash primary, Pro fallback — never Opus), image preprocessing pipeline (resize/EXIF/hash), Zod schema, prompt structure, merging with text extraction, cost guardrails.
 
 **Built-in skills also enabled:**
 
@@ -425,7 +425,7 @@ Install in `.claude/skills/`. Each is a folder with a `SKILL.md`.
 
 1. Pick 1–3 work items from your scope tracker / issue board. Mark them in-progress.
 2. Open Claude Code in the repo. CLAUDE.md files auto-load.
-3. Paste the work item summary as the spec (e.g. "Mobile · Task Discovery · Home feed (ranked) · MVP-IN").
+3. Paste the work item summary as the spec (e.g. "Mobile · Job Discovery · Home feed (ranked) · MVP-IN").
 4. Enter **plan mode** (Shift+Tab in CLI, or `/plan`) for anything above ~30 minutes of work. Review the plan before code is written.
 5. Branch naming: `feat/<short-name>` (e.g., `feat/ranked-feed`).
 6. Conventional Commit messages: `feat: ranked feed v0 — deterministic blend`.
@@ -438,7 +438,7 @@ Install in `.claude/skills/`. Each is a folder with a `SKILL.md`.
 - Review what shipped versus what's still in progress.
 - Triage any items that grew in scope into their own follow-up tickets.
 
-**Plan mode discipline:** for any task that's not "rename a variable", always plan first. Catches hallucinations and saves hours of rework.
+**Plan mode discipline:** for any work that's not "rename a variable", always plan first. Catches hallucinations and saves hours of rework.
 
 ---
 
@@ -521,8 +521,8 @@ To keep MVP scope tight, certain items are explicitly deferred. Don't accidental
 - Magic link login
 - Welcome tour / coach marks
 - Tasker availability calendar + API
-- Recurring task posting
-- Counter-offer / negotiation in-thread (replaced with public Q&A on task)
+- Recurring job posting
+- Counter-offer / negotiation in-thread (replaced with public Q&A on job)
 - In-app voice/video call
 - Job extension / reschedule
 - Message reactions, voice messages, typing indicators, mute/archive/pin threads
@@ -538,8 +538,8 @@ To keep MVP scope tight, certain items are explicitly deferred. Don't accidental
 
 **POST (deferred, may revisit at month 3+):**
 
-- SEO content auto-generation per task
-- Bid AI coaching nudges (needs real bid acceptance data first)
+- SEO content auto-generation per job
+- Offer AI coaching nudges (needs real offer acceptance data first)
 - Review authenticity scoring (needs review data first)
 - Behavioural fraud detection (graph-based)
 - LightGBM ranker (deterministic weights at MVP)
@@ -556,7 +556,7 @@ To keep MVP scope tight, certain items are explicitly deferred. Don't accidental
 **Promoted from POST → IN this round:**
 
 - Multi-turn clarifying ReAct loop (multi-turn dialogue when AI confidence is low on required fields)
-- Multimodal image-based task extraction (vision model infers scope/materials/duration from photos)
+- Multimodal image-based job extraction (vision model infers scope/materials/duration from photos)
 - EXIF tampering / consistency check (detect tasker uploading old/wrong-location photos as completion proof)
 
 **MANUAL (operator-driven via admin or external tool):**
@@ -583,7 +583,7 @@ To keep MVP scope tight, certain items are explicitly deferred. Don't accidental
 | SMS notifications vendor                       | Notifyre with registered alphanumeric sender "JOBBEES" (alpha sender application pending)                                                                                                                                                                                                                                                                                                                             | `vendor-list.md`                                                                |
 | Email vendor                                   | SendGrid (free tier 100/day; SOC 2, GDPR)                                                                                                                                                                                                                                                                                                                                                                             | `vendor-list.md`                                                                |
 | OTP dev workflow                               | `MockOtpService` accepting hardcoded `000000` for Sprint 1-4, swap to real provider in Sprint 5 (safety guards: startup assertion + Semgrep rule + AuditLog)                                                                                                                                                                                                                                                          | `008-otp-sms-strategy.md`                                                       |
-| Sprint plan structure (2026-06-12 restructure) | Sprint 0 extended to Fri 19 Jun; Sprint 1 is backend-only auth foundation (Mon 22 Jun → Fri 3 Jul); Sprint 2 is first user-visible (mobile auth + onboarding + Stripe Connect + ABN, Mon 6 Jul → Fri 17 Jul); License module deferred from S2 to S4 (with bidding); Sprint 12 ends Fri 4 Dec                                                                                                                          | `docs/sprints/PLAN.md`                                                          |
+| Sprint plan structure (2026-06-12 restructure) | Sprint 0 extended to Fri 19 Jun; Sprint 1 is backend-only auth foundation (Mon 22 Jun → Fri 3 Jul); Sprint 2 is first user-visible (mobile auth + onboarding + Stripe Connect + ABN, Mon 6 Jul → Fri 17 Jul); License module deferred from S2 to S4 (with offering); Sprint 12 ends Fri 4 Dec                                                                                                                         | `docs/sprints/PLAN.md`                                                          |
 | **Tasker verification model**                  | Stripe Connect Express KYC (Stripe handles identity) + ABN verify (free ABR API) + per-category license verification (manual admin review against AU state register). NO identity vendor (Didit / Stripe Identity / etc.). License model added to schema; `Category.requiresLicense` field added.                                                                                                                     | `005-kyc-strategy.md`                                                           |
 | **Allowed license types per category**         | 13 license type slugs across 8 licensed-trade categories (Electrical, Plumbing, Drainage, Gas fitting, Asbestos, Refrigerated AC, Pest control, Builder). Stored as shared TypeScript constant `ALLOWED_LICENSE_TYPES` in `packages/types/src/licenses.ts` (added Sprint 2). Mobile dropdowns + backend validator + admin review queue all import from one source. Per-state register cross-check is NSW-only at MVP. | `005-kyc-strategy.md`, `packages/types/src/licenses.README.md`                  |
 | Branding (palette + typography + shape + logo) | Carried forward from React Native prototype: primary `#FF6B2C` (coral), dark `#1A1A2E` (navy), Inter font, generous corners, bee-themed logo. Material 3 layered on top.                                                                                                                                                                                                                                              | `docs/brand/COLORS.md`, `docs/brand/UI-PRINCIPLES.md`, `apps/mobile/lib/theme/` |
@@ -611,7 +611,7 @@ To keep MVP scope tight, certain items are explicitly deferred. Don't accidental
 
 1. `git init`, monorepo skeleton, pnpm workspaces, Turborepo, root `CLAUDE.md`, root `PROJECT_CONTEXT.md` ✅ DONE in scaffold
 2. Postgres 16 + pgvector + Redis 7 via Docker Compose (`ops/docker/dev.yml`) ✅ DONE
-3. NestJS scaffold in `apps/api`; Prisma schema with `User` + `Country` + `Category` + `Task` + `AuditLog` ✅ DONE
+3. NestJS scaffold in `apps/api`; Prisma schema with `User` + `Country` + `Category` + `Job` + `AuditLog` ✅ DONE
 4. Flutter scaffold in `apps/mobile`; Riverpod + go_router + dio — **run `flutter create .` first**
 5. Next.js scaffold in `apps/admin` with shadcn/ui — **run `pnpm create next-app@latest` first**
 6. Next.js scaffold in `apps/web` — same

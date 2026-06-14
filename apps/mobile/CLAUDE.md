@@ -1,6 +1,6 @@
 # CLAUDE.md — apps/mobile (Flutter)
 
-User-facing app for both posters and taskers. Calls the NestJS API for everything — no business logic in Flutter.
+User-facing app for both clients and taskers. Calls the NestJS API for everything — no business logic in Flutter.
 
 ## Stack
 
@@ -35,11 +35,11 @@ apps/mobile/lib/
 │   │   ├── providers/                # Riverpod providers
 │   │   ├── models/
 │   │   └── repositories/             # API client wrapper
-│   ├── profile_poster/
+│   ├── profile_client/
 │   ├── profile_tasker/
-│   ├── task_posting/
-│   ├── task_discovery/
-│   ├── bidding/
+│   ├── job_posting/
+│   ├── job_discovery/
+│   ├── offering/
 │   ├── job_execution/
 │   ├── messaging/
 │   ├── payments/
@@ -66,6 +66,7 @@ apps/mobile/lib/
 8. **Network errors render as the error state.** Never silently swallow. Use the `ErrorMapper` to convert dio errors to user messages.
 9. **Always set `autofillHints: [AutofillHints.oneTimeCode]`** on OTP fields. iOS Smart Auth + Android SMS Retriever depend on it.
 10. **App lifecycle handlers** for background tasks (location during active job). Pause on `AppLifecycleState.paused`, resume on `resumed`.
+
 
 ## Conventions
 
@@ -105,7 +106,7 @@ apps/mobile/lib/
 - Use the M3 type scale (`Theme.of(context).textTheme.headlineMedium` etc.), not raw `TextStyle`s
 - Use the spacing tokens (`JobbeesSpacing.lg`) for layout — no magic numbers
 - Respect reduced motion: check `MediaQuery.of(context).disableAnimations` before non-essential animations
-- Haptic feedback on key moments (`HapticFeedback.lightImpact()` on bid placed, `heavyImpact()` on task completed)
+- Haptic feedback on key moments (`HapticFeedback.lightImpact()` on offer placed, `heavyImpact()` on job completed)
 
 ## Testing
 

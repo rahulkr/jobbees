@@ -7,8 +7,8 @@
 
 | Role        | Capabilities                                                                            |
 | ----------- | --------------------------------------------------------------------------------------- |
-| POSTER      | Post tasks, accept bids, pay, review                                                    |
-| TASKER      | Bid on tasks, deliver work, get paid, review                                            |
+| CLIENT      | Post jobs, accept offers, pay, review                                                   |
+| TASKER      | Make offers on jobs, deliver work, get paid, review                                     |
 | ADMIN       | Moderate content, handle disputes, issue refunds, KYC overrides — see admin role detail |
 | SUPER_ADMIN | Everything ADMIN + manage admins + change configuration                                 |
 

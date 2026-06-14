@@ -25,8 +25,8 @@ apps/api/src/
 ├── modules/                 # feature modules — one per product domain
 │   ├── auth/                # JWT, OAuth, OTP, KYC orchestration
 │   ├── users/               # user + tasker profile CRUD
-│   ├── tasks/               # task CRUD, AI extraction, embeddings
-│   ├── bids/                # bid CRUD, state machine
+│   ├── jobs/                # job CRUD, AI extraction, embeddings
+│   ├── offers/              # offer CRUD, state machine
 │   ├── matching/            # vector + ranked feed, auto-invite
 │   ├── threads/             # messaging, Socket.IO gateway, chat policing
 │   ├── payments/            # Stripe, state machine, idempotency
@@ -71,7 +71,7 @@ modules/<name>/
 - **Errors:** throw `HttpException` subclasses (`BadRequestException`, `ForbiddenException`, etc.). Global exception filter maps to consistent response shape.
 - **Validation:** `class-validator` on DTOs. `ValidationPipe` global with `whitelist: true, forbidNonWhitelisted: true`.
 - **Auth:** JWT in `Authorization` header. `@CurrentUser()` decorator extracts the user from the request. `@UseGuards(JwtAuthGuard)` on protected routes.
-- **Permissions:** `@Roles('TASKER', 'POSTER')` decorator with `RolesGuard`. Never check roles inline.
+- **Permissions:** `@Roles('TASKER', 'CLIENT')` decorator with `RolesGuard`. Never check roles inline.
 - **OpenAPI:** every controller has `@ApiOperation` and DTOs have `@ApiProperty`. We generate `packages/types` from this spec.
 - **Environment:** access via `ConfigService`, never `process.env` directly. Validated on boot.
 

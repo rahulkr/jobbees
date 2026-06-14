@@ -15,8 +15,8 @@ This directory holds the 13-sprint MVP plan (Sprint 0 setup + 12 build sprints).
 | `sprint-00-foundation-and-setup.md`        | 0      | Mon 1 Jun → Fri 19 Jun  | Foundation + AI setup + security tooling (extended 1 week for research catch-up)             |
 | `sprint-01-onboarding-and-auth.md`         | 1      | Mon 22 Jun → Fri 3 Jul  | **Backend Auth Foundation** (backend-only — no mobile this sprint)                           |
 | `sprint-02-kyc-tasker-connect.md`          | 2      | Mon 6 Jul → Fri 17 Jul  | Mobile Auth + Onboarding + Tasker upgrade + Stripe Connect + ABN (first user-visible sprint) |
-| `sprint-03-task-posting-ai.md`             | 3      | Mon 20 Jul → Fri 31 Jul | Task posting + AI extraction + guest mode                                                    |
-| `sprint-04-discovery-bidding.md`           | 4      | Mon 3 Aug → Fri 14 Aug  | Discovery + Bidding + Q&A + **License verification + bid-time guard** (per ADR 005)          |
+| `sprint-03-task-posting-ai.md`             | 3      | Mon 20 Jul → Fri 31 Jul | Job posting + AI extraction + guest mode                                                     |
+| `sprint-04-discovery-bidding.md`           | 4      | Mon 3 Aug → Fri 14 Aug  | Discovery + Offering + Q&A + **License verification + offer-time guard** (per ADR 005)       |
 | `sprint-05-messaging-payments.md`          | 5      | Mon 17 Aug → Fri 28 Aug | Messaging + Payments core + OTP swap                                                         |
 | `sprint-06-execution-tax.md`               | 6      | Mon 31 Aug → Fri 11 Sep | Job execution + Tax/RCTI/ATO                                                                 |
 | `sprint-07-reviews-disputes.md`            | 7      | Mon 14 Sep → Fri 25 Sep | Reviews + Disputes (Tier-0 mediator)                                                         |

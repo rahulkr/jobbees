@@ -10,8 +10,8 @@ Client direction: all MVP categories are transactional (payment flows through th
 
 Examples:
 
-- **Transactional** (MVP): "Clean my house for $80" — poster pays platform $80, tasker gets $68, platform takes $12 fee.
-- **Lead** (post-MVP): "Renovate my bathroom — find me a contractor" — poster posts, qualified contractors pay platform $20 each to view contact details, the renovation contract is signed off-platform.
+- **Transactional** (MVP): "Clean my house for $80" — client pays platform $80, tasker gets $68, platform takes $12 fee.
+- **Lead** (post-MVP): "Renovate my bathroom — find me a contractor" — client posts, qualified contractors pay platform $20 each to view contact details, the renovation contract is signed off-platform.
 
 The two flows differ fundamentally:
 
@@ -20,14 +20,14 @@ The two flows differ fundamentally:
 
 ## Decision
 
-Schema field `Category.type` is `enum CategoryType { TRANSACTIONAL | LEAD }`. Default `TRANSACTIONAL`. Task snapshots the type at creation as `Task.transactionType`. All MVP categories are TRANSACTIONAL.
+Schema field `Category.type` is `enum CategoryType { TRANSACTIONAL | LEAD }`. Default `TRANSACTIONAL`. Job snapshots the type at creation as `Job.transactionType`. All MVP categories are TRANSACTIONAL.
 
 ### Schema
 
 ```prisma
 enum CategoryType {
   TRANSACTIONAL  // payment flows through platform (MVP)
-  LEAD           // poster→tasker intro, payment off-platform (post-MVP)
+  LEAD           // client→tasker intro, payment off-platform (post-MVP)
 }
 
 model Category {
@@ -36,23 +36,23 @@ model Category {
   leadFeeCents  Int?         // only used if type = LEAD
 }
 
-model Task {
+model Job {
   // ...
-  transactionType CategoryType  // snapshot from Category at creation; immutable per task
+  transactionType CategoryType  // snapshot from Category at creation; immutable per job
 }
 ```
 
-### Why snapshot on Task
+### Why snapshot on Job
 
-If the client ever flips a Category from TRANSACTIONAL to LEAD (or vice versa) mid-life, **in-flight tasks should retain their original behaviour**. Snapshotting at task creation prevents a transactional task suddenly demanding lead-fee payment because someone changed a category config.
+If the operator ever flips a Category from TRANSACTIONAL to LEAD (or vice versa) mid-life, **in-flight jobs should retain their original behaviour**. Snapshotting at job creation prevents a transactional job suddenly demanding lead-fee payment because someone changed a category config.
 
 ### MVP code path
 
 Every payment, dispute, RCTI, and cancellation service starts with:
 
 ```ts
-if (task.transactionType !== 'TRANSACTIONAL') {
-  throw new BadRequestException(`Lead-type tasks not supported at MVP (task ${task.id})`);
+if (job.transactionType !== 'TRANSACTIONAL') {
+  throw new BadRequestException(`Lead-type jobs not supported at MVP (job ${job.id})`);
 }
 ```
 
@@ -61,15 +61,15 @@ This asserts the invariant in every place that would need a different code path.
 ### What's NOT built at MVP
 
 - Lead payment flow (tasker pays a fee to unlock contact details — different Stripe pattern)
-- Lead-specific review trigger (no "task completed" event since platform doesn't see the deal close)
+- Lead-specific review trigger (no "job completed" event since platform doesn't see the deal close)
 - Lead-specific UI in mobile (e.g., "Pay $20 to view contact info" sheet)
 - Admin tools for managing lead pricing per category
 
 ### How LEAD support is added later (~3-4 weeks of work)
 
 1. Implement `LeadPaymentService` — different Stripe flow (PaymentIntent on tasker, immediate capture, no escrow)
-2. Update `Bid` model — leads have a different acceptance flow (poster "selects" rather than "accepts"; contact details unlock per tasker who paid)
-3. Update `Task` model — leads have no completion proof, no dispute window, no auto-confirm
+2. Update `Offer` model — leads have a different acceptance flow (client "selects" rather than "accepts"; contact details unlock per tasker who paid)
+3. Update `Job` model — leads have no completion proof, no dispute window, no auto-confirm
 4. New mobile UI: lead-pay flow, contact-revealed screen for taskers
 5. Admin UI for setting `leadFeeCents` per LEAD category
 6. Replace all `throw` assertions with proper branching in payment / dispute / cancellation / RCTI services
@@ -78,9 +78,9 @@ This asserts the invariant in every place that would need a different code path.
 
 **Positive:**
 
-- Schema is forward-compatible — no migration on Task/Category when LEAD support lands
+- Schema is forward-compatible — no migration on Job/Category when LEAD support lands
 - Asserting `TRANSACTIONAL` everywhere prevents accidental misuse at MVP
-- Snapshot on Task means category config changes don't retroactively affect in-flight work
+- Snapshot on Job means category config changes don't retroactively affect in-flight work
 
 **Negative:**
 
@@ -90,14 +90,14 @@ This asserts the invariant in every place that would need a different code path.
 
 ## Alternatives considered
 
-| Option                                                     | Why rejected                                                              |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Hardcode "transactional" everywhere, add type column later | Retrofit pain — need to update every payment service when LEAD lands      |
-| Two separate task tables (TransactionalTask, LeadTask)     | Massive refactor for what's still essentially "a task posted by a poster" |
-| Boolean flag instead of enum                               | Doesn't scale to a third type (rental, subscription, etc.)                |
-| Don't snapshot type on Task                                | Mid-life category type changes would corrupt in-flight task behaviour     |
+| Option                                                     | Why rejected                                                             |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Hardcode "transactional" everywhere, add type column later | Retrofit pain — need to update every payment service when LEAD lands     |
+| Two separate job tables (TransactionalJob, LeadJob)        | Massive refactor for what's still essentially "a job posted by a client" |
+| Boolean flag instead of enum                               | Doesn't scale to a third type (rental, subscription, etc.)               |
+| Don't snapshot type on Job                                 | Mid-life category type changes would corrupt in-flight job behaviour     |
 
 ## References
 
-- `packages/prisma/schema.prisma` — `Category.type`, `Task.transactionType`
+- `packages/prisma/schema.prisma` — `Category.type`, `Job.transactionType`
 - `PROJECT_CONTEXT.md` §11 Category Type System

@@ -1,0 +1,1995 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>JOBBees MVP — Sprint Detail Booklet</title>
+    <style>
+      :root {
+        --primary: #ff6b2c;
+        --dark: #1a1a2e;
+        --grey: #5a5a6e;
+        --light: #f4f4f6;
+        --border: #d8d8de;
+        --success: #22c55e;
+        --warn: #f59e0b;
+      }
+      @page {
+        size: A4;
+        margin: 12mm 14mm;
+      }
+      @media print {
+        /* Bare-metal print: strip everything decorative that could mislead the
+       paginator. We get the gutter from @page margin only. */
+        .no-print {
+          display: none !important;
+        }
+        html,
+        body {
+          background: white !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          font-size: 9.5pt;
+        }
+        /* Strip every property that imposed a fixed size on .page. The only
+       behaviour we want is "start each section on a new sheet". */
+        .page {
+          width: auto !important;
+          min-height: 0 !important;
+          height: auto !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          box-shadow: none !important;
+          border: none !important;
+          background: transparent !important;
+          display: block !important;
+          page-break-inside: auto;
+          page-break-after: always;
+          break-after: page;
+        }
+        .page:last-child {
+          page-break-after: auto;
+          break-after: auto;
+        }
+        /* Absolute-positioned chrome doesn't survive pagination. Hide entirely. */
+        .brand-bar,
+        .page-header,
+        .page-footer {
+          display: none !important;
+        }
+        .content {
+          padding-top: 0 !important;
+        }
+        /* Atomic blocks — short enough to fit on one sheet, keep together. */
+        .sprint-header,
+        .demo-checklist,
+        .deferred,
+        .feature-group {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+        /* Tighten content density so each sprint stays on one sheet where possible. */
+        h1 {
+          font-size: 18pt;
+        }
+        h2 {
+          font-size: 13pt;
+        }
+        h3 {
+          font-size: 10pt;
+        }
+        p,
+        ul,
+        li,
+        td,
+        th {
+          font-size: 9pt;
+          line-height: 1.35;
+        }
+        .section-title {
+          font-size: 10pt;
+          margin: 10pt 0 4pt 0;
+        }
+        .sprint-header h2 {
+          font-size: 15pt;
+        }
+        .sprint-header .dates {
+          font-size: 10pt;
+        }
+        .sprint-header {
+          margin-bottom: 8pt;
+        }
+        .feature-group {
+          margin-bottom: 6pt;
+        }
+        .feature-group ul li {
+          margin-bottom: 1pt;
+        }
+        .demo-checklist,
+        .deferred {
+          padding: 6pt 9pt;
+          margin: 4pt 0;
+        }
+        /* Cover page: keep tall layout on screen, recenter on print. */
+        .cover-content {
+          height: auto !important;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        color: var(--dark);
+        background: #ececef;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        font-size: 10.5pt;
+        line-height: 1.45;
+      }
+      body {
+        padding: 24px 0;
+      }
+      .page {
+        background: white;
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto 14px auto;
+        padding: 16mm;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        position: relative;
+      }
+      .brand-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6mm;
+        background: var(--primary);
+      }
+      .page-header {
+        position: absolute;
+        top: 10mm;
+        left: 16mm;
+        right: 16mm;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 9pt;
+      }
+      .page-header .brand {
+        font-weight: 700;
+        color: var(--dark);
+      }
+      .page-header .crumb {
+        color: var(--grey);
+      }
+      .page-footer {
+        position: absolute;
+        bottom: 8mm;
+        left: 16mm;
+        right: 16mm;
+        display: flex;
+        justify-content: space-between;
+        font-size: 8pt;
+        color: var(--grey);
+        border-top: 0.5px solid var(--border);
+        padding-top: 4mm;
+      }
+      .content {
+        padding-top: 12mm;
+      }
+
+      h1 {
+        font-size: 22pt;
+        margin: 0 0 6pt 0;
+        color: var(--dark);
+      }
+      h1.cover-title {
+        font-size: 32pt;
+        margin-bottom: 4pt;
+      }
+      .subtitle {
+        font-size: 13pt;
+        color: var(--primary);
+        margin: 0 0 16pt 0;
+        font-weight: 400;
+      }
+      h2 {
+        font-size: 15pt;
+        margin: 14pt 0 6pt 0;
+        color: var(--dark);
+      }
+      h3 {
+        font-size: 11pt;
+        margin: 8pt 0 4pt 0;
+        color: var(--dark);
+      }
+      p {
+        margin: 0 0 6pt 0;
+      }
+      p.muted {
+        color: var(--grey);
+        font-size: 9.5pt;
+      }
+      p.cover-meta {
+        font-size: 10pt;
+        color: var(--grey);
+        margin: 0 0 2pt 0;
+      }
+
+      ul {
+        margin: 0 0 6pt 0;
+        padding-left: 18pt;
+      }
+      ul li {
+        margin-bottom: 3pt;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 6pt 0 10pt 0;
+        font-size: 9.5pt;
+      }
+      th,
+      td {
+        padding: 6pt 7pt;
+        border-bottom: 0.5px solid var(--border);
+        vertical-align: top;
+        text-align: left;
+      }
+      th {
+        background: var(--dark);
+        color: white;
+        font-weight: 700;
+        border-bottom: none;
+        font-size: 9pt;
+      }
+      tbody tr:nth-child(odd) {
+        background: var(--light);
+      }
+      tbody tr:nth-child(even) {
+        background: white;
+      }
+
+      /* Cover */
+      .cover-content {
+        height: calc(297mm - 36mm);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      /* Sprint pages */
+      .sprint-header {
+        border-left: 4px solid var(--primary);
+        padding-left: 12pt;
+        margin-bottom: 14pt;
+      }
+      .sprint-header .sprint-num {
+        font-size: 10pt;
+        color: var(--grey);
+        text-transform: uppercase;
+        letter-spacing: 1.5pt;
+      }
+      .sprint-header h2 {
+        margin: 0 0 4pt 0;
+        font-size: 18pt;
+      }
+      .sprint-header .dates {
+        font-size: 11pt;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .section-title {
+        font-size: 11pt;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 14pt 0 6pt 0;
+        padding-bottom: 3pt;
+        border-bottom: 1.5px solid var(--primary);
+      }
+
+      .feature-group {
+        margin-bottom: 10pt;
+      }
+      .feature-group .surface {
+        font-weight: 700;
+        font-size: 10pt;
+        color: var(--dark);
+        margin: 6pt 0 3pt 0;
+      }
+      .feature-group ul {
+        font-size: 9.5pt;
+        padding-left: 14pt;
+        margin: 0;
+      }
+      .feature-group ul li {
+        margin-bottom: 2pt;
+      }
+
+      /* Demo checklist */
+      .demo-checklist {
+        background: var(--light);
+        padding: 8pt 12pt;
+        border-radius: 2pt;
+        border-left: 3px solid var(--success);
+        margin: 6pt 0;
+      }
+      .demo-checklist ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+      }
+      .demo-checklist ul li {
+        font-size: 9.5pt;
+        padding-left: 18pt;
+        position: relative;
+        margin-bottom: 3pt;
+      }
+      .demo-checklist ul li::before {
+        content: '☐';
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 11pt;
+        color: var(--dark);
+      }
+
+      /* Deferred block */
+      .deferred {
+        background: #fff7ed;
+        padding: 6pt 10pt;
+        border-radius: 2pt;
+        border-left: 3px solid var(--warn);
+        margin: 6pt 0;
+        font-size: 9.5pt;
+      }
+      .deferred ul {
+        padding-left: 14pt;
+        margin: 4pt 0 0 0;
+      }
+      .deferred li {
+        margin-bottom: 2pt;
+      }
+
+      /* Coverage matrix table tweaks */
+      table.coverage td:first-child {
+        font-weight: 700;
+        width: 38%;
+      }
+      table.coverage td:nth-child(2) {
+        width: 14%;
+        color: var(--primary);
+        font-weight: 700;
+      }
+      table.coverage td:nth-child(3) {
+        width: 48%;
+        font-size: 9pt;
+      }
+
+      .print-cta {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 999;
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      }
+      .print-cta:hover {
+        background: #e55a20;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-cta no-print" onclick="window.print()">Save as PDF</button>
+
+    <!-- ===================== COVER ===================== -->
+    <section class="page avoid-break">
+      <div class="brand-bar"></div>
+      <div class="cover-content">
+        <h1 class="cover-title">JOBBees MVP</h1>
+        <p class="subtitle">Sprint detail booklet</p>
+        <p style="font-size: 11pt; max-width: 130mm">
+          Per-sprint feature list and demo acceptance criteria, so you can verify against the
+          original scope before every Friday demo.
+        </p>
+        <div style="margin-top: 18pt">
+          <p class="cover-meta">
+            Project period: <strong>Mon 1 Jun &nbsp;—&nbsp; Fri 4 Dec 2026</strong> &nbsp;(27 weeks)
+          </p>
+          <p class="cover-meta">
+            Total: <strong>1 foundation sprint &nbsp;+&nbsp; 12 build sprints</strong>
+          </p>
+          <p class="cover-meta">
+            Companion document to the <em>JOBBees MVP — Development sprint plan</em>.
+          </p>
+          <p class="cover-meta" style="margin-top: 18pt">Prepared 12 June 2026</p>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 1</span>
+      </div>
+    </section>
+
+    <!-- ===================== ABOUT + COVERAGE MATRIX ===================== -->
+    <section class="page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Jun – Dec 2026</span>
+      </div>
+      <div class="content">
+        <h1>How to use this booklet</h1>
+        <p>
+          The companion sprint-plan PDF gave you the strategic view: timeline, themes, and a
+          one-line description of what each Friday demo will show. This booklet goes one level
+          deeper. For every sprint you get three things:
+        </p>
+        <ul>
+          <li>
+            <strong>What we're building this sprint</strong> — the concrete feature list, grouped by
+            Mobile, Backend, and Admin.
+          </li>
+          <li>
+            <strong>The Friday demo will confirm</strong> — an acceptance checklist you can tick off
+            while watching the demo recording.
+          </li>
+          <li>
+            <strong>Deferred from this sprint</strong> — what someone might reasonably expect to be
+            in this sprint but is actually landing later, with the destination sprint named.
+          </li>
+        </ul>
+        <p>
+          The feature names use the same wording as the original feature inventory, so
+          cross-referencing is straightforward. Anything originally marked
+          <em>POST</em> (post-MVP) in the inventory is listed in the appendix at the back, not in
+          any sprint.
+        </p>
+
+        <h1 style="margin-top: 18pt">Feature coverage matrix</h1>
+        <p class="muted">
+          Each broad feature area from the original scope, with the sprint where the core of it
+          lands. Several areas are split across multiple sprints — the "Primary sprint" column shows
+          where the most of it gets built; the notes column flags follow-on work.
+        </p>
+        <table class="coverage">
+          <thead>
+            <tr>
+              <th>Feature area</th>
+              <th>Primary sprint</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Welcome &amp; onboarding screens</td>
+              <td>Sprint 2</td>
+              <td>Tooltips and "How it works" page polish in Sprint 11.</td>
+            </tr>
+            <tr>
+              <td>Email / Google / Apple signup &amp; login</td>
+              <td>Sprint 2</td>
+              <td>Backend foundation built in Sprint 1.</td>
+            </tr>
+            <tr>
+              <td>OTP &amp; phone verification (dev mock)</td>
+              <td>Sprint 1</td>
+              <td>Swapped to real production OTP provider in Sprint 5.</td>
+            </tr>
+            <tr>
+              <td>Biometric re-login</td>
+              <td>Sprint 2</td>
+              <td>Backend token exchange built in Sprint 1.</td>
+            </tr>
+            <tr>
+              <td>Client profile</td>
+              <td>Sprint 2</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Tasker upgrade flow</td>
+              <td>Sprint 2</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Stripe Connect onboarding &amp; held funds</td>
+              <td>Sprint 2</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>ABN verification (via free ABR API)</td>
+              <td>Sprint 2</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Tasker profile (bio, skills, areas, rate, photo)</td>
+              <td>Sprint 2</td>
+              <td>Portfolio thin in S2; reviews populate in S7.</td>
+            </tr>
+            <tr>
+              <td>Trade-licence upload &amp; admin review</td>
+              <td>Sprint 4</td>
+              <td>Full admin review queue UI in Sprint 9.</td>
+            </tr>
+            <tr>
+              <td>Job posting (text + photo + voice)</td>
+              <td>Sprint 3</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>AI extraction + ReAct clarifying loop</td>
+              <td>Sprint 3</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Guest browse + post-then-signup</td>
+              <td>Sprint 3</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Location / map picker (Google Maps)</td>
+              <td>Sprint 3</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Ranked feed + map view + filters</td>
+              <td>Sprint 4</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Bidding + accept/decline</td>
+              <td>Sprint 4</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Bid-time licence guard (incl. Builder rule)</td>
+              <td>Sprint 4</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Public Q&amp;A under jobs</td>
+              <td>Sprint 4</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>In-app messaging (Socket.IO)</td>
+              <td>Sprint 5</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Stripe payment authorisation &amp; capture</td>
+              <td>Sprint 5</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Real SMS / OTP provider swap-in</td>
+              <td>Sprint 5</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Job execution (check-in, completion proof)</td>
+              <td>Sprint 6</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Cancellation &amp; fee matrix</td>
+              <td>Sprint 6</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>GST + RCTI + ATO sharing-economy reporting</td>
+              <td>Sprint 6</td>
+              <td>Tax advisor signs off before merge.</td>
+            </tr>
+            <tr>
+              <td>Reviews (blind, timeout-reveal)</td>
+              <td>Sprint 7</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Disputes (Tier-0 AI mediator + admin co-pilot)</td>
+              <td>Sprint 7</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Notifications (push, email, SMS, in-app)</td>
+              <td>Sprint 8</td>
+              <td>Spam Act compliance built in.</td>
+            </tr>
+            <tr>
+              <td>Content moderation + EXIF check</td>
+              <td>Sprint 8</td>
+              <td>Azure Content Safety integration.</td>
+            </tr>
+            <tr>
+              <td>Privacy: DSR, consent ledger, anonymisation</td>
+              <td>Sprint 8</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Admin console (all surfaces)</td>
+              <td>Sprint 9</td>
+              <td>License review queue scaffold in S4, full UI in S9.</td>
+            </tr>
+            <tr>
+              <td>Azure cloud deployment + Cloudflare WAF</td>
+              <td>Sprint 10</td>
+              <td>First sprint with real cloud spend.</td>
+            </tr>
+            <tr>
+              <td>TestFlight + Play Store internal</td>
+              <td>Sprint 11</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Final polish: tooltips, "How it works", empty states</td>
+              <td>Sprint 11</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Soft launch in one Sydney suburb</td>
+              <td>Sprint 12</td>
+              <td>30-50 manually onboarded taskers.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 2</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 0 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 0</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 0 (Foundation) — Completed Fri 19 Jun</div>
+          <h2>Foundation: monorepo, schema, security, AI tooling, plan</h2>
+          <div class="dates">Mon 1 Jun — Fri 19 Jun 2026</div>
+        </div>
+
+        <p class="muted">
+          Sprint 0 isn't a feature-build sprint. It's the foundation that makes Sprints 1-12
+          possible. Everything below is already complete and reviewable in the project repository.
+        </p>
+
+        <div class="section-title">What we built</div>
+
+        <div class="feature-group">
+          <div class="surface">Repository &amp; tooling</div>
+          <ul>
+            <li>
+              Monorepo with the four apps (mobile, backend API, admin console, public web) and
+              shared packages
+            </li>
+            <li>
+              Database schema with nine core models (users, jobs, bids, reviews, messages, payments,
+              audit log, categories, country)
+            </li>
+            <li>
+              Brand theme locked from prior prototype, modernised for Material 3 design language
+            </li>
+            <li>Local-development Docker setup for Postgres and Redis</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Architecture &amp; planning</div>
+          <ul>
+            <li>
+              Eight architecture decision records covering: monorepo &amp; stack, database
+              conventions, multi-country readiness, category types, tasker verification model, auth
+              tokens, edge security, OTP strategy
+            </li>
+            <li>
+              Twenty IT-audit documents (privacy policy, data flow diagrams, DSR process, incident
+              response, encryption policy, vendor list, etc.)
+            </li>
+            <li>
+              Tasker verification model designed end-to-end: Stripe Connect + ABN + per-category
+              trade licence (no identity vendor)
+            </li>
+            <li>
+              Thirteen trade licence types catalogued across eight licensed categories, with the
+              conditional Builder rule (over $5,000 AUD per NSW Fair Trading) locked
+            </li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Security &amp; CI</div>
+          <ul>
+            <li>
+              Six custom AI-assistant tools written for the development workflow (Stripe payments,
+              AU tax, vector matching, dispute mediator, multimodal extraction, security review)
+            </li>
+            <li>
+              Five-layer security stack in place: AI-assistant checklist, pre-commit hooks,
+              server-side CI (lint, typecheck, tests, secrets scan, static analysis), branch
+              protection ruleset, planned runtime defences
+            </li>
+            <li>
+              End-to-end verification of the security stack: deliberately broken code was
+              successfully blocked from reaching the main branch
+            </li>
+          </ul>
+        </div>
+
+        <div class="section-title">Sprint 0 wrap demo confirmed</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Repository walkthrough complete</li>
+            <li>All eight architecture decisions reviewed and accepted</li>
+            <li>Twenty audit documents in place for compliance readiness</li>
+            <li>Six custom AI tools demonstrated and understood</li>
+            <li>
+              Security gates demonstrated end-to-end (a deliberately broken commit was blocked)
+            </li>
+            <li>13-sprint plan locked, including the backend-first Sprint 1 reasoning</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Operational items still in flight (not feature work):</strong>
+          <ul>
+            <li>
+              Notifyre alpha sender ID application submitted (5-7 business day approval — needed for
+              Sprint 5)
+            </li>
+            <li>Stripe / Apple / Google developer accounts already in place</li>
+            <li>Lawyer review of Terms + Privacy Policy scheduled for Sprint 11</li>
+            <li>Tax advisor RFP scheduled for mid-Sprint 5</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 3</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 1 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 1</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 1</div>
+          <h2>Backend authentication foundation</h2>
+          <div class="dates">Mon 22 Jun — Fri 3 Jul 2026</div>
+        </div>
+
+        <p class="muted">
+          Backend-only sprint by design. The auth API gets built and verified before any mobile work
+          starts — saves several weeks of rework when the mobile app later integrates against a
+          stable backend in Sprint 2.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Backend (sole focus this sprint)</div>
+          <ul>
+            <li>
+              NestJS application scaffold with logging, error handling, and OpenAPI / Swagger
+              documentation
+            </li>
+            <li>
+              Shared infrastructure: idempotency, rate limiting, request tracing, structured error
+              responses
+            </li>
+            <li>User management endpoints (create, read, update, soft-delete)</li>
+            <li>OAuth providers — Google and Apple ID token verification with user upsert</li>
+            <li>JWT session tokens with rotating refresh tokens</li>
+            <li>Password hashing (argon2id) and reset flow</li>
+            <li>Phone OTP service with development-safe mock (real provider swaps in Sprint 5)</li>
+            <li>Email verification flow</li>
+            <li>Biometric token exchange endpoint (used by Sprint 2 mobile)</li>
+            <li>Role-based access control (Client / Tasker / Admin / Super-Admin)</li>
+            <li>Account suspension and ban endpoints</li>
+            <li>Session revocation (logout-from-all-devices)</li>
+            <li>Re-authentication gate for sensitive changes (change email, change phone)</li>
+            <li>Immutable audit log capturing every authentication and role-change event</li>
+            <li>
+              Integration tests covering happy path, unauthenticated, unauthorised, and
+              replay-protection scenarios
+            </li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Admin (gate only)</div>
+          <ul>
+            <li>Admin login with session timeout (the full admin console arrives in Sprint 9)</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 3 Jul)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>
+              Postman walkthrough: signup → email verify → login → refresh → logout works end-to-end
+            </li>
+            <li>Swagger / OpenAPI documentation accessible and lists every endpoint</li>
+            <li>
+              Database query shows every signup, login, refresh, and logout recorded in the audit
+              log
+            </li>
+            <li>
+              OTP service uses a development mock that accepts code <code>000000</code>; production
+              safeguards visible in startup logs
+            </li>
+            <li>Continuous integration is green on the merge commit</li>
+            <li>Security review checklist passes</li>
+            <li>
+              Sprint 2 mobile-side mockups walked through so the client sees what's coming the
+              following Friday
+            </li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deliberately not in this sprint (deferred):</strong>
+          <ul>
+            <li>Mobile app — starts Sprint 2 (against this now-stable backend)</li>
+            <li>Tasker upgrade flow + Stripe Connect — Sprint 2</li>
+            <li>Real production OTP provider — Sprint 5 (mock used in development for safety)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 4</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 2 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 2</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 2</div>
+          <h2>Mobile auth + onboarding + tasker upgrade + Stripe Connect</h2>
+          <div class="dates">Mon 6 Jul — Fri 17 Jul 2026</div>
+        </div>
+
+        <p class="muted">
+          First user-visible sprint. Mobile lands and integrates against the Sprint 1 backend. By
+          Friday a user can install the app, sign up, become a jober, complete Stripe Connect, and
+          verify their ABN.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Mobile</div>
+          <ul>
+            <li>Splash screen and 3-screen welcome carousel</li>
+            <li>Email signup (with first name, last name, email, mobile, location, role)</li>
+            <li>Google signup and Apple signup (Apple required by App Store)</li>
+            <li>Email + password login, Google login, Apple login</li>
+            <li>Biometric re-login (Face ID, Touch ID, fingerprint)</li>
+            <li>Forgot-password / reset flow</li>
+            <li>Email verification (client) and phone OTP verification (tasker)</li>
+            <li>Role selection at signup</li>
+            <li>Permissions priming (location, camera, notifications, photos)</li>
+            <li>Account-suspended / banned screen and force-logout flow</li>
+            <li>Account-deletion confirmation</li>
+            <li>Client profile setup, edit, and public view</li>
+            <li>Client → Tasker upgrade flow with one-way confirmation</li>
+            <li>ABN entry plus ABR business-lookup result</li>
+            <li>Verification status screen (Stripe Connect + ABN states)</li>
+            <li>
+              Tasker profile setup wizard (bio, skills selection, service areas, hourly rate,
+              profile photo)
+            </li>
+            <li>
+              Stripe Connect onboarding launched in a webview (Stripe handles all identity
+              verification)
+            </li>
+            <li>Held-funds banner with reminder cadence</li>
+            <li>Public tasker profile with verification badges</li>
+            <li>Portfolio &amp; reviews placeholders (thin in S2; populated in S4 + S7)</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Backend</div>
+          <ul>
+            <li>ABR business-lookup integration (free Australian Business Register API)</li>
+            <li>Client → Tasker role upgrade endpoint with audit-log capture</li>
+            <li>Stripe Connect Express integration</li>
+            <li>
+              Stripe Connect webhook handlers (account.updated, account.application.authorized)
+            </li>
+            <li>Connect onboarding state tracking</li>
+            <li>Held-funds calculation per tasker</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Admin (read-only this sprint)</div>
+          <ul>
+            <li>Stripe Connect status mirror (read-only display per tasker)</li>
+            <li>Connect onboarding tracker scaffold</li>
+          </ul>
+        </div>
+
+        <div class="section-title">
+          Friday demo will confirm (Fri 17 Jul) — first user-visible demo
+        </div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Cold-launch on simulator: splash → welcome carousel → "Get started"</li>
+            <li>Email signup completes and OTP entry accepts <code>000000</code> in dev</li>
+            <li>Email verification link lands user on role-select screen</li>
+            <li>Role select → client home (empty state because posting comes in Sprint 3)</li>
+            <li>Force-quit and reopen → biometric prompt fires and signs user back in</li>
+            <li>
+              "Become a jober" flow launches Stripe Connect webview; user completes with test data
+            </li>
+            <li>Returns to app, Connect status updates to "approved", held-funds banner appears</li>
+            <li>ABN entry verifies against ABR; business name displays</li>
+            <li>Tasker profile wizard completes; public tasker profile renders correctly</li>
+            <li>Admin console shows the new tasker in the Connect tracker</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint (lands in Sprint 4 alongside the offers code):</strong>
+          <ul>
+            <li>Trade-licence upload UI</li>
+            <li>Licensed-trade category selector with "licence required" deep-link</li>
+            <li>Licence verification module (backend)</li>
+            <li>Bid-time licence guard</li>
+            <li>Licence expiry cron with reminder emails</li>
+            <li>Admin licence-review queue scaffold</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 5</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 3 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 3</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 3</div>
+          <h2>Job posting + AI extraction + guest mode</h2>
+          <div class="dates">Mon 20 Jul — Fri 31 Jul 2026</div>
+        </div>
+
+        <p class="muted">
+          The largest single AI sprint. Anyone, including a guest user with no account, can post a
+          job; the AI does the heavy lifting of categorising, pricing, and clarifying.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Mobile</div>
+          <ul>
+            <li>Guest-mode shell with read-only browse of the public feed</li>
+            <li>Task-posting entry from anywhere in the app</li>
+            <li>Category picker</li>
+            <li>Title and free-text description</li>
+            <li>AI extraction confirmation screen (single-pass)</li>
+            <li>Multi-turn ReAct clarifying-question loop (when the AI needs more info)</li>
+            <li>Photo upload (multiple)</li>
+            <li>Camera-based task creation (vision model extracts task details from photos)</li>
+            <li>Voice-driven posting (voice → transcript → AI extraction)</li>
+            <li>Location and address picker on Google Maps</li>
+            <li>Date and time selection</li>
+            <li>Duration estimate (AI-suggested, user-editable)</li>
+            <li>Budget input with AI nudge</li>
+            <li>Special requirements field</li>
+            <li>Review-and-publish screen</li>
+            <li>Save-as-draft and resume-draft</li>
+            <li>Schedule jobs more than 7 days out</li>
+            <li>Edit and cancel a posted task</li>
+            <li>"Sign up to publish" bottom sheet for guests with local draft persistence</li>
+            <li>Auth-on-publish flow that transfers the draft to the new account</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Backend</div>
+          <ul>
+            <li>Task CRUD and state machine</li>
+            <li>AI extraction via Gemini Flash (JSON-mode for reliability)</li>
+            <li>ReAct multi-turn orchestration with confidence scoring</li>
+            <li>Multimodal vision extraction (Gemini Flash → Pro fallback if confidence low)</li>
+            <li>Image upload pipeline (local filesystem at MVP; Azure Blob in Sprint 10)</li>
+            <li>Geocoding via Google Maps Platform (server-side proxy to keep API key safe)</li>
+            <li>Lifecycle audit log of task changes</li>
+            <li>Vector embeddings generated on publish (used by ranked feed in Sprint 4)</li>
+            <li>Task draft persistence + claim-on-signup endpoint</li>
+            <li>Task search endpoint</li>
+            <li>Public read endpoint with PII filter and anonymous rate limiting</li>
+            <li>Voice transcription endpoint (Gemini audio)</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 31 Jul)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Guest cold-launches the app (no account) and browses the public feed</li>
+            <li>Guest taps "Post a job" and takes a photo of (e.g.) a broken fence</li>
+            <li>AI automatically extracts category and suggests a budget range</li>
+            <li>ReAct loop asks one or two clarifying questions when needed</li>
+            <li>Location picker on Google Maps confirms address correctly</li>
+            <li>Voice-driven path: guest dictates a job, AI transcribes and extracts</li>
+            <li>Guest taps "Publish" → "Sign up to publish" bottom sheet appears</li>
+            <li>Guest completes signup → draft transfers and task posts to the new account</li>
+            <li>Drafts saved and resumed correctly between app launches</li>
+            <li>Task search returns expected results</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint:</strong>
+          <ul>
+            <li>Other taskers seeing the job and offers — Sprint 4</li>
+            <li>Licence checks for plumbing / electrical / builder jobs — Sprint 4</li>
+            <li>Messaging between client and tasker once a bid is accepted — Sprint 5</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 6</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 4 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 4</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 4</div>
+          <h2>Discovery + offers + public Q&amp;A + licence verification</h2>
+          <div class="dates">Mon 3 Aug — Fri 14 Aug 2026</div>
+        </div>
+
+        <p class="muted">
+          Taskers find jobs, bid on them, and the licence-verification system ensures only licensed
+          trades can bid on licensed work.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Mobile</div>
+          <ul>
+            <li>Home feed ranked by relevance (skills, location, completion history)</li>
+            <li>Map view of nearby jobs (Google Maps)</li>
+            <li>List view with filters (category, budget, distance, date) and sort options</li>
+            <li>Saved jobs / favourites</li>
+            <li>Task share link with deep-link handling</li>
+            <li>Hide / not interested</li>
+            <li>Bid placement (amount, ETA, message)</li>
+            <li>Own bids list (active, accepted, declined)</li>
+            <li>Edit and withdraw own bid</li>
+            <li>Bid review screen for clients (list, sort, filter)</li>
+            <li>Accept and decline bid</li>
+            <li>Public Q&amp;A under each task (questions visible to all taskers)</li>
+            <li>Trade-licence upload (photo, licence number, issuing state, expiry)</li>
+            <li>Licensed-trade category selector that deep-links to upload when needed</li>
+            <li>Licence status screen showing pending / approved / rejected per category</li>
+            <li>"Verified [Trade]" badges on tasker profiles and bid lists</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Backend</div>
+          <ul>
+            <li>Offer CRUD and state machine</li>
+            <li>Offer expiry cron and notification triggers</li>
+            <li>One-active-bid-per-pair validation</li>
+            <li>Vector similarity matching (Postgres pgvector, cosine top-K)</li>
+            <li>
+              Ranked-feed algorithm (weighted blend of skills, distance, history, availability)
+            </li>
+            <li>Auto-invite push to top-matched taskers when a job publishes</li>
+            <li>Proximity calculation (Haversine)</li>
+            <li>Category / skill matching engine</li>
+            <li>Public Q&amp;A backend with off-platform-contact detection</li>
+            <li>Licence verification module with admin approval state machine</li>
+            <li>
+              Bid-time licence guard: unconditional rule for licensed trades AND conditional Builder
+              rule (over $5,000 AUD per NSW Fair Trading)
+            </li>
+            <li>
+              Licence expiry cron (14-day, 7-day, 1-day reminders; auto-expire when past expiry)
+            </li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Admin</div>
+          <ul>
+            <li>Licence review queue scaffold (full UI lands in Sprint 9)</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 14 Aug)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Tasker opens app, ranked feed shows jobs matched to their skills and location</li>
+            <li>Map and list views both work; filters and sort apply correctly</li>
+            <li>
+              Public Q&amp;A: tasker asks a question, client answers, both update in real-time
+            </li>
+            <li>Tasker bids on a non-licensed task; bid arrives at the client via push</li>
+            <li>Client accepts the bid; both sides receive notifications</li>
+            <li>
+              Tasker tries to bid on a plumbing task without a licence → blocked with "Add your
+              plumbing licence to bid"
+            </li>
+            <li>Tasker uploads plumbing licence; admin approves in the licence queue</li>
+            <li>Tasker can now bid; bid shows "Verified Plumber" badge to the client</li>
+            <li>
+              Conditional Builder rule: offers $4,000 on a builder task succeeds (under the $5K
+              threshold); offers $7,500 is blocked with a clear message
+            </li>
+            <li>Expired licence auto-transitions and tasker can no longer bid on plumbing jobs</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint:</strong>
+          <ul>
+            <li>Messaging once a bid is accepted — Sprint 5</li>
+            <li>Payments — Sprint 5</li>
+            <li>
+              Full admin licence-review UI with cross-check workflow — Sprint 9 (scaffold only here)
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 7</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 5 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 5</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 5</div>
+          <h2>Messaging + payments core + real OTP</h2>
+          <div class="dates">Mon 17 Aug — Fri 28 Aug 2026</div>
+        </div>
+
+        <p class="muted">
+          Money starts flowing this sprint. Before it does, the mock OTP used in development is
+          swapped for the real production provider so all phone verifications are authentic.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Mobile</div>
+          <ul>
+            <li>Inbox / thread list of conversations</li>
+            <li>Conversation view (text, photo attachments, file/PDF)</li>
+            <li>Read receipts</li>
+            <li>Report a user or message</li>
+            <li>Block user</li>
+            <li>Off-platform contact warning (when users try to share phone / email)</li>
+            <li>Message search</li>
+            <li>Push notifications for new messages</li>
+            <li>Thread freeze when a dispute opens</li>
+            <li>Add / remove credit card, set default card</li>
+            <li>Apple Pay and Google Pay (via Stripe's PaymentSheet)</li>
+            <li>Stripe-hosted onboarding webview</li>
+            <li>Payout history (tasker)</li>
+            <li>Earnings summary (tasker) and transaction history (client)</li>
+            <li>Receipt PDF viewer</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Backend</div>
+          <ul>
+            <li>Real-time messaging via Socket.IO (single-node at MVP)</li>
+            <li>Message persistence with Redis adapter groundwork</li>
+            <li>Attachment upload + virus scan (local at MVP; Azure Content Safety in Sprint 8)</li>
+            <li>Thread state machine (open / frozen / closed)</li>
+            <li>Off-platform regex detection (phone numbers, emails, etc.)</li>
+            <li>Stripe PaymentIntent (create, capture, void)</li>
+            <li>Stripe Refund (full and partial)</li>
+            <li>Manual capture flow within Stripe's 7-day authorisation window</li>
+            <li>SetupIntent and saved payment methods for scheduled jobs &gt; 7 days out</li>
+            <li>Re-authorisation flow on capture expiry</li>
+            <li>Payment state machine with full audit log</li>
+            <li>Idempotency middleware (Redis-backed)</li>
+            <li>Stripe webhook signature verification</li>
+            <li>Application fee / platform fee logic</li>
+            <li>Production OTP provider swap with safeguard checks</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 28 Aug)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Client and tasker chat in-app in real time; messages and attachments deliver</li>
+            <li>Off-platform warning fires when a user tries to share a phone number</li>
+            <li>Client adds a card and places a payment authorisation on an accepted bid</li>
+            <li>Tasker sees "Authorised $XXX" status on the job</li>
+            <li>Stripe webhook delivers correctly and updates payment state</li>
+            <li>Re-authorisation prompt works for scheduled jobs &gt; 7 days out</li>
+            <li>Production OTP provider goes live; a real SMS is delivered to a real phone</li>
+            <li>Receipt PDF viewable from transaction history</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint:</strong>
+          <ul>
+            <li>Job execution (check-in, completion proof) — Sprint 6</li>
+            <li>Cancellation and refund processing — Sprint 6</li>
+            <li>Tax invoices and RCTI generation — Sprint 6</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 8</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 6 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 6</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 6</div>
+          <h2>Job execution + tax / RCTI / GST / ATO</h2>
+          <div class="dates">Mon 31 Aug — Fri 11 Sep 2026</div>
+        </div>
+
+        <p class="muted">
+          Tax-critical sprint. A tax advisor will be engaged before this sprint starts and will sign
+          off the GST + RCTI logic before any of it merges.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Mobile</div>
+          <ul>
+            <li>
+              Accepted-job screen with status update buttons (en route, arrived, in progress,
+              completed)
+            </li>
+            <li>Geofenced check-in / arrival proof</li>
+            <li>Live location share during an active job</li>
+            <li>Completion proof upload (2 photos + completion checklist)</li>
+            <li>Tax invoice PDF for clients</li>
+            <li>RCTI (Recipient Created Tax Invoice) PDF for taskers</li>
+            <li>RCTI agreement screen with consent capture (required by ATO)</li>
+            <li>Refund request flow</li>
+            <li>Re-authorisation prompt when payment authorisation is about to expire</li>
+            <li>Promo code input</li>
+            <li>Cancellation flow with fee preview based on cancellation timing</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Backend</div>
+          <ul>
+            <li>Cancellation engine with fee matrix (no-show, late cancel, etc.)</li>
+            <li>Geofenced check-in verification</li>
+            <li>Auto-confirm cron (closes the job N hours after completion if no dispute)</li>
+            <li>Dispute window cron (48 hours)</li>
+            <li>Escalating notification cadence</li>
+            <li>State transitions for every cancellation scenario</li>
+            <li>GST calculation on the platform fee (10% Australian GST)</li>
+            <li>ABN status tracking with periodic re-check</li>
+            <li>RCTI generation and PDF (PDFKit)</li>
+            <li>RCTI agreement workflow with explicit consent capture per ATO requirements</li>
+            <li>Tax invoice generation and PDF</li>
+            <li>ATO sharing-economy reporting export (monthly batch job)</li>
+            <li>Tax-rate config (admin-editable, defaults to 10% GST)</li>
+            <li>Live location share endpoint</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 11 Sep)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>
+              Tasker walks into the job geofence (simulated) and the app auto-prompts check-in
+            </li>
+            <li>Tasker checks in; client receives a notification</li>
+            <li>Live location sharing visible to the client during the active job</li>
+            <li>Tasker marks complete, uploads 2 proof photos with the checklist</li>
+            <li>
+              Auto-capture fires within the agreed window; payment moves from authorised to captured
+            </li>
+            <li>Tax invoice generated and downloadable as a PDF (client)</li>
+            <li>
+              RCTI generated and downloadable as a PDF (tasker), with their RCTI agreement on record
+            </li>
+            <li>Cancellation by either side calculates the correct fee from the matrix</li>
+            <li>ATO sharing-economy report previewable in the admin tooling</li>
+            <li>Tax advisor sign-off recorded for the GST, RCTI, and ATO code paths</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint:</strong>
+          <ul>
+            <li>Reviews after job completion — Sprint 7</li>
+            <li>Dispute mediation flow — Sprint 7</li>
+            <li>Notification opt-out / preferences — Sprint 8</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 9</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 7 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 7</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 7</div>
+          <h2>Reviews + AI-assisted disputes (Tier-0 mediator)</h2>
+          <div class="dates">Mon 14 Sep — Fri 25 Sep 2026</div>
+        </div>
+
+        <p class="muted">
+          Both sides leave reviews. When something goes wrong, the AI mediator proposes a resolution
+          that humans can accept, reject, or escalate. The admin gets an AI-generated case brief for
+          any escalation.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Mobile</div>
+          <ul>
+            <li>Post-completion review prompt (both sides)</li>
+            <li>Star rating with text review (minimum length enforced)</li>
+            <li>
+              Blind review with timeout-reveal (you can't see what the other side wrote until both
+              submit or N days pass)
+            </li>
+            <li>Response to a review</li>
+            <li>Report a review (admin reviews flagged content)</li>
+            <li>Dispute initiation flow with reason picker</li>
+            <li>Evidence upload (photos, message screenshots)</li>
+            <li>Dispute conversation thread</li>
+            <li>AI-proposed resolution screen with rationale</li>
+            <li>Accept / reject / escalate buttons</li>
+            <li>Dispute status tracker</li>
+            <li>Resolution outcome screen</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Backend</div>
+          <ul>
+            <li>Review CRUD with blind / timeout-reveal logic</li>
+            <li>Response-to-review API</li>
+            <li>Admin-triggered review removal</li>
+            <li>Minimum-length enforcement</li>
+            <li>Dispute CRUD with full state machine</li>
+            <li>Tier-0 LLM mediator agent (Claude Sonnet for nuance) with cost guardrails</li>
+            <li>Evidence aggregation across messages, photos, and completion proof</li>
+            <li>Resolution proposal generation (full release, partial release, refund)</li>
+            <li>Tier-0 threshold config (auto-mediate disputes under AUD $200 by default)</li>
+            <li>Accept / reject proposal logic with audit log</li>
+            <li>Escalation to human admin pathway</li>
+            <li>
+              Admin case brief generator (co-pilot) summarising timeline, key messages, evidence,
+              precedent
+            </li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 25 Sep)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Job completes; review prompts appear on both sides</li>
+            <li>Blind review: neither side can see the other's review until both have submitted</li>
+            <li>Tasker responds to a review; response appears under the original</li>
+            <li>Client opens a dispute, picks a reason, uploads evidence</li>
+            <li>
+              Tier-0 AI mediator analyses messages, photos, and completion proof, then proposes a
+              resolution like "$50 partial refund because tasker missed one checklist item"
+            </li>
+            <li>Client accepts the proposal; funds release accordingly with audit log entry</li>
+            <li>
+              Disputes above the $200 threshold escalate to a human admin with an AI-generated case
+              brief
+            </li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint:</strong>
+          <ul>
+            <li>Notification preferences and unsubscribe — Sprint 8</li>
+            <li>Privacy DSR endpoints — Sprint 8</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 10</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 8 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 8</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 8</div>
+          <h2>Notifications + trust &amp; safety + privacy</h2>
+          <div class="dates">Mon 28 Sep — Fri 9 Oct 2026</div>
+        </div>
+
+        <p class="muted">
+          Notifications go live on all channels with proper opt-out support (Spam Act compliant).
+          Trust and safety includes content moderation and EXIF tampering checks. Privacy includes
+          DSR self-service for the Privacy Act.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Mobile</div>
+          <ul>
+            <li>Push notification setup (iOS APNS, Android FCM)</li>
+            <li>In-app notification centre</li>
+            <li>Per-channel toggle (push, email, SMS, in-app)</li>
+            <li>Email unsubscribe</li>
+            <li>SMS opt-out (STOP)</li>
+            <li>Notification badges and deep-links</li>
+            <li>Critical-state fallback (escalation push → email → SMS for high-priority items)</li>
+            <li>Notification history</li>
+            <li>
+              Privacy data-subject-request (DSR) self-service: export and account-deletion request
+            </li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Backend</div>
+          <ul>
+            <li>Push notification service (FCM, APNS)</li>
+            <li>Email service (SendGrid) with verified domain</li>
+            <li>SMS service (Notifyre, alpha sender "JOBBEES")</li>
+            <li>In-app notification queue and API</li>
+            <li>User preferences engine</li>
+            <li>Notification templates (versioned)</li>
+            <li>Critical-state fallback escalation</li>
+            <li>Spam Act and Privacy Act compliance</li>
+            <li>Unsubscribe token endpoint</li>
+            <li>Image content moderation via Azure Content Safety</li>
+            <li>Async moderation queue</li>
+            <li>EXIF tampering / consistency check on uploaded photos</li>
+            <li>LLM cost telemetry with anomaly alerts</li>
+            <li>Account suspension webhooks</li>
+            <li>Data inventory + retention schema</li>
+            <li>DSR endpoints (access, delete, correct) with proof of execution</li>
+            <li>Anonymisation job (financial data retained 7 years per ATO)</li>
+            <li>Hard delete vs anonymise logic</li>
+            <li>Consent ledger</li>
+            <li>PII redaction layer in front of every external LLM call</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 9 Oct)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Push notification arrives on a real device for a new bid</li>
+            <li>Email notification with working unsubscribe link</li>
+            <li>SMS notification with STOP opt-out tested</li>
+            <li>Critical-state fallback: push → email → SMS escalation visible in audit log</li>
+            <li>Per-channel opt-out preferences honoured</li>
+            <li>
+              EXIF flag fires on a deliberately-tampered upload; admin moderation queue gets the
+              photo
+            </li>
+            <li>Content moderation auto-rejects a known-bad test image</li>
+            <li>
+              Privacy &amp; data screen: user requests data export, receives a downloadable file
+            </li>
+            <li>User requests account deletion; backend anonymises within retention rules</li>
+            <li>Consent ledger shows the user's consent history</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint:</strong>
+          <ul>
+            <li>Full admin console — Sprint 9</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 11</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 9 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 9</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 9</div>
+          <h2>Admin console end-to-end</h2>
+          <div class="dates">Mon 12 Oct — Fri 23 Oct 2026</div>
+        </div>
+
+        <p class="muted">
+          The most surface-area sprint. The admin console pulls together everything built across
+          Sprints 1-8 into one workspace where the operator can run the marketplace day-to-day.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Admin (almost the entire sprint)</div>
+          <ul>
+            <li>Mandatory two-factor authentication (TOTP) for admin login</li>
+            <li>Role-based access (single admin role at MVP; super-admin distinction post-MVP)</li>
+            <li>Audit log of every admin action</li>
+            <li>Admin user CRUD</li>
+            <li>KPI overview dashboard (daily active users, jobs, GMV, payouts, disputes)</li>
+            <li>System health panel (error rate, latency)</li>
+            <li>Today's queue (pending KYC, licences, disputes, flagged content, DSR requests)</li>
+            <li>User list, search, filter, and detail view</li>
+            <li>KYC review queue (full UI on top of the Sprint 2 scaffold)</li>
+            <li>
+              Trade-licence review queue (full UI on top of the Sprint 4 scaffold), with cross-check
+              against state register
+            </li>
+            <li>Connect onboarding tracker</li>
+            <li>Suspend, ban, and reinstate users</li>
+            <li>Manual identity verification override (audited)</li>
+            <li>Force logout and admin-triggered password reset</li>
+            <li>DSR request handler with action history</li>
+            <li>Task list, detail, edit, delete</li>
+            <li>Content moderation queue with manual approval</li>
+            <li>Re-categorise task; force-cancel task; edit AI extraction results</li>
+            <li>Offer list per job</li>
+            <li>Public Q&amp;A moderation queue</li>
+            <li>Flagged messages queue with manual review and thread freeze / unfreeze</li>
+            <li>Payment list, detail, refund processing, manual capture / void</li>
+            <li>Payout tracking; held-funds dashboard</li>
+            <li>Daily reconciliation report</li>
+            <li>Stripe webhook delivery log</li>
+            <li>Promo code admin (CRUD with usage tracking)</li>
+            <li>Tax invoice listing; RCTI status per tasker; RCTI re-generation</li>
+            <li>ATO report preview, download, and submission log</li>
+            <li>GST rate config and tax-adjustment / manual-override log</li>
+            <li>Dispute queue with Tier-0 mediator suggestion panel</li>
+            <li>Manual mediation interface and evidence viewer</li>
+            <li>Resolution actions (release, partial, refund, escalate)</li>
+            <li>Admin notes per dispute; AI-generated co-pilot brief renderer</li>
+            <li>Review queue with manual review removal</li>
+            <li>FAQ CRUD (drives the in-app help and the public web FAQ)</li>
+            <li>Help article CRUD; T&amp;Cs and Privacy Policy versioned editor</li>
+            <li>Push notification broadcast composer</li>
+            <li>In-app banner / announcement composer</li>
+            <li>Category, sub-category, skill tag, service area CRUD</li>
+            <li>Platform fee config (per category); cancellation fee matrix config</li>
+            <li>Auto-confirm timing and Tier-0 dispute threshold config</li>
+            <li>Stripe credentials display (read-only)</li>
+            <li>LLM provider config and model selection</li>
+            <li>Feature flags, maintenance-mode toggle, rate-limit config</li>
+            <li>Geographic launch toggle (per suburb)</li>
+            <li>Manual broadcast tool (push a job to candidate taskers)</li>
+            <li>Tasker invitation tool with admin-issued invite codes</li>
+            <li>Admin action audit log viewer and user action audit trail viewer</li>
+            <li>Data retention dashboard and DSR request queue</li>
+            <li>Consent ledger viewer</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 23 Oct)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Admin login requires TOTP from an authenticator app</li>
+            <li>Today's queue shows real pending items across all surfaces</li>
+            <li>KYC and licence reviews can be approved or rejected with audit log entries</li>
+            <li>Dispute resolution end-to-end works using the Tier-0 mediator and case brief</li>
+            <li>Refund processing flows through Stripe with audit trail</li>
+            <li>Monthly ATO report previews and downloads in the expected format</li>
+            <li>
+              Tunable settings (ranking weights, Tier-0 threshold, fee matrix) update live and are
+              audited
+            </li>
+            <li>Manual broadcast tool sends to filtered audience</li>
+            <li>Audit-log viewer shows the admin's own actions across the session</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint:</strong>
+          <ul>
+            <li>
+              Cloud deployment — Sprint 10 (admin still runs against local infrastructure here)
+            </li>
+            <li>Some polish items moved to Sprint 11 if time tight</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 12</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 10 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 10</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 10</div>
+          <h2>Cloud deployment + WAF</h2>
+          <div class="dates">Mon 26 Oct — Fri 6 Nov 2026</div>
+        </div>
+
+        <p class="muted">
+          Move from "works on a laptop with Docker" to "works on Azure with Cloudflare protection on
+          a public URL." First sprint with real cloud spend.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Cloud infrastructure (Microsoft Azure, Australia East)</div>
+          <ul>
+            <li>Three Azure App Services (API, admin console, public web)</li>
+            <li>Azure Database for PostgreSQL Flexible Server with pgvector extension</li>
+            <li>Azure Cache for Redis</li>
+            <li>
+              Azure Blob Storage for user-uploaded files (with private containers + SAS tokens)
+            </li>
+            <li>Azure Key Vault for secrets and rotated credentials</li>
+            <li>Azure Content Safety for content moderation</li>
+            <li>Azure Application Insights for monitoring and alerts</li>
+            <li>Virtual Network with private endpoints; network security groups</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Edge security (Cloudflare Pro)</div>
+          <ul>
+            <li>Cloudflare WAF rules with OWASP top-ten ruleset</li>
+            <li>DDoS protection</li>
+            <li>Bot Fight Mode</li>
+            <li>Geo-restrict the admin console to Australia</li>
+            <li>Rate limits at the edge</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">CI / CD pipelines</div>
+          <ul>
+            <li>GitHub Actions: lint, typecheck, test on every PR</li>
+            <li>Deploy to staging on merge to main</li>
+            <li>Deploy to production on tagged release</li>
+            <li>Prisma migrate deploy in CI (no app-startup migrations in production)</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Application changes for cloud</div>
+          <ul>
+            <li>Swap local-filesystem blob storage for the Azure Blob SDK</li>
+            <li>Key Vault references in App Service config</li>
+            <li>Secrets rotation policy</li>
+            <li>Encryption-at-rest verification</li>
+            <li>OpenAPI documentation generation</li>
+            <li>Health-check endpoints</li>
+            <li>Status page (thin)</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 6 Nov)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Same end-to-end happy path from Sprint 6 demo runs against Azure staging</li>
+            <li>Cloudflare WAF is in front of the public URL (no direct origin access)</li>
+            <li>Admin console geo-restricted to Australia (VPN test from another country fails)</li>
+            <li>Health checks return green; status page is live</li>
+            <li>
+              Deploy pipeline succeeds: merge to main → staging deploy → tag → production deploy
+            </li>
+            <li>Backup-and-restore drill executed successfully (Postgres point-in-time restore)</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint:</strong>
+          <ul>
+            <li>Real-device app store testing — Sprint 11</li>
+            <li>Soft launch with real users — Sprint 12</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 13</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 11 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 11</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 11</div>
+          <h2>TestFlight + bug fix + launch hardening</h2>
+          <div class="dates">Mon 9 Nov — Fri 20 Nov 2026</div>
+        </div>
+
+        <p class="muted">
+          First time real human hands hold the app on real devices. Whatever breaks, we fix. Legal,
+          store listings, and SEO go in. App is ready to face actual paying users.
+        </p>
+
+        <div class="section-title">What we're building this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">TestFlight + Play Store</div>
+          <ul>
+            <li>Apple Developer Program enrolment already in place</li>
+            <li>Signing certificates and App Store Connect setup</li>
+            <li>TestFlight internal testers added (client + 2-3 trusted testers)</li>
+            <li>First TestFlight build uploaded</li>
+            <li>Google Play internal testing track</li>
+            <li>Signing key, AAB upload</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Mobile polish</div>
+          <ul>
+            <li>Final app icon, splash, launch animation</li>
+            <li>App Store and Play Store listing screenshots</li>
+            <li>App Tracking Transparency prompt (iOS)</li>
+            <li>Contextual tooltips at 5-6 key first-use moments</li>
+            <li>"How it works" page (in-app + on public web)</li>
+            <li>Expanded instructive empty states</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Compliance + legal</div>
+          <ul>
+            <li>Lawyer review of Terms of Service and Privacy Policy</li>
+            <li>Final compliance check (security review skill rerun across all code)</li>
+            <li>Static analysis (Semgrep, CodeQL) clean</li>
+            <li>npm vulnerability audit clean</li>
+            <li>Tax advisor sign-off on the entire RCTI / GST / ATO code path</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Bug fix budget</div>
+          <ul>
+            <li>
+              15-hour buffer reserved for issues surfaced by TestFlight testers (typical: 30-50
+              small ones in week 1)
+            </li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 20 Nov)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>Client installs the app on their own iPhone via TestFlight invite</li>
+            <li>Client runs the happy-path end-to-end on a real device</li>
+            <li>Onboarding tooltips fire on first use of each major flow</li>
+            <li>"How it works" page is accessible from the home screen and public web</li>
+            <li>App Store listing screenshots and copy approved</li>
+            <li>Lawyer-approved Terms and Privacy Policy published</li>
+            <li>Tax advisor sign-off on file</li>
+            <li>
+              All bugs reported during week 1 of testing are either fixed or triaged with sign-off
+            </li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>Deferred from this sprint:</strong>
+          <ul>
+            <li>Stripe switch from test to live mode — Sprint 12 (one-way decision)</li>
+            <li>Real-money production runs — Sprint 12</li>
+            <li>External penetration test — booked for within 60 days post-launch</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 14</span>
+      </div>
+    </section>
+
+    <!-- ===================== SPRINT 12 ===================== -->
+    <section class="page sprint-page">
+      <div class="brand-bar"></div>
+      <div class="page-header">
+        <span class="brand">JOBBees</span>
+        <span class="crumb">Sprint Detail Booklet &nbsp;|&nbsp; Sprint 12</span>
+      </div>
+      <div class="content">
+        <div class="sprint-header">
+          <div class="sprint-num">Sprint 12</div>
+          <h2>Soft launch + first real users + retrospective</h2>
+          <div class="dates">Mon 23 Nov — Fri 4 Dec 2026</div>
+        </div>
+
+        <p class="muted">
+          The MVP exists in the world. A real tasker in one Sydney suburb completes a real job
+          posted by a real client, with real money flowing through Stripe in live mode.
+        </p>
+
+        <div class="section-title">What we're doing this sprint</div>
+
+        <div class="feature-group">
+          <div class="surface">Soft launch operations</div>
+          <ul>
+            <li>Pick one Sydney suburb (Newtown, Surry Hills, or similar inner-city pilot area)</li>
+            <li>Onboard 30-50 taskers via manual outreach and the admin invitation tool</li>
+            <li>
+              Switch Stripe from test mode to live mode (one-way decision — checklist reviewed by
+              engineering lead and client before flipping)
+            </li>
+            <li>Monitor App Insights and Cloudflare logs every day</li>
+            <li>Daily 30-minute "what broke today" sync between engineering and client</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">End-of-MVP audit</div>
+          <ul>
+            <li>
+              Run the coverage script — every in-scope feature row should be marked done with the PR
+              number
+            </li>
+            <li>Anything not done has written justification in the post-MVP deferred document</li>
+            <li>Hand-off documentation for ongoing maintenance</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Retrospective</div>
+          <ul>
+            <li>What went well, what didn't</li>
+            <li>Post-MVP roadmap drafted (multi-suburb expansion, insurance verification, etc.)</li>
+            <li>Retrospective document committed to the repository</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 4 Dec — the launch video)</div>
+        <div class="demo-checklist">
+          <ul>
+            <li>
+              A real tasker in the soft-launch suburb is verified, licensed (if applicable), and
+              live in the marketplace
+            </li>
+            <li>A real client posts a job in the soft-launch suburb</li>
+            <li>The tasker bids, the client accepts, payment authorises on a real card</li>
+            <li>
+              The tasker completes the job; auto-capture fires; real money moves through Stripe
+              Connect
+            </li>
+            <li>Both sides leave reviews</li>
+            <li>Tax invoice and RCTI generated and emailed</li>
+            <li>Day-0 monitoring dashboard shows no critical errors</li>
+            <li>Coverage report shows every committed feature is done</li>
+            <li>Launch video recorded and ready to share</li>
+          </ul>
+        </div>
+
+        <div class="deferred">
+          <strong>What's deliberately NOT in the MVP (deferred to post-launch):</strong>
+          <ul>
+            <li>Multi-suburb expansion (beyond the one soft-launch suburb)</li>
+            <li>Multi-state expansion (NSW only; per-state builder thresholds added later)</li>
+            <li>Public Liability insurance verification for taskers</li>
+            <li>Tasker availability calendar</li>
+            <li>Counter-offer or back-and-forth bid negotiation (replaced by public Q&amp;A)</li>
+            <li>International clients / taskers</li>
+            <li>Multi-admin role enforcement (single admin role at MVP)</li>
+            <li>
+              Police checks / Working-with-Children Checks (only if child-related categories are
+              added)
+            </li>
+            <li>Customer support ticket queue UI (handled via email at MVP)</li>
+            <li>Funnel, cohort, LTV, churn, and surge analytics dashboards</li>
+            <li>Referral code management</li>
+            <li>Synthetic supply seeding workflow</li>
+          </ul>
+        </div>
+      </div>
+      <div class="page-footer">
+        <span>JOBBees MVP &nbsp;—&nbsp; Sprint Detail Booklet</span>
+        <span>Page 15</span>
+      </div>
+    </section>
+  </body>
+</html>

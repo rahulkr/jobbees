@@ -34,12 +34,12 @@ Then Sprints 1-12 spend the ~945-hour build budget on actual features without re
 
 ### Data model
 
-- Prisma schema with 9 first-class models: `Country`, `User`, `UserSkill`, `Category`, `Task`, `TaskPhoto`, `TaskQuestion`, `Bid`, `Review`, `AuditLog`
-- Enums: `UserRole`, `CategoryType`, `TaskStatus`, `BidStatus`, `PaymentState`, `DisputeState`, `KycStatus`, `ConnectStatus`
+- Prisma schema with 9 first-class models: `Country`, `User`, `UserSkill`, `Category`, `Job`, `JobPhoto`, `JobQuestion`, `Offer`, `Review`, `AuditLog`
+- Enums: `UserRole`, `CategoryType`, `JobStatus`, `OfferStatus`, `PaymentState`, `DisputeState`, `KycStatus`, `ConnectStatus`
 - Conventions: cuid2 IDs, integer cents, soft delete on user-facing entities, UTC times, `countryCode` defaulting to AU
-- pgvector columns on User + Task (1536-dim, ready for OpenAI embeddings)
+- pgvector columns on User + Job (1536-dim, ready for OpenAI embeddings)
 - Migrations: `000_enable_pgvector` (raw SQL for extension), `20260602102440_init` (full schema)
-- Seed data: 1 super-admin + 5 posters + 10 taskers + 20 tasks + 39 bids
+- Seed data: 1 super-admin + 5 clients + 10 taskers + 20 jobs + 39 offers
 - `FUTURE MODELS` comment block in `schema.prisma` lists every model needed by IN features but not yet built (Payment, TaxInvoice, Rcti, Cancellation, Dispute, NotificationPreference, ServiceArea, AdminTotp, RefreshToken, etc.) — nothing falls through
 
 ### Architecture Decision Records
@@ -88,7 +88,7 @@ ADRs to land before end of Sprint 0:
 - **`au-tax`** — GST + RCTI + ATO sharing-economy reporting. Flagged for high AI-hallucination risk — every line requires manual review
 - **`pgvector-match`** — embedding model, cosine queries, ranked-feed weighted blend
 - **`tier0-dispute`** — system prompt, evidence aggregation, output schema, escalation rules
-- **`multimodal-extraction`** — vision-based task extraction (Flash → Pro fallback, never Opus), preprocessing, cost guardrails
+- **`multimodal-extraction`** — vision-based job extraction (Flash → Pro fallback, never Opus), preprocessing, cost guardrails
 - **`security-review`** — project-specific security review with 30+ JOBBees rules (auto-invokes on changes to auth/payment/tax/kyc/ai/webhook/schema paths)
 
 ### Security tooling
@@ -115,7 +115,7 @@ ADRs to land before end of Sprint 0:
 ### Repo on GitHub
 
 - https://github.com/rahulkr/jobbees
-- Initial commit pushed (`chore: initial scaffold for JOBBees AU task marketplace`)
+- Initial commit pushed (`chore: initial scaffold for JOBBees AU job marketplace`)
 - Author email + name configured locally
 - Branch: `main` (default + tracked from origin)
 - Branch protection: TODO before Sprint 1 D1 (require 1 reviewer, all CI checks green, no merging if CRITICAL security findings open)

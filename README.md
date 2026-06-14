@@ -1,6 +1,6 @@
 # JOBBees
 
-Australian peer-to-peer task marketplace. Mobile-first (Flutter), single Node/NestJS backend, Next.js admin and public web.
+Australian peer-to-peer job marketplace. Mobile-first (Flutter), single Node/NestJS backend, Next.js admin and public web.
 
 ## What's in this repo
 
@@ -84,7 +84,7 @@ Read these in order before contributing:
 
 `CLAUDE.md` files at the root and inside each `apps/*` directory auto-load when Claude Code runs in that folder. Custom skills are in `.claude/skills/`.
 
-Always use **plan mode** (`Shift+Tab` in CLI, or `/plan`) for any task above ~30 minutes of work. Run the `security-review` skill on every PR touching auth, payments, or PII.
+Always use **plan mode** (`Shift+Tab` in CLI, or `/plan`) for any work above ~30 minutes. Run the `security-review` skill on every PR touching auth, payments, or PII.
 
 ## Australian compliance — non-negotiable
 

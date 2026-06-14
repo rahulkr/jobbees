@@ -20,9 +20,9 @@ Every sensitive write produces an `AuditLog` row:
 | `payment.void`               | Payment     |                                      |
 | `dispute.resolve`            | Dispute     | Resolution type, admin who decided   |
 | `dispute.tier0.proposal`     | Dispute     | What Tier-0 proposed                 |
-| `dispute.tier0.accept`       | Dispute     | Who accepted (poster/tasker/both)    |
+| `dispute.tier0.accept`       | Dispute     | Who accepted (client/tasker/both)    |
 | `dispute.escalate`           | Dispute     | Reason for escalation                |
-| `task.force_cancel`          | Task        | Admin force-cancellation             |
+| `job.force_cancel`           | Job         | Admin force-cancellation             |
 | `category.change_type`       | Category    | TRANSACTIONAL ↔ LEAD swap (post-MVP) |
 | `category.commission_change` | Category    | Platform fee change                  |
 | `config.change`              | Config      | Any platform-level config change     |

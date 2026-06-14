@@ -1,14 +1,14 @@
 # Sprint 5 — Messaging + Payments core + OTP swap to Firebase
 
 **Dates:** Mon 17 Aug → Fri 28 Aug 2026 (10 working days)
-**Theme:** A poster and tasker chat in-app about an accepted bid, the poster authorises a payment hold, the tasker can see the funds are committed but not yet paid out. **Plus**: the MockOtpService from Sprint 1 gets swapped for the real production OTP provider so phone-verified accounts are real before real money flows.
+**Theme:** A client and tasker chat in-app about an accepted offer, the client authorises a payment hold, the tasker can see the funds are committed but not yet paid out. **Plus**: the MockOtpService from Sprint 1 gets swapped for the real production OTP provider so phone-verified accounts are real before real money flows.
 **Hours budget:** ~118 (50 mobile, 68 backend) — most payment-heavy sprint, bumped 3h for OTP swap
 **Mid-sprint demo:** Fri 21 Aug
 **End-of-sprint demo:** Fri 28 Aug
 
 ## Goal in one sentence
 
-By Friday 21 Aug, poster + tasker chat in-app about the accepted task → poster authorises a payment hold via Stripe → tasker sees "$X held" in earnings dashboard → if scheduled >7d, SetupIntent path is used so funds can be re-authorised closer to completion.
+By Friday 21 Aug, client + tasker chat in-app about the accepted job → client authorises a payment hold via Stripe → tasker sees "$X held" in earnings dashboard → if scheduled >7d, SetupIntent path is used so funds can be re-authorised closer to completion.
 
 ## Scope — inventory rows
 
@@ -34,7 +34,7 @@ By Friday 21 Aug, poster + tasker chat in-app about the accepted task → poster
 | 130 | Stripe-hosted onboarding webview          | IN   | 2   |                 |
 | 131 | Payout history (tasker)                   | IN   | 3   |                 |
 | 132 | Earnings summary (tasker)                 | IN   | 3   |                 |
-| 133 | Transaction history (poster)              | IN   | 3   |                 |
+| 133 | Transaction history (client)              | IN   | 3   |                 |
 
 **Mobile total: ~42h**
 
@@ -67,12 +67,12 @@ By Friday 21 Aug, poster + tasker chat in-app about the accepted task → poster
 
 ### Schema additions
 
-- New `Thread` model: `id`, `taskId`, `posterId`, `taskerId`, `state ENUM(OPEN, FROZEN_BY_DISPUTE, CLOSED)`, `createdAt`, `updatedAt`, `@@unique([taskId])` (one thread per task)
+- New `Thread` model: `id`, `jobId`, `clientId`, `taskerId`, `state ENUM(OPEN, FROZEN_BY_DISPUTE, CLOSED)`, `createdAt`, `updatedAt`, `@@unique([jobId])` (one thread per job)
 - New `Message` model: `id`, `threadId`, `senderId`, `body Text`, `attachments Json?`, `readAt DateTime?`, `createdAt`, plus `@@index([threadId, createdAt])`
 - New `Attachment` model: `id`, `messageId`, `blobUrl`, `mimeType`, `sizeBytes`, `scanStatus ENUM(PENDING, CLEAN, FAILED)`, `createdAt`
 - New `BlockedUser` model: `userId`, `blockedUserId`, `@@id([userId, blockedUserId])`, `createdAt`
-- New `Report` model: `id`, `reporterId`, `targetType ENUM(MESSAGE, USER, TASK)`, `targetId`, `reason`, `details Text?`, `createdAt`, `reviewedAt`, `reviewerId`
-- New `Payment` model: `id`, `taskId`, `bidId`, `posterId`, `amountCents Int`, `currency String @default("AUD")`, `state PaymentState`, `stripePaymentIntentId`, `stripeSetupIntentId`, `stripePaymentMethodId`, `capturedAt`, `expiresAt`, `voidedAt`, `refundedCents Int @default(0)`, `applicationFeeCents Int`, `createdAt`, `updatedAt`
+- New `Report` model: `id`, `reporterId`, `targetType ENUM(MESSAGE, USER, JOB)`, `targetId`, `reason`, `details Text?`, `createdAt`, `reviewedAt`, `reviewerId`
+- New `Payment` model: `id`, `jobId`, `offerId`, `clientId`, `amountCents Int`, `currency String @default("AUD")`, `state PaymentState`, `stripePaymentIntentId`, `stripeSetupIntentId`, `stripePaymentMethodId`, `capturedAt`, `expiresAt`, `voidedAt`, `refundedCents Int @default(0)`, `applicationFeeCents Int`, `createdAt`, `updatedAt`
 - New `PaymentEvent` model: `id`, `paymentId`, `fromState`, `toState`, `stripeEventId`, `idempotencyKey`, `payloadJson Json`, `createdAt` — immutable, append-only
 - New `IdempotencyKey` model? No — keep in Redis (per CLAUDE.md rule 3)
 - AuditLog writes on Payment state transitions (already supported)
@@ -97,7 +97,7 @@ Same as Sprint 1, plus per skill §H and the PR template payment section:
 
 ```
 00:00 — "Sprint 5 wrap. Messaging + payments. Two devices."
-00:15 — Device A (poster): from accepted bid, tap chat icon → thread opens.
+00:15 — Device A (client): from accepted offer, tap chat icon → thread opens.
 00:30 — Device B (tasker): notification arrives, tap → thread opens on
         their side.
 00:45 — Type a message. Read receipt appears on A. Both directions.
@@ -107,7 +107,7 @@ Same as Sprint 1, plus per skill §H and the PR template payment section:
 01:30 — Switch to A: tap Settings → Payment methods → Add card. Stripe
         Elements native sheet appears. Enter test card 4242 4242 4242
         4242. Save.
-01:50 — Back to thread. Tap "Authorise payment" CTA tied to the bid.
+01:50 — Back to thread. Tap "Authorise payment" CTA tied to the offer.
         Confirm $X.
 02:05 — Show payment state: AUTHORISED. Held but not captured.
 02:15 — Switch to B (tasker): earnings summary screen → "$X held".
@@ -115,16 +115,16 @@ Same as Sprint 1, plus per skill §H and the PR template payment section:
         now arrives via real Firebase SMS (no longer the mock code 000000).
         Caveat: AU pooled sender used, branded sender via Notifyre later.
         Cost telemetry shows ~$0.02 per SMS (well within free tier).
-02:30 — Device A: post a scheduled-for-2-weeks-out task (from S3 flow),
-        accept a bid on it. Show SetupIntent path used (no immediate
+02:30 — Device A: post a scheduled-for-2-weeks-out job (from S3 flow),
+        accept an offer on it. Show SetupIntent path used (no immediate
         hold) — card saved for later auth. State: SETUP_ONLY.
 02:55 — Trigger re-auth flow manually (admin/dev tool to fast-forward
-        7d): re-auth prompt appears on poster device. Tap → confirms.
+        7d): re-auth prompt appears on client device. Tap → confirms.
 03:10 — Show webhook log: Stripe webhook signature verified, payment
         state transitioned, AuditLog entry written.
 03:30 — Show partial refund flow: admin triggers $X refund on the first
-        task. Payment moves to PARTIAL_REFUNDED.
-03:45 — Show transaction history (poster) and payout history (tasker).
+        job. Payment moves to PARTIAL_REFUNDED.
+03:45 — Show transaction history (client) and payout history (tasker).
 04:00 — Block user demo: block the tasker → can't send messages anymore.
 04:15 — Coverage report. Stoplight + asks. End.
 ```
@@ -174,7 +174,7 @@ Same as Sprint 1, plus per skill §H and the PR template payment section:
 - [ ] All 19 mobile rows done
 - [ ] All 19 backend rows done
 - [ ] Payment authorise + capture works end-to-end in Stripe test mode
-- [ ] SetupIntent + re-auth works for tasks scheduled >7d
+- [ ] SetupIntent + re-auth works for jobs scheduled >7d
 - [ ] Idempotency key replay test passes
 - [ ] Webhook signature failure test passes
 - [ ] Eng lead's manual line-by-line review attached to every payment PR

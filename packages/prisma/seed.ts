@@ -5,11 +5,11 @@
  *
  * Creates a usable local development environment:
  * - 1 super admin user
- * - 5 test posters, 10 test taskers (KYC stub'd to APPROVED)
+ * - 5 test clients, 10 test taskers (KYC stub'd to APPROVED)
  * - Country (AU only at MVP)
  * - Categories (transactional, with parent/child hierarchy)
- * - 20 sample tasks across categories
- * - A few sample bids
+ * - 20 sample jobs across categories
+ * - A few sample offers
  *
  * Do NOT seed prod-like volumes — keep local dev fast. Use Faker for realism.
  */
@@ -29,8 +29,8 @@ import {
   PrismaClient,
   UserRole,
   CategoryType,
-  TaskStatus,
-  BidStatus,
+  JobStatus,
+  OfferStatus,
   KycStatus,
   ConnectStatus,
 } from './generated';
@@ -76,7 +76,7 @@ async function main() {
     { slug: 'handyman', name: 'Handyman' },
     { slug: 'gardening', name: 'Gardening & Yard Work' },
     { slug: 'assembly', name: 'Assembly' },
-    { slug: 'errands', name: 'Errands & Tasks' },
+    { slug: 'errands', name: 'Errands & Jobs' },
     { slug: 'tech-help', name: 'Tech Help' },
     { slug: 'pet-care', name: 'Pet Care' },
   ];
@@ -116,9 +116,9 @@ async function main() {
   });
   console.log(`  ✓ Super admin: admin@jobbees.local`);
 
-  const posters: Array<{ id: string; email: string }> = [];
+  const clients: Array<{ id: string; email: string }> = [];
   for (let i = 0; i < 5; i++) {
-    const email = `poster${i + 1}@jobbees.local`;
+    const email = `client${i + 1}@jobbees.local`;
     const u = await prisma.user.upsert({
       where: { email },
       update: {},
@@ -128,16 +128,16 @@ async function main() {
         phone: `+61400${faker.string.numeric(6)}`,
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
-        role: UserRole.POSTER,
+        role: UserRole.CLIENT,
         emailVerified: true,
         countryCode: 'AU',
         kycStatus: KycStatus.APPROVED,
         defaultAddress: `${faker.location.streetAddress()}, ${faker.location.city()} NSW`,
       },
     });
-    posters.push({ id: u.id, email: u.email });
+    clients.push({ id: u.id, email: u.email });
   }
-  console.log(`  ✓ Posters: ${posters.length}`);
+  console.log(`  ✓ Clients: ${clients.length}`);
 
   const taskers: Array<{ id: string; email: string }> = [];
   for (let i = 0; i < 10; i++) {
@@ -166,16 +166,16 @@ async function main() {
   console.log(`  ✓ Taskers: ${taskers.length}`);
 
   // -----------------------------
-  // Tasks
+  // Jobs
   // -----------------------------
   const allCategories = await prisma.category.findMany();
   for (let i = 0; i < 20; i++) {
-    const poster = faker.helpers.arrayElement(posters);
+    const client = faker.helpers.arrayElement(clients);
     const category = faker.helpers.arrayElement(allCategories);
-    await prisma.task.create({
+    await prisma.job.create({
       data: {
         id: createId(),
-        posterId: poster.id,
+        clientId: client.id,
         categoryId: category.id,
         title: faker.lorem.sentence({ min: 3, max: 7 }),
         description: faker.lorem.paragraphs(2),
@@ -189,46 +189,46 @@ async function main() {
         longitude: parseFloat(faker.location.longitude({ min: 150, max: 152 }).toFixed(6)),
         scheduledAt: faker.date.soon({ days: 7 }),
         durationHours: faker.number.int({ min: 1, max: 8 }),
-        status: TaskStatus.BIDDING,
+        status: JobStatus.OFFERING,
         publishedAt: new Date(),
       },
     });
   }
-  console.log(`  ✓ Tasks: 20`);
+  console.log(`  ✓ Jobs: 20`);
 
   // -----------------------------
-  // Bids
+  // Offers
   // -----------------------------
-  const tasks = await prisma.task.findMany({ where: { status: TaskStatus.BIDDING } });
-  let bidCount = 0;
-  for (const task of tasks) {
-    const numBids = faker.number.int({ min: 0, max: 4 });
-    const biddersForThisTask = faker.helpers.arrayElements(taskers, numBids);
-    for (const tasker of biddersForThisTask) {
-      await prisma.bid.create({
+  const jobs = await prisma.job.findMany({ where: { status: JobStatus.OFFERING } });
+  let offerCount = 0;
+  for (const job of jobs) {
+    const numOffers = faker.number.int({ min: 0, max: 4 });
+    const offerersForThisJob = faker.helpers.arrayElements(taskers, numOffers);
+    for (const tasker of offerersForThisJob) {
+      await prisma.offer.create({
         data: {
           id: createId(),
-          taskId: task.id,
+          jobId: job.id,
           taskerId: tasker.id,
           amountCents: faker.number.int({
-            min: Math.floor(task.budgetCents * 0.8),
-            max: Math.ceil(task.budgetCents * 1.2),
+            min: Math.floor(job.budgetCents * 0.8),
+            max: Math.ceil(job.budgetCents * 1.2),
           }),
           message: faker.lorem.sentence(),
-          status: BidStatus.ACTIVE,
+          status: OfferStatus.ACTIVE,
           expiresAt: faker.date.soon({ days: 2 }),
         },
       });
-      bidCount++;
+      offerCount++;
     }
   }
-  console.log(`  ✓ Bids: ${bidCount}`);
+  console.log(`  ✓ Offers: ${offerCount}`);
 
   console.log('🌱 Seed complete.');
   console.log('');
   console.log('Test accounts:');
   console.log('  Super admin: admin@jobbees.local');
-  console.log('  Posters:     poster1@jobbees.local ... poster5@jobbees.local');
+  console.log('  Clients:     client1@jobbees.local ... client5@jobbees.local');
   console.log('  Taskers:     tasker1@jobbees.local ... tasker10@jobbees.local');
   console.log('  (All passwords: set via your auth flow — none stored in seed)');
 }

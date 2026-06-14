@@ -10,7 +10,7 @@ Maps every Australian legal/regulatory obligation to system behaviour. Reviewed 
 | Australian Privacy Principle (APP)                   | System implementation                                                                                 |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | APP 1 — Open and transparent management              | Privacy Policy published, kept in sync via `privacy-policy.md` mapping                                |
-| APP 2 — Anonymity / pseudonymity                     | Posters can use display names; full name required only for KYC verification                           |
+| APP 2 — Anonymity / pseudonymity                     | Clients can use display names; full name required only for KYC verification                           |
 | APP 3 — Collection of solicited personal information | Only collect what's necessary for marketplace function; documented in `data-classification-policy.md` |
 | APP 4 — Dealing with unsolicited information         | Process to delete unsolicited personal info on receipt (admin queue)                                  |
 | APP 5 — Notification of collection                   | Signup flow shows what data is collected + why                                                        |
@@ -33,7 +33,7 @@ See `incident-response-plan.md` — 30-day assessment, OAIC notification for eli
 | ---------------------------------------- | ------------------------------------------------------------------------ |
 | GST registration                         | TODO: client to register platform once turnover hits $75k AUD/year       |
 | GST collection (10%)                     | On platform fee only; calculated by `GstService`                         |
-| Tax invoices (poster side)               | Generated on every captured payment                                      |
+| Tax invoices (client side)               | Generated on every captured payment                                      |
 | RCTI (Recipient-Created Tax Invoice)     | For taskers without ABN; consent required at signup; generated on payout |
 | ABN collection + validation              | At tasker signup; ABR lookup; quarterly re-check                         |
 | **ATO Sharing Economy Reporting Regime** | Monthly export to ATO Online Services; fields per ATO spec               |
@@ -53,7 +53,7 @@ See `incident-response-plan.md` — 30-day assessment, OAIC notification for eli
 | AUSTRAC registration      | TODO: client to assess (typically not required for marketplaces under threshold) |
 | Stripe Connect onboarding | Connect Express with bundled KYC (Stripe Identity) + bank verification           |
 | KYC for taskers           | Required before payout (Stripe Identity)                                         |
-| KYC for posters           | Required for >$1000 single transactions (TODO: confirm threshold with client)    |
+| KYC for clients           | Required for >$1000 single transactions (TODO: confirm threshold with client)    |
 | Anti-money laundering     | Stripe handles transaction monitoring; we surface flagged transactions to admin  |
 
 ## Spam Act 2003

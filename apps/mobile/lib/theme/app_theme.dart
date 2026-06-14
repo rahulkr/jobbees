@@ -185,7 +185,7 @@ class JobbeesTheme {
         elevation: 0,
       ),
 
-      // FAB (the raised "Post a task" button)
+      // FAB (the raised "Post a job" button)
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,

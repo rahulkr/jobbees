@@ -13,11 +13,11 @@ Any of: GST, ABN, ABR, RCTI, ATO, sharing-economy, tax invoice, tax advisor, wit
 
 This is the highest-risk area in the codebase for AI hallucination. Specific things AI gets subtly wrong:
 
-- Whether GST applies to the full task amount or just the platform fee
+- Whether GST applies to the full job amount or just the platform fee
 - Whether RCTI is required for non-ABN taskers (it is) or non-GST-registered taskers (different concept)
 - ATO sharing-economy reporting field schema (it's specific and mandatory)
 - Whether platform fee includes GST or excludes it (excludes, then GST added on top)
-- Threshold for GST registration ($75k AUD/year) — applies to the platform's GST registration, not per-task
+- Threshold for GST registration ($75k AUD/year) — applies to the platform's GST registration, not per-job
 
 **Always have the tax advisor review the SQL + the PDF templates + the ATO export schema before merging.**
 
@@ -26,12 +26,12 @@ This is the highest-risk area in the codebase for AI hallucination. Specific thi
 ### GST calculation
 
 - GST rate: 10% (current Australian rate, single-bracket)
-- **Applied to the platform fee only**, not the full task amount
+- **Applied to the platform fee only**, not the full job amount
 - Formula: `gstCents = round(platformFeeCents * 0.10)`. **Round half-up**, never banker's rounding (ATO requires).
-- Platform fee = `task.budgetCents * commissionRate` (commission rate per category, default 15%)
+- Platform fee = `job.budgetCents * commissionRate` (commission rate per category, default 15%)
 - Final breakdown returned to caller:
   ```
-  taskAmount     = X
+  jobAmount      = X
   platformFee    = Y (commission% of X)
   gst            = Y * 0.10
   taskerPayout   = X - Y
@@ -54,10 +54,10 @@ This is the highest-risk area in the codebase for AI hallucination. Specific thi
 - RCTI agreement must include the specific wording mandated by ATO — get from tax advisor
 - RCTI PDF must include: invoice number, date, platform ABN, tasker name + address + bank, line items, GST breakdown, "Recipient-created tax invoice" header
 
-### Tax invoice (poster side)
+### Tax invoice (client side)
 
-- Issued to the poster on every captured payment
-- Format: invoice number, date, platform ABN, poster name + email, line items (task description + platform fee + GST), total
+- Issued to the client on every captured payment
+- Format: invoice number, date, platform ABN, client name + email, line items (job description + platform fee + GST), total
 - PDF stored in Azure Blob, signed URL on download
 
 ### ATO sharing-economy reporting
@@ -75,7 +75,7 @@ This is the highest-risk area in the codebase for AI hallucination. Specific thi
 
 ```
 On payment captured:
-  Generate tax invoice (poster side) — always
+  Generate tax invoice (client side) — always
 
   If tasker.abn is null OR !abrLookup(tasker.abn).gstRegistered:
     Require RCTI agreement on file (else block payout)
@@ -83,6 +83,16 @@ On payment captured:
   Else:
     Tasker issues their own tax invoice externally; we don't generate one
 ```
+
+### State machine for tax document triggers
+
+```
+Offer.accepted → Job.completed → Payment.captured → Payout.released → RCTI.issued
+                                       ↓
+                                  TaxInvoice.issued (always, to client)
+```
+
+RCTI is triggered on payout release (not on offer acceptance, not on capture). This is the ATO-correct timing: RCTI documents the actual transfer of money to the tasker.
 
 ## Hard rules — never violate
 
@@ -106,7 +116,7 @@ On payment captured:
 - `apps/api/src/modules/tax/pdf-templates/` — versioned PDF templates
 - `apps/api/test/tax/` — tax test suite with ATO fixtures
 
-## Common tasks
+## Common changes
 
 ### Adding a new tax invoice line item type
 
@@ -125,7 +135,7 @@ On payment captured:
 
 1. Add a new tax module per the AU template: `apps/api/src/modules/tax/nz/`
 2. Service interface implements `TaxModelService`
-3. Route by `country.taxModel` field on the Task
+3. Route by `country.taxModel` field on the Job
 4. AU and NZ both use 10%/15% GST but with different RCTI rules — keep modules separate
 
 ## Tax advisor handoff

@@ -1,6 +1,6 @@
 # Sprint 2 — Mobile Auth + Onboarding + Tasker upgrade + Stripe Connect + ABN
 
-> **Note:** Per the 2026-06-12 plan restructure, Sprint 2 became the **first user-visible sprint**. Mobile auth + onboarding (originally in Sprint 1) move here, integrating against the now-stable Sprint 1 backend. License verification (mobile upload + backend module + bid-time guard + expiry cron + admin review queue scaffold) **deferred to Sprint 4**, where it lives natively with the bidding code.
+> **Note:** Per the 2026-06-12 plan restructure, Sprint 2 became the **first user-visible sprint**. Mobile auth + onboarding (originally in Sprint 1) move here, integrating against the now-stable Sprint 1 backend. License verification (mobile upload + backend module + offer-time guard + expiry cron + admin review queue scaffold) **deferred to Sprint 4**, where it lives natively with the offering code.
 
 **Dates:** Mon 6 Jul → Fri 17 Jul 2026 (10 working days)
 **Theme:** First "click through the app" sprint. Mobile lands and integrates against the real backend from Sprint 1. By Friday a user can install the app, sign up, log in, become a tasker, complete Stripe Connect, and verify their ABN.
@@ -10,7 +10,7 @@
 
 ## Goal in one sentence
 
-By Friday 17 Jul, a user can cold-launch the app, see the welcome carousel, sign up (email/Google/Apple), verify OTP (against MockOtpService), pick a role, land on poster home, tap "Become a tasker", complete Stripe Connect onboarding (Stripe handles identity KYC), verify their ABN — all against the real Sprint 1 backend, running entirely on local Docker.
+By Friday 17 Jul, a user can cold-launch the app, see the welcome carousel, sign up (email/Google/Apple), verify OTP (against MockOtpService), pick a role, land on client home, tap "Become a tasker", complete Stripe Connect onboarding (Stripe handles identity KYC), verify their ABN — all against the real Sprint 1 backend, running entirely on local Docker.
 
 ## Verification model (per ADR 005)
 
@@ -18,9 +18,9 @@ We are NOT using an identity vendor (Didit / Stripe Identity / similar). Three i
 
 1. **Stripe Connect Express KYC** — Stripe handles end-to-end during their onboarding flow (this sprint)
 2. **ABN verification** — JOBBees calls free ABR API (checksum + business name) (this sprint)
-3. **Professional license verification** (per category, only for licensed trades) — **deferred to Sprint 4 with bidding**
+3. **Professional license verification** (per category, only for licensed trades) — **deferred to Sprint 4 with offering**
 
-Most categories (cleaning, gardening, moving, handyman, IT, tutoring, Ikea assembly) require NO license. Licensed trades (electrical, plumbing, gas, asbestos, refrigerated AC, pest control, builder>$5K NSW) need a category-specific license — which lands in Sprint 4 alongside the bidding code that gates on it.
+Most categories (cleaning, gardening, moving, handyman, IT, tutoring, Ikea assembly) require NO license. Licensed trades (electrical, plumbing, gas, asbestos, refrigerated AC, pest control, builder>$5K NSW) need a category-specific license — which lands in Sprint 4 alongside the offering code that gates on it.
 
 ## Scope — inventory rows
 
@@ -39,36 +39,36 @@ Most categories (cleaning, gardening, moving, handyman, IT, tutoring, Ikea assem
 | 9   | Login — biometric (Face ID / Touch ID / fingerprint)                     | IN   | 3   | `local_auth` package + biometric token exchange against Sprint 1 endpoint                                                                        |
 | 10  | Forgot password / reset flow                                             | IN   | 3   | Email reset link from Sprint 1 backend                                                                                                           |
 | 11  | OTP entry screen                                                         | IN   | 2   | Used by phone verify; autofills via Smart Auth (iOS) / SMS Retriever (Android)                                                                   |
-| 12  | Email verification (posters)                                             | IN   | 2   | Click-through link from email                                                                                                                    |
+| 12  | Email verification (clients)                                             | IN   | 2   | Click-through link from email                                                                                                                    |
 | 13  | Phone OTP verification (taskers only)                                    | IN   | 3   | Tasker-gated; uses MockOtpService (`000000`) until Sprint 5 OTP swap                                                                             |
-| 14  | Role selection (Poster / Tasker / Decide later) at signup                | IN   | 2   |                                                                                                                                                  |
+| 14  | Role selection (Client / Tasker / Decide later) at signup                | IN   | 2   |                                                                                                                                                  |
 | 16  | Permissions priming (location, camera, notifications, photos)            | IN   | 3   | Per-OS handling; show value prop before OS prompt                                                                                                |
 | 18  | Account suspended/banned screen                                          | IN   | 1   |                                                                                                                                                  |
 | 19  | Force logout (session expired)                                           | IN   | 1   |                                                                                                                                                  |
 | 20  | Account deletion confirmation screen                                     | IN   | 2   |                                                                                                                                                  |
-| 28  | Profile setup (name, photo, default address)                             | IN   | 3   | Poster — minimal                                                                                                                                 |
+| 28  | Profile setup (name, photo, default address)                             | IN   | 3   | Client — minimal                                                                                                                                 |
 | 29  | Profile edit                                                             | IN   | 2   |                                                                                                                                                  |
 | 33  | Public profile view (limited fields visible to taskers)                  | IN   | 2   |                                                                                                                                                  |
 | 34  | Verification badges (email, phone, Stripe Connect)                       | THIN | 1   | Just rendering; license badges come in Sprint 4                                                                                                  |
-| 15  | Poster → Tasker upgrade flow (one-way only)                              | IN   | 4   | Triggers Stripe Connect + ABN entry                                                                                                              |
+| 15  | Client → Tasker upgrade flow (one-way only)                              | IN   | 4   | Triggers Stripe Connect + ABN entry                                                                                                              |
 | 24  | ABN entry + ABR lookup UI                                                | IN   | 3   | Tasker-only; checksum + business name match via ABR API                                                                                          |
 | 25  | Verification status screen (Connect / ABN)                               | IN   | 2   | Replaces old "KYC status screen"; license tab comes in S4                                                                                        |
 | 35  | Tasker profile setup wizard (multi-step)                                 | IN   | 5   |                                                                                                                                                  |
 | 36  | Bio / about me                                                           | IN   | 1   |                                                                                                                                                  |
 | 37  | Skills selection (categories + tags)                                     | IN   | 3   | Flags `requiresLicense` + `licenseRequiredOverCents` categories visually with "License required in S4" chip — sets expectations without blocking |
 | 38  | Service areas (suburb / radius picker)                                   | IN   | 3   |                                                                                                                                                  |
-| 39  | Hourly rate / minimum task fee                                           | IN   | 1   |                                                                                                                                                  |
+| 39  | Hourly rate / minimum job fee                                            | IN   | 1   |                                                                                                                                                  |
 | 40  | Profile photo + cover image upload                                       | IN   | 2   |                                                                                                                                                  |
 | 44  | Stripe Connect onboarding entry                                          | IN   | 2   | Stripe handles all identity KYC end-to-end                                                                                                       |
 | 45  | Held-funds banner                                                        | IN   | 2   | Persistent until Connect complete                                                                                                                |
 | 46  | Connect reminder cadence — mobile rendering                              | IN   | 2   | 24h / 72h / 7d                                                                                                                                   |
-| 47  | Public tasker profile (visible to posters)                               | IN   | 3   | Shows Stripe Connect verified badge; license badges come in S4                                                                                   |
+| 47  | Public tasker profile (visible to clients)                               | IN   | 3   | Shows Stripe Connect verified badge; license badges come in S4                                                                                   |
 | 48  | Portfolio / previous work photos                                         | THIN | 2   | Upload + render only                                                                                                                             |
 | 49  | Reviews received display                                                 | IN   | 2   | Empty state for now                                                                                                                              |
 
 **Mobile total: ~60h**
 
-REMOVED from earlier draft (deferred to Sprint 4 with bidding):
+REMOVED from earlier draft (deferred to Sprint 4 with offering):
 
 - ~~Row 41: License upload~~ — deferred to S4
 - ~~Row 531: Licensed-trade category selector~~ — deferred to S4 (skills picker in S2 just flags categories visually)
@@ -78,7 +78,7 @@ REMOVED from earlier draft (deferred to Sprint 4 with bidding):
 | ID  | Item                                    | Call | Hrs | Notes                                                                                                 |
 | --- | --------------------------------------- | ---- | --- | ----------------------------------------------------------------------------------------------------- |
 | 241 | ABN + ABR lookup integration            | IN   | 3   | https://abr.business.gov.au/ ; 24h local cache                                                        |
-| 244 | Poster→Tasker upgrade backend (one-way) | IN   | 3   | State change, triggers Connect onboarding init                                                        |
+| 244 | Client→Tasker upgrade backend (one-way) | IN   | 3   | State change, triggers Connect onboarding init                                                        |
 | 292 | Stripe Connect Express integration      | IN   | 12  | Stripe handles identity KYC end-to-end                                                                |
 | 293 | Connect webhook handlers                | IN   | 6   | `account.updated`, `account.application.authorized`, etc. — HMAC signature verified before processing |
 | 294 | Connect onboarding status tracking      | IN   | 4   | Pending → restricted → complete state transitions; mirrors to User.kycStatus                          |
@@ -89,7 +89,7 @@ REMOVED from earlier draft (deferred to Sprint 4 with bidding):
 REMOVED from earlier draft (deferred to Sprint 4):
 
 - ~~Row 240: License verification module~~ — deferred to S4
-- ~~Row 532: Bid-time license guard~~ — deferred to S4 (bidding code's natural home)
+- ~~Row 532: Offer-time license guard~~ — deferred to S4 (offering code's natural home)
 - ~~Row 533: License expiry cron~~ — deferred to S4
 
 ### Admin scaffolding (apps/admin)
@@ -108,10 +108,10 @@ REMOVED: ~~Row 534 (License review queue scaffold)~~ — deferred to Sprint 4 al
 - Add to User: `stripeConnectAccountId String?`, `connectStatus ConnectStatus @default(NOT_STARTED)`, `connectOnboardedAt DateTime?`
 - Add to User: `abn String?`, `abnVerifiedAt DateTime?`, `abrBusinessName String?`, `noAbnReason String?`
 - New `ServiceArea` model (from FUTURE MODELS): `userId`, `suburb`, `postcode`, `radiusKm Int @default(15)`, composite `@@unique([userId, suburb])`
-- New `Category` seeds: full category catalog including the `requiresLicense Boolean @default(false)` + `licenseRequiredOverCents Int?` fields per ADR 005. Sprint 2 seeds the data; Sprint 4 wires up the bid-time guard that consumes it. Builder seeded with `licenseRequiredOverCents = 500000`, all unconditional licensed trades seeded with `requiresLicense = true`.
-- New shared TypeScript constant **`packages/types/src/licenses.ts`** — `ALLOWED_LICENSE_TYPES` per ADR 005 "Allowed license types per category" section. 13 license type slugs across 8 categories (Electrical, Plumbing, Drainage, Gas fitting, Asbestos, Refrigerated AC, Pest control, Builder). Plus 8-value `ISSUING_STATES` const (`NSW`/`VIC`/`QLD`/`WA`/`SA`/`TAS`/`ACT`/`NT`). Mobile dropdowns + backend bid-time guard (S4) + admin License Review Queue (S4 scaffold, S9 full) all import from this single file. Add the constant in Sprint 2 even though License upload UI lands in Sprint 4 — having it landed early lets the Category seeds reference it.
+- New `Category` seeds: full category catalog including the `requiresLicense Boolean @default(false)` + `licenseRequiredOverCents Int?` fields per ADR 005. Sprint 2 seeds the data; Sprint 4 wires up the offer-time guard that consumes it. Builder seeded with `licenseRequiredOverCents = 500000`, all unconditional licensed trades seeded with `requiresLicense = true`.
+- New shared TypeScript constant **`packages/types/src/licenses.ts`** — `ALLOWED_LICENSE_TYPES` per ADR 005 "Allowed license types per category" section. 13 license type slugs across 8 categories (Electrical, Plumbing, Drainage, Gas fitting, Asbestos, Refrigerated AC, Pest control, Builder). Plus 8-value `ISSUING_STATES` const (`NSW`/`VIC`/`QLD`/`WA`/`SA`/`TAS`/`ACT`/`NT`). Mobile dropdowns + backend offer-time guard (S4) + admin License Review Queue (S4 scaffold, S9 full) all import from this single file. Add the constant in Sprint 2 even though License upload UI lands in Sprint 4 — having it landed early lets the Category seeds reference it.
 
-REMOVED from earlier draft (deferred to Sprint 4 with bidding):
+REMOVED from earlier draft (deferred to Sprint 4 with offering):
 
 - ~~`License` model~~ — added in Sprint 4
 - ~~`LicenseStatus` enum~~ — added in Sprint 4
@@ -153,13 +153,13 @@ Same as Sprint 1, plus:
         → "Get started".
 
 00:40 — Signup screen. Pick "Sign up with email". Fill form (Rahul Test,
-        rahul@example.com, +61400000000, Sydney, Poster). Submit.
+        rahul@example.com, +61400000000, Sydney, Client). Submit.
 
 01:00 — OTP entry screen. Enter `000000`. Verify. Banner: "Phone verified."
         (Server log shows MockOtpService used; AuditLog row created.)
 
 01:20 — Email verification: tap simulated link. Land on role select.
-        Pick "Poster". Land on poster home (empty state — "No tasks yet.
+        Pick "Client". Land on client home (empty state — "No jobs yet.
         Posting comes in Sprint 3.").
 
 01:45 — Hard close app. Reopen. Biometric prompt fires. Touch ID
@@ -191,8 +191,8 @@ Same as Sprint 1, plus:
 
 05:10 — Coverage report. Stoplight + asks. End.
 
-05:30 — "Sprint 3 starts Monday: task posting + AI extraction + guest mode.
-        Sprint 4 lands bidding + license verification + Verified Plumber
+05:30 — "Sprint 3 starts Monday: job posting + AI extraction + guest mode.
+        Sprint 4 lands offering + license verification + Verified Plumber
         badges."
 ```
 
@@ -208,16 +208,16 @@ Same as Sprint 1, plus:
 | Apple Sign-in returns name only once and you forgot to capture it            | Medium     | Medium | Capture firstName + lastName on FIRST Apple Sign-In response and persist immediately to backend                                                             |
 | Social-auth users have no password — login fallback misses this              | Low        | High   | Backend allows password-less signup (`User.passwordHash` nullable per Sprint 1 schema); login screen treats "password not set" as social-only               |
 
-## Explicitly NOT in scope (deferred to S4 with bidding)
+## Explicitly NOT in scope (deferred to S4 with offering)
 
 - License upload UI (mobile row 41)
 - Licensed-trade category selector (mobile row 531)
 - License module backend (row 240)
-- Bid-time license guard (row 532)
+- Offer-time license guard (row 532)
 - License expiry cron (row 533)
 - Admin License Review Queue scaffold (row 534)
 
-S2 just flags `requiresLicense` + `licenseRequiredOverCents` categories visually so taskers know what's coming. The bid-time gating + upload + review queue land natively in S4.
+S2 just flags `requiresLicense` + `licenseRequiredOverCents` categories visually so taskers know what's coming. The offer-time gating + upload + review queue land natively in S4.
 
 ## Day-by-day rough plan
 
@@ -225,11 +225,11 @@ S2 just flags `requiresLicense` + `licenseRequiredOverCents` categories visually
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | Mon 6 (D1)   | Project scaffold (Flutter app + Riverpod + go_router + dio). Splash + welcome carousel.                                         | Stripe Connect Express scaffold. ABR API client + 24h cache.        |
 | Tue 7 (D2)   | Email signup screen → real `/auth/signup`. OTP entry → real `/auth/otp/verify`.                                                 | Stripe Connect onboarding init endpoint. Connect webhook handler.   |
-| Wed 8 (D3)   | Google + Apple signup. Role select. Forgot password.                                                                            | Connect onboarding status tracking. Poster→Tasker upgrade endpoint. |
+| Wed 8 (D3)   | Google + Apple signup. Role select. Forgot password.                                                                            | Connect onboarding status tracking. Client→Tasker upgrade endpoint. |
 | Thu 9 (D4)   | Login + biometric re-login. Email verify. Permissions priming.                                                                  | Held-funds calculation. ABN validation + ABR lookup endpoint.       |
 | Fri 10 (D5)  | **Mid-sprint demo + catch-up.**                                                                                                 | Mid-sprint demo + catch-up. AuditLog wiring complete.               |
 | Mon 13 (D6)  | Account-suspended / force-logout / deletion screens. Profile setup + edit.                                                      | Connect reminder cadence (24h / 72h / 7d cron).                     |
-| Tue 14 (D7)  | Poster→Tasker upgrade entry. ABN entry UI + ABR result screen.                                                                  | Connect status webhook → push notification.                         |
+| Tue 14 (D7)  | Client→Tasker upgrade entry. ABN entry UI + ABR result screen.                                                                  | Connect status webhook → push notification.                         |
 | Wed 15 (D8)  | Tasker wizard: bio + skills + service areas. Stripe Connect webview entry.                                                      | Admin Connect tracker endpoint.                                     |
 | Thu 16 (D9)  | Tasker wizard: hourly rate + photo + portfolio scaffold. Held-funds banner + reminder cadence rendering. Public tasker profile. | Polish. AuditLog write coverage check.                              |
 | Fri 17 (D10) | End-of-sprint demo + CSV update.                                                                                                | Confirm CI green. Tag `sprint-02-end`.                              |
@@ -244,13 +244,13 @@ S2 just flags `requiresLicense` + `licenseRequiredOverCents` categories visually
 - [ ] Test Stripe Connect onboarding completes end-to-end in test mode
 - [ ] `./scripts/coverage.sh` reports ~22% MVP
 - [ ] Sprint 3 detail doc reviewed (already drafted)
-- [ ] Sprint 4 detail doc updated to absorb License module + bid-time guard + license review queue
+- [ ] Sprint 4 detail doc updated to absorb License module + offer-time guard + license review queue
 - [ ] Demo video uploaded + sent to client
 
 ## Expected PRs (~14-18)
 
 - `feat(prisma): User.stripeConnect*, User.abn*, ServiceArea model, Category seeds with requiresLicense + licenseRequiredOverCents (Builder $5K)`
-- `feat(api/users): poster→tasker upgrade endpoint + AuditLog`
+- `feat(api/users): client→tasker upgrade endpoint + AuditLog`
 - `feat(api/users): ABR lookup integration + ABN validation`
 - `feat(api/connect): Stripe Connect Express integration`
 - `feat(api/connect): Connect webhook handlers + signature verification + status tracking`
@@ -259,11 +259,12 @@ S2 just flags `requiresLicense` + `licenseRequiredOverCents` categories visually
 - `feat(mobile): scaffold + splash + welcome carousel`
 - `feat(mobile): email/Google/Apple signup + login + biometric`
 - `feat(mobile): OTP + email verify + role select + permissions priming`
-- `feat(mobile): poster profile + suspend/banned/deletion screens`
-- `feat(mobile): poster→tasker upgrade flow + ABN entry UI`
+- `feat(mobile): client profile + suspend/banned/deletion screens`
+- `feat(mobile): client→tasker upgrade flow + ABN entry UI`
 - `feat(mobile): tasker profile wizard (bio, skills, service areas, rate, photo)`
 - `feat(mobile): Stripe Connect webview + held-funds banner + reminder cadence`
 - `feat(mobile): public tasker profile view`
+
 - `feat(admin): Connect tracker scaffold + Connect status mirror`
 
 Each PR closes 1-3 inventory rows.
