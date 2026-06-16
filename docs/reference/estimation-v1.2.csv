@@ -1,0 +1,495 @@
+"JOBBees — Feature Estimation  ·  Edit ""Call"" column → totals update automatically",,,,,,
+ID,Component,Section,Feature / Screen,Call,Hours,Architect Notes
+1,1. Mobile App,1.1 Onboarding & Auth,Splash screen,IN,1,"App load screen, branding only."
+2,1. Mobile App,1.1 Onboarding & Auth,Email signup,IN,4,"First name, last name, email, mobile, location, user type. Single form with validation."
+3,1. Mobile App,1.1 Onboarding & Auth,Google signup,IN,3,Flutter google_sign_in package.
+4,1. Mobile App,1.1 Onboarding & Auth,Apple signup,IN,3,iOS App Store requirement — mandatory for any app offering social login.
+5,1. Mobile App,1.1 Onboarding & Auth,Email + password login,IN,2,Standard credential login.
+6,1. Mobile App,1.1 Onboarding & Auth,Google login,IN,1,Reuses signup integration.
+7,1. Mobile App,1.1 Onboarding & Auth,Apple login,IN,1,Reuses signup integration.
+8,1. Mobile App,1.1 Onboarding & Auth,Magic link login,DROP,0,Removed per direction.
+9,1. Mobile App,1.1 Onboarding & Auth,Biometric login (Face ID / Touch ID),IN,2,local_auth package. Local device auth only.
+10,1. Mobile App,1.1 Onboarding & Auth,Forgot password / reset flow,IN,3,Email reset token flow.
+11,1. Mobile App,1.1 Onboarding & Auth,OTP entry screen,IN,2,Reusable 6-digit input component for phone OTP.
+12,1. Mobile App,1.1 Onboarding & Auth,Email verification (posters),IN,2,Click-through link from email. Required before posting tasks.
+13,1. Mobile App,1.1 Onboarding & Auth,Phone OTP verification (taskers only),IN,3,Tasker-gated. Verified phone = Trust Tier 1.
+14,1. Mobile App,1.1 Onboarding & Auth,Role selection (Poster / Tasker) at signup,IN,2,Determines which onboarding path is shown.
+15,1. Mobile App,1.1 Onboarding & Auth,Poster → Tasker upgrade flow (one-way),DROP,0,Removed per direction.
+16,1. Mobile App,1.1 Onboarding & Auth,"Permissions priming (location, camera, notifications)",IN,3,iOS/Android permission request with clear rationale. Critical for feature adoption.
+17,1. Mobile App,1.1 Onboarding & Auth,Welcome tour / coach marks,DROP,0,Folded into onboarding form.
+18,1. Mobile App,1.1 Onboarding & Auth,Account suspended/banned screen,IN,1,Clear message explaining suspension + support contact.
+19,1. Mobile App,1.1 Onboarding & Auth,Force logout (session expired),IN,1,Graceful redirect to login when JWT expires.
+20,1. Mobile App,1.1 Onboarding & Auth,Account deletion confirmation screen,IN,2,P0-08. Confirms user intent before triggering anonymisation pipeline.
+21,1. Mobile App,1.2 KYC / Identity,ID document upload (licence/passport),POST,4,Camera-only capture (gallery blocked). Uploaded to Azure Blob for manual admin review — no Onfido automated check.
+22,1. Mobile App,1.2 KYC / Identity,Selfie / liveness check,POST,3,Standard camera selfie — no Onfido SDK / liveness detection. Admin manually cross-checks selfie vs uploaded ID.
+23,1. Mobile App,1.2 KYC / Identity,Onfido KYC SDK flow,DROP,0,Skipped — going full manual review. Onfido SDK integration not required.
+24,1. Mobile App,1.2 KYC / Identity,ABN entry + ABR lookup UI,IN,3,P0-05. Free ABR government API validates ABN + returns GST registration status.
+25,1. Mobile App,1.2 KYC / Identity,KYC status screen (pending/approved/rejected),IN,2,Shows current verification state. Triggers re-submission if rejected.
+26,1. Mobile App,1.2 KYC / Identity,Manual review prompt,IN,1,"Shown when admin manual review is pending — sets expectations, prevents repeated submission attempts."
+27,1. Mobile App,1.2 KYC / Identity,KYC re-submission flow,IN,2,Guides rejected tasker through re-upload with reason shown.
+28,1. Mobile App,1.3 Profile — Poster,"Profile setup (name, photo, default address)",IN,3,Basic poster identity shown to taskers when reviewing bids.
+29,1. Mobile App,1.3 Profile — Poster,Profile edit,IN,2,Standard edit form for poster profile fields.
+30,1. Mobile App,1.3 Profile — Poster,Payment methods management (add/remove cards),IN,2,Stripe Elements drop-in UI. We store only PaymentMethod ID — no card data logic needed.
+31,1. Mobile App,1.3 Profile — Poster,Default card selection,IN,1,Store default_payment_method_id in our users table and pass it to PaymentIntent.
+32,1. Mobile App,1.3 Profile — Poster,Address book (saved addresses),THIN,2,Simplified — save and reuse common task locations.
+33,1. Mobile App,1.3 Profile — Poster,Public profile view (limited fields),IN,2,"Taskers see poster's first name, verified badges, member since."
+34,1. Mobile App,1.3 Profile — Poster,"Verification badges (email, phone, ID)",THIN,1,Visual trust signals on poster profile.
+35,1. Mobile App,1.4 Profile — Tasker,Profile setup wizard (multi-step),IN,5,"Photo upload, map picker, skills multi-select + triggers embedding generation."
+36,1. Mobile App,1.4 Profile — Tasker,Bio / about me,IN,1,Free-text bio. Feeds directly into tasker's AI embedding vector for matching.
+37,1. Mobile App,1.4 Profile — Tasker,Skills selection (categories + tags),IN,3,Updates must trigger embedding refresh job.
+38,1. Mobile App,1.4 Profile — Tasker,Service areas (suburb / radius picker),IN,3,Tasker defines which suburbs they serve. Hard filter in matching engine.
+39,1. Mobile App,1.4 Profile — Tasker,Hourly rate / minimum task fee,IN,1,Sets tasker's price floor. Shown on public profile.
+40,1. Mobile App,1.4 Profile — Tasker,Profile photo + cover image upload,IN,2,Profile photo is critical for trust.
+41,1. Mobile App,1.4 Profile — Tasker,Certifications / licences upload,THIN,2,Simplified storage + display only at MVP.
+42,1. Mobile App,1.4 Profile — Tasker,Availability — weekly recurring,DROP,0,Removed per direction.
+43,1. Mobile App,1.4 Profile — Tasker,Availability — calendar with blackout dates,DROP,0,Removed per direction.
+44,1. Mobile App,1.4 Profile — Tasker,Stripe Connect onboarding entry,IN,2,P0-04. Entry point to Stripe-hosted payout setup. Separate from KYC.
+45,1. Mobile App,1.4 Profile — Tasker,Held funds banner (until Connect complete),IN,2,P0-04. 'You have $X waiting' — primary conversion driver.
+46,1. Mobile App,1.4 Profile — Tasker,Connect reminder cadence (24h / 72h / 7d),IN,2,Escalating urgency over 7 days.
+47,1. Mobile App,1.4 Profile — Tasker,Public tasker profile (visible to posters),IN,3,"Primary hiring decision screen. Photo, bio, skills, rating, badges."
+48,1. Mobile App,1.4 Profile — Tasker,Portfolio / previous work photos,POST,2,Post-launch. Strong conversion driver for trades — add once core profile is stable.
+49,1. Mobile App,1.4 Profile — Tasker,Reviews received display,IN,2,Blind-reveal design prevents retaliatory reviews.
+50,1. Mobile App,1.4 Profile — Tasker,Completion stats / badges,THIN,1,"Simplified display of tasks completed, completion rate."
+51,1. Mobile App,1.4 Profile — Tasker,Tasker reputation score,THIN,1,Computed trust_score — feeds matching ranker.
+52,1. Mobile App,1.4 Profile — Tasker,Response-to-review display on profile,POST,1,Post-launch. Tasker's one-time public reply to a review.
+53,1. Mobile App,1.5 Task Posting,Category picker,IN,2,Manual category selection as fallback/supplement to AI extraction.
+54,1. Mobile App,1.5 Task Posting,Title + description (free text),IN,1,Text fallback for users who don't use voice.
+55,1. Mobile App,1.5 Task Posting,AI extraction confirmation screen,IN,4,Shows AI-structured fields for poster to confirm/edit before publishing.
+56,1. Mobile App,1.5 Task Posting,Multi-turn clarifying questions (ReAct loop),IN,8,Mobile UI for clarifying questions — fires only when AI extraction confidence is below threshold. Requires clarifying agent BE (ID 248) to be live first. Max 3 follow-up questions per task.
+57,1. Mobile App,1.5 Task Posting,Photo upload (multi-photo),IN,3,Posters attach photos to describe the task.
+58,1. Mobile App,1.5 Task Posting,Voice-driven task posting,IN,10,Core differentiator. Mic → transcription API call → AI extraction → confirmation screen. Transcription is a single endpoint; UI reuses extraction confirmation (ID 55).
+59,1. Mobile App,1.5 Task Posting,Camera-based task creation (vision model),IN,6,Mobile wrapper only — camera capture + image upload + pass to BE (ID 249). All vision logic is in ID 249. Feature-flagged; only activated once ID 249 is validated in production.
+60,1. Mobile App,1.5 Task Posting,Location / address picker (map + autocomplete),IN,5,Google Places autocomplete + drag-pin. Produces lat/lng for matching engine.
+61,1. Mobile App,1.5 Task Posting,Map preview,IN,2,Confirms selected task location before posting.
+62,1. Mobile App,1.5 Task Posting,Date / time picker,IN,2,"Selected date triggers payment mode logic: ≤7d = Mode 1, >7d = Mode 2."
+63,1. Mobile App,1.5 Task Posting,Duration estimate (AI-suggested),IN,1,AI suggests duration from task description.
+64,1. Mobile App,1.5 Task Posting,Budget input,IN,1,Poster's budget cap. Shown to taskers when bidding.
+65,1. Mobile App,1.5 Task Posting,Budget AI nudge (LLM verbal),THIN,1,"LLM suggests typical price range. Framed as advice, not a gate."
+66,1. Mobile App,1.5 Task Posting,Special requirements / preferences,IN,1,Free-text field for extra requirements.
+67,1. Mobile App,1.5 Task Posting,Review & publish,IN,2,Final confirmation screen before task goes live.
+68,1. Mobile App,1.5 Task Posting,Save as draft,IN,2,Poster can save incomplete task for later.
+69,1. Mobile App,1.5 Task Posting,Resume draft from list,IN,1,Draft task list screen. Tap to resume.
+70,1. Mobile App,1.5 Task Posting,Re-post / clone task,THIN,1,Duplicate a past task. Useful for recurring work.
+71,1. Mobile App,1.5 Task Posting,Schedule task within 7 days,IN,1,Standard Mode 1 payment: card authorised immediately.
+72,1. Mobile App,1.5 Task Posting,Schedule task >7 days in future,IN,3,Triggers Mode 2 (SetupIntent) — avoids Stripe 7-day auth expiry.
+73,1. Mobile App,1.5 Task Posting,Recurring task,DROP,0,Removed per direction.
+74,1. Mobile App,1.5 Task Posting,Edit posted task (before bid accepted),THIN,2,Simplified edit — notifies existing bidders of changes.
+75,1. Mobile App,1.5 Task Posting,Cancel/delete posted task,IN,1,Remove a task before any bid is accepted.
+76,1. Mobile App,1.6 Task Discovery,Home feed (ranked),IN★,6,AI-ranked personalised task feed. Matching engine must be live first.
+77,1. Mobile App,1.6 Task Discovery,Vector-based semantic matching UI,IN★,2,'Tasks matched for you' section. Backend renders ranked list; mobile displays.
+78,1. Mobile App,1.6 Task Discovery,Map view of nearby tasks,IN,3,Geo-based task browse. Pins on map.
+79,1. Mobile App,1.6 Task Discovery,List view of tasks,IN,3,Scrollable task cards. Default view for most taskers.
+80,1. Mobile App,1.6 Task Discovery,"Filters (category, budget, distance, date)",IN,4,Narrows the task feed. Applied on top of ranked results.
+81,1. Mobile App,1.6 Task Discovery,"Sort (newest, nearest, highest budget)",IN,1,Alternative sort overrides the default relevance ranking.
+82,1. Mobile App,1.6 Task Discovery,Saved tasks / favourites,THIN,2,Simple local + server persistence.
+83,1. Mobile App,1.6 Task Discovery,Auto-invite push handling,IN★,2,Handles push when backend auto-invites top taskers to zero-bid task.
+84,1. Mobile App,1.6 Task Discovery,Task search bar (text query),THIN,2,Simplified keyword search.
+85,1. Mobile App,1.6 Task Discovery,Task share link (deep link),IN,1,Share a task URL that deep-links into the app.
+86,1. Mobile App,1.6 Task Discovery,Hide / not interested,THIN,1,Tasker dismisses a task from their feed.
+87,1. Mobile App,1.7 Bidding,"Bid placement screen (amount, message, ETA)",IN,3,AI moderation on message. Bid caps enforced by trust tier. Show warning banner if tasker has not completed Stripe Connect setup.
+88,1. Mobile App,1.7 Bidding,Bid AI coaching nudge,POST,8,Post-launch — needs real conversion data before nudges are useful.
+89,1. Mobile App,1.7 Bidding,"Own bids list (active, accepted, declined)",IN,3,Tasker's bid dashboard. Status-filtered tabs.
+90,1. Mobile App,1.7 Bidding,Edit own bid,IN,2,Tasker can revise bid amount or message before acceptance.
+91,1. Mobile App,1.7 Bidding,Withdraw own bid,IN,1,Tasker removes their bid. Simple state change.
+92,1. Mobile App,1.7 Bidding,"Bid review (poster — list, sort, filter)",IN,4,"Sort by price, rating, response time. Tap to view full tasker profile."
+93,1. Mobile App,1.7 Bidding,Accept bid,IN,2,Triggers payment authorisation + notifies tasker.
+94,1. Mobile App,1.7 Bidding,Decline bid,IN,1,Manually decline a specific bid. Notifies tasker.
+95,1. Mobile App,1.7 Bidding,Counter-offer / negotiation,DROP,0,Removed — replaced by public Q&A (#96).
+96,1. Mobile App,1.7 Bidding,Public Q&A under task,IN,6,Any tasker can ask; poster answers publicly. AI moderation on both.
+97,1. Mobile App,1.7 Bidding,Bid expiry handling,IN,1,Bids auto-expire when task closes.
+98,1. Mobile App,1.7 Bidding,Bid notifications handling,IN,1,In-app handling of new-bid push for poster; accepted/declined push for tasker.
+99,1. Mobile App,1.8 Job Execution,Accepted task / job-in-progress screen,IN,3,"Central screen for active job. Status buttons, contact options, proof upload."
+100,1. Mobile App,1.8 Job Execution,Status update buttons (en route / arrived / in progress / completed),IN,2,Each status triggers backend events and poster notifications.
+101,1. Mobile App,1.8 Job Execution,Geofenced check-in / arrival proof,IN,4,P0-06. GPS verifies tasker within 200–500m of task location on 'arrived'.
+102,1. Mobile App,1.8 Job Execution,Live location share during active job (opt-in),POST,5,Post-launch. Real-time GPS share via WebSocket. Background location permission required.
+103,1. Mobile App,1.8 Job Execution,Completion proof upload (2 photos + checklist),IN,4,P0-07. Mandatory before marking complete. Photos must have valid EXIF timestamp.
+104,1. Mobile App,1.8 Job Execution,Completion proof — optional 30s video,THIN,3,Optional video proof. Simplified — upload and store only.
+105,1. Mobile App,1.8 Job Execution,Time tracking (start / stop / total),THIN,2,Optional timer. Informational only — doesn't auto-adjust payment.
+106,1. Mobile App,1.8 Job Execution,Job extension / reschedule request,DROP,0,Removed per direction.
+107,1. Mobile App,1.8 Job Execution,In-app voice/video call,DROP,0,Removed per direction.
+108,1. Mobile App,1.8 Job Execution,Mid-job message to poster,IN,0,Via messaging threads (§1.9). No separate implementation needed.
+109,1. Mobile App,1.9 Messaging,Inbox / thread list,IN,3,Task-scoped design — no open user-to-user messaging.
+110,1. Mobile App,1.9 Messaging,Conversation view (text),IN,4,Real-time via Socket.IO. Every outgoing message passes AI moderation.
+111,1. Mobile App,1.9 Messaging,Photo attachment,IN,2,Stored in Azure Blob; URL in message payload.
+112,1. Mobile App,1.9 Messaging,File / PDF attachment,THIN,2,Simplified file attachment.
+113,1. Mobile App,1.9 Messaging,Voice messages,DROP,0,Removed per direction.
+114,1. Mobile App,1.9 Messaging,Message reactions (emoji),DROP,0,Removed per direction.
+115,1. Mobile App,1.9 Messaging,Read receipts,IN,2,Delivered / seen ticks. Important for dispute evidence.
+116,1. Mobile App,1.9 Messaging,Typing indicators,DROP,0,Removed per direction.
+117,1. Mobile App,1.9 Messaging,Mute thread,DROP,0,Removed per direction.
+118,1. Mobile App,1.9 Messaging,Archive thread,DROP,0,Removed per direction.
+119,1. Mobile App,1.9 Messaging,Pin thread,DROP,0,Removed per direction.
+120,1. Mobile App,1.9 Messaging,Report user / message,IN,2,Flags content for admin review. Triggers fraud graph signal.
+121,1. Mobile App,1.9 Messaging,Block user,IN,1,Prevents contact from specific user.
+122,1. Mobile App,1.9 Messaging,Off-platform contact warning banner,IN,1,AI classifier detects phone/email/payment in messages; shows inline warning.
+123,1. Mobile App,1.9 Messaging,Message search,IN,4,Search across message history. Backend search query; mobile renders results.
+124,1. Mobile App,1.9 Messaging,Push notifications for messages,IN,1,New message push via FCM/APNS.
+125,1. Mobile App,1.9 Messaging,Thread freeze on dispute open,IN,1,Thread goes read-only when dispute filed. Preserves evidence.
+126,1. Mobile App,1.10 Payments,Add card (Stripe Elements),IN,3,Stripe Elements drop-in. PCI-compliant; we store only a PaymentMethod ID. Shares component with ID 30.
+127,1. Mobile App,1.10 Payments,Remove / update card,IN,1,Cannot delete a card attached to an active payment authorisation.
+128,1. Mobile App,1.10 Payments,Set default card,IN,1,Updates default_payment_method_id in our DB.
+129,1. Mobile App,1.10 Payments,Apple Pay / Google Pay,IN,1,Toggle in Stripe dashboard. Minimal UI.
+130,1. Mobile App,1.10 Payments,Stripe-hosted onboarding webview,IN,1,Stripe Connect Express hosted flow. (partially estimated in ID-44)
+131,1. Mobile App,1.10 Payments,Payout history (tasker),IN,3,List of past payouts. Sourced from Stripe Connect payouts API.
+132,1. Mobile App,1.10 Payments,Earnings summary (tasker),IN,4,"Total earnings, pending, and paid out. Date range picker (custom start/end). Downloadable as CSV or PDF — generated server-side and emailed/linked to tasker."
+133,1. Mobile App,1.10 Payments,Transaction history (poster),IN,3,List of all payments made as a poster.
+134,1. Mobile App,1.10 Payments,Receipt PDF view / download,IN,1,In-app view and download of receipt PDFs.
+135,1. Mobile App,1.10 Payments,Tax invoice PDF (poster),IN,1,P0-05. GST-compliant tax invoice auto-sent on completion.
+136,1. Mobile App,1.10 Payments,Tax invoice / RCTI PDF (tasker),IN,1,P0-05. RCTI = Recipient Created Tax Invoice.
+137,1. Mobile App,1.10 Payments,RCTI agreement screen,IN,2,P0-05. One-time consent screen. Immutable — survives account deletion.
+138,1. Mobile App,1.10 Payments,Refund request (poster initiates),IN,3,Triggers refund workflow. Routes to dispute flow if within window.
+139,1. Mobile App,1.10 Payments,Re-authorisation prompt (capture-expiry),IN,4,P0-03. Stripe auth expires in 7 days. BullMQ fires at T-6d.
+140,1. Mobile App,1.10 Payments,Tip / gratuity option,THIN,1,Optional tip after completion. Fixed amounts or custom.
+141,1. Mobile App,1.10 Payments,Promo code / discount input,IN,5,Validated before PaymentIntent creation. Per-user limits needed.
+142,1. Mobile App,1.11 Cancellation,Cancellation flow with fee preview,IN,6,P0-06. Fee matrix shown before confirming. Matrix in Configuration Engine.
+143,1. Mobile App,1.11 Cancellation,Poster-initiated cancel,IN,1,Cancellation fee applies based on timing.
+144,1. Mobile App,1.11 Cancellation,Tasker-initiated cancel,IN,1,Penalty to reputation score + refund to poster.
+145,1. Mobile App,1.11 Cancellation,Mutual cancellation request,THIN,2,Either party proposes mutual cancel; other must accept. No fee.
+146,1. Mobile App,1.11 Cancellation,Reason picker,IN,1,Structured reason selection. Feeds analytics.
+147,1. Mobile App,1.11 Cancellation,Fee disclosure / confirmation step,IN,1,Shows exact fee before final cancel confirmation.
+148,1. Mobile App,1.11 Cancellation,No-show reporting,IN,3,P0-06. Geofence data used to verify. Auto-refund + reputation penalty.
+149,1. Mobile App,1.11 Cancellation,Cancellation history (per task),THIN,1,Simplified log of cancellations on a task.
+150,1. Mobile App,1.12 Reviews,Post-completion review prompt (both sides),IN,2,Prompted after task completes. Blind mechanism kicks in.
+151,1. Mobile App,1.12 Reviews,Star rating,IN,1,1–5 star rating input. Feeds trust_score computation.
+152,1. Mobile App,1.12 Reviews,Text review with min length,IN,1,Min character count enforced — prevents empty reviews.
+153,1. Mobile App,1.12 Reviews,Blind review with timeout-reveal,IN,2,Neither party sees review until both submit or 14-day timeout (Blueprint §16).
+154,1. Mobile App,1.12 Reviews,Photo attachment in review,THIN,2,Poster can attach before/after photo to review.
+155,1. Mobile App,1.12 Reviews,"Response to review (one-time, public)",THIN,1,Tasker can reply once to a review — publicly visible. One-time limit.
+156,1. Mobile App,1.12 Reviews,Edit / delete own review (within window),DROP,0,"Removed — show review after both submitted, no edit window."
+157,1. Mobile App,1.12 Reviews,Report review,IN,1,Flag abusive or fake reviews for admin moderation.
+158,1. Mobile App,1.13 Disputes,Dispute initiation flow,IN,3,Structured entry: reason + description + evidence. Freezes payment + thread.
+159,1. Mobile App,1.13 Disputes,Reason picker,IN,1,Structured reason categories. Helps AI mediator classify dispute type.
+160,1. Mobile App,1.13 Disputes,"Evidence upload (photos, screenshots)",IN,3,Both parties upload supporting evidence. EXIF metadata validated.
+161,1. Mobile App,1.13 Disputes,Dispute conversation thread,IN,3,Separate communication channel during dispute (job thread is frozen).
+162,1. Mobile App,1.13 Disputes,AI-proposed resolution screen,IN★,3,Tier-0 AI mediator (Claude Sonnet) proposes resolution. Targets 50–70% deflection.
+163,1. Mobile App,1.13 Disputes,Accept AI proposal,IN★,1,Executes Stripe payment action immediately. Must be idempotent.
+164,1. Mobile App,1.13 Disputes,Reject / escalate to human admin,IN★,1,Routes to Tier-1 admin with AI-generated brief.
+165,1. Mobile App,1.13 Disputes,Dispute status tracker,IN,2,Progress indicator: filed → AI reviewing → proposal → resolved.
+166,1. Mobile App,1.13 Disputes,Resolution outcome screen,IN,2,Shows final outcome + payment action taken.
+167,1. Mobile App,1.13 Disputes,Dispute history (per user),THIN,1,Simplified log of user's past disputes.
+168,1. Mobile App,1.14 Notifications,Push notifications (FCM / APNS setup),IN,4,Core infrastructure. Device token registered at login.
+169,1. Mobile App,1.14 Notifications,In-app notification centre,IN,4,Bell icon feed of all events. Fallback for missed push.
+170,1. Mobile App,1.14 Notifications,Per-channel toggle (push / email / SMS),THIN,2,Australian Spam Act compliance. Transactional notifications cannot be disabled.
+171,1. Mobile App,1.14 Notifications,Per-category granular prefs,DROP,0,Removed per direction.
+172,1. Mobile App,1.14 Notifications,Email opt-out unsubscribe link,IN,1,Spam Act legal requirement on all marketing emails.
+173,1. Mobile App,1.14 Notifications,SMS opt-out (STOP keyword),IN,1,Spam Act requirement.
+174,1. Mobile App,1.14 Notifications,Notification badges,IN,1,App icon badge count. Clears on opening notification centre.
+175,1. Mobile App,1.14 Notifications,Deep-link from notification → screen,IN,2,Tap on push → lands directly on relevant screen. Requires Universal Links.
+176,1. Mobile App,1.14 Notifications,Critical-state SMS/email fallback,IN,1,Backend sends SMS/email for critical events as push backup.
+177,1. Mobile App,1.14 Notifications,Notification history / replay,THIN,2,Simplified — view and re-read past notifications.
+178,1. Mobile App,1.15 Settings,Account info edit,IN,2,"Edit name, bio, photo. Standard settings form."
+179,1. Mobile App,1.15 Settings,Change email (re-auth required),IN,3,Requires fresh auth before change. Sends verification to new email.
+180,1. Mobile App,1.15 Settings,Change phone (re-auth required),IN,3,Re-auth + OTP verification to new number.
+181,1. Mobile App,1.15 Settings,Change password,IN,2,Requires current password confirmation. Invalidates all other sessions.
+182,1. Mobile App,1.15 Settings,2FA for users,POST,8,Post-launch. English MVP only.
+183,1. Mobile App,1.15 Settings,"Linked accounts (Google, Apple) — view + unlink",DROP,0,Removed per direction.
+184,1. Mobile App,1.15 Settings,Notification preferences,THIN,2,Folded with §1.14 per-channel toggles.
+185,1. Mobile App,1.15 Settings,Privacy / data download (DSR),IN,3,P0-08. Australian Privacy Act APP 12 compliance.
+186,1. Mobile App,1.15 Settings,Account deletion request,IN,3,P0-08. Triggers anonymisation pipeline. Blocked if active tasks exist.
+187,1. Mobile App,1.15 Settings,Language switcher,POST,6,English-only at MVP.
+188,1. Mobile App,1.15 Settings,Theme — light only at MVP,IN,4,Architecture uses theme tokens so dark themes can be added later.
+189,1. Mobile App,1.15 Settings,Logout from all devices,THIN,1,Revokes all JWT sessions. Security feature.
+190,1. Mobile App,1.16 Support,FAQ section (searchable),IN,4,Content embedded in pgvector to power RAG support agent (#194).
+191,1. Mobile App,1.16 Support,FAQ article view,IN,2,Article detail screen. Supports rich text + images.
+192,1. Mobile App,1.16 Support,Help categories,IN,1,Organised categories for FAQ navigation.
+193,1. Mobile App,1.16 Support,Contact support (email form),IN,2,Fallback escalation. Creates ticket in admin queue.
+194,1. Mobile App,1.16 Support,RAG support agent (chat),IN,14,AI chat using Claude Haiku + pgvector. Targets 60–80% L1 deflection.
+195,1. Mobile App,1.16 Support,Report a bug / feedback form,THIN,2,Simplified in-app bug report. Attaches device info automatically.
+196,1. Mobile App,1.16 Support,App version / build info,IN,1,Required for CS to identify which version a user is on.
+197,1. Mobile App,1.16 Support,Send logs to support,THIN,2,Sends device logs to CS for hard-to-reproduce issues.
+198,1. Mobile App,1.17 Static / Legal,Terms of Service,IN,1,Static screen. Must be authored by legal counsel before launch.
+199,1. Mobile App,1.17 Static / Legal,Privacy Policy,IN,1,P0-08. Must cover APP 1–13 under Australian Privacy Act.
+200,1. Mobile App,1.17 Static / Legal,Community guidelines,IN,1,Acceptable use policy. Referenced by moderation and dispute flows.
+201,1. Mobile App,1.17 Static / Legal,RCTI agreement,IN,1,Legal text for the RCTI consent. Must be reviewed by Australian tax lawyer.
+202,1. Mobile App,1.17 Static / Legal,Cancellation policy,IN,1,Explains fee matrix in plain language.
+203,1. Mobile App,1.17 Static / Legal,Open source licences,IN,1,App Store / Play Store requirement.
+204,1. Mobile App,1.17 Static / Legal,About page,IN,1,Company info + mission statement.
+205,1. Mobile App,1.17 Static / Legal,Contact / company info,IN,1,"ACN/ABN, registered address. Required for Australian Consumer Law compliance."
+206,1. Mobile App,1.18 Cross-cutting,Deep linking (Universal Links / App Links),IN,3,jobbees.com.au/task/abc opens in app. Required for Stripe Connect return URL.
+207,1. Mobile App,1.18 Cross-cutting,Share task / profile (system share sheet),IN,2,Native OS share sheet.
+208,1. Mobile App,1.18 Cross-cutting,Invite friend / referral code,DROP,0,Removed per direction.
+209,1. Mobile App,1.18 Cross-cutting,App update prompt (soft / force),IN,2,Soft prompt for optional updates; force prompt when minimum version enforced.
+210,1. Mobile App,1.18 Cross-cutting,Maintenance mode screen,THIN,1,Full-screen message when backend is in maintenance.
+211,1. Mobile App,1.18 Cross-cutting,Offline indicator,THIN,2,Simplified banner when device has no internet.
+212,1. Mobile App,1.18 Cross-cutting,Offline draft persistence (tasks only),POST,3,"Post-launch. Task drafts saved locally when offline, synced on reconnect."
+213,1. Mobile App,1.18 Cross-cutting,Empty states,IN,3,Illustrated empty state screens for all lists. Critical for new user experience.
+214,1. Mobile App,1.18 Cross-cutting,Error boundary screens,IN,2,Catch unhandled errors and show friendly screen with retry.
+215,1. Mobile App,1.18 Cross-cutting,Network retry / loader UX,IN,2,Loading skeletons + automatic retry on network timeout.
+216,1. Mobile App,1.18 Cross-cutting,Crash reporting (Sentry SDK),IN,2,Real-time crash visibility. Must scrub PII from crash reports.
+217,1. Mobile App,1.18 Cross-cutting,Analytics events (PostHog / Mixpanel),IN,3,Event taxonomy for funnel analysis. Pseudonymous user_id — no PII in events.
+218,1. Mobile App,1.18 Cross-cutting,Accessibility — basics (WCAG 2.1 AA),THIN,4,Minimum compliance. Full audit post-launch.
+219,1. Mobile App,1.18 Cross-cutting,RTL text support (Arabic),DROP,0,Removed per direction — English-only MVP.
+220,1. Mobile App,1.18 Cross-cutting,Background tasks (location during active job),IN,3,iOS/Android background location for live tracking.
+221,1. Mobile App,1.18 Cross-cutting,App lifecycle handling (background / foreground),IN,2,"Refreshes feed, reconnects WebSocket on foreground."
+222,1. Mobile App,1.18 Cross-cutting,Biometric prompt on payment / sensitive action,POST,2,Post-launch. Optional biometric confirmation before high-value payment actions.
+223,1. Mobile App,1.18 Cross-cutting,Push token rotation,IN,2,Refreshes FCM/APNS device token on reinstall or device change.
+224,1. Mobile App,1.18 Cross-cutting,Universal link verification setup,IN,2,apple-app-site-association + assetlinks.json files.
+225,1. Mobile App,1.18 Cross-cutting,"App icon, splash, launch animation",IN,2,Brand assets integrated into Flutter build config.
+226,1. Mobile App,1.18 Cross-cutting,App Store / Play Store listings + screenshots,IN,4,"Store metadata, screenshots, descriptions. ~1 week before launch."
+227,1. Mobile App,1.18 Cross-cutting,App Tracking Transparency prompt (iOS),IN,1,Required by Apple for any analytics that tracks users.
+M-228,1. Mobile App,1.19 Security & Trust Extras,AI Welcome Agent (onboarding walkthrough),IN,4,Blueprint §18. Conversational AI agent on first login. Tasker and poster see different journeys. Claude Haiku. Skippable.
+M-229,1. Mobile App,1.19 Security & Trust Extras,Device fingerprinting at signup (FingerprintJS),IN,3,Blueprint §37. FingerprintJS Pro. Feeds fraud graph. Detects multi-account devices.
+M-230,1. Mobile App,1.19 Security & Trust Extras,"Versioned consent capture (ToS, Privacy, marketing)",IN,4,Blueprint §4. Separate timestamped records in user_consent_log per ToS version.
+M-231,1. Mobile App,1.19 Security & Trust Extras,Account lockout after failed OTP / auth attempts,IN,2,Blueprint §4. 5 failed OTP/hour → lockout. 10 failed passwords → forced re-auth.
+M-232,1. Mobile App,1.19 Security & Trust Extras,Offline draft queue for messages (SQLite),POST,4,Post-launch. Flutter drift (SQLite) queues messages offline. Idempotency keys on drain.
+M-233,1. Mobile App,1.10 Payments,Annual income statement download,IN,2,[MDR §5.2] ATO requirement. Screen lists available income statements by financial year. Tap to download PDF generated by B-55 batch job. Required for contractor tax returns.
+M-234,1. Mobile App,1.5 Task Posting,Supply soft-block + waitlist signup,IN,4,"[MDR §5.3] Shown when geographic supply check returns zero eligible contractors for task location + category. Options: (1) expand radius, (2) join waitlist — captures email + task type + suburb. Clear messaging: 'We'll notify you when a tasker becomes available nearby.' Backend supply check in B-59."
+228,2.1-2.2 Backend,2.1 Auth & Users,User CRUD endpoints,IN,6,"Core user management API. Create, read, update, deactivate."
+229,2.1-2.2 Backend,2.1 Auth & Users,"OAuth providers (Google, Apple) — server side",IN,6,"Token validation, profile merge with existing account if email matches."
+230,2.1-2.2 Backend,2.1 Auth & Users,JWT session + refresh rotation,IN,4,Short-lived access token + long-lived refresh. Rotation on each use.
+231,2.1-2.2 Backend,2.1 Auth & Users,Password hashing + reset tokens,IN,2,bcrypt/argon2 hashing. Time-limited reset tokens sent via email.
+232,2.1-2.2 Backend,2.1 Auth & Users,OTP service (Notifyre SMS / SendGrid email),IN,5,"SMS via Notifyre (AU-registered sender ID, Blueprint §37)."
+233,2.1-2.2 Backend,2.1 Auth & Users,Email verification (posters),IN,2,Verification token sent via SendGrid. Blocks posting until verified.
+234,2.1-2.2 Backend,2.1 Auth & Users,Phone OTP verification (taskers only),IN,3,Gated by user_type=tasker. Required for Trust Tier 1.
+235,2.1-2.2 Backend,2.1 Auth & Users,Biometric token exchange,IN,2,App presents local biometric result; backend exchanges for short-lived session token.
+236,2.1-2.2 Backend,2.1 Auth & Users,Role-based permissions (poster / tasker / admin),IN,4,RBAC middleware on all endpoints.
+237,2.1-2.2 Backend,2.1 Auth & Users,Account suspension / ban,IN,2,Admin action that sets suspended flag. All active sessions revoked immediately.
+238,2.1-2.2 Backend,2.1 Auth & Users,Account deletion + anonymisation pipeline,IN,8,P0-08. Multi-step: anonymise PII → revoke sessions → update Stripe → cancel active tasks.
+239,2.1-2.2 Backend,2.1 Auth & Users,Session revocation (logout-all),THIN,2,Invalidates all refresh tokens. Redis token blocklist.
+240,2.1-2.2 Backend,2.1 Auth & Users,KYC orchestration (manual queue),IN,2,MVP-required: upload docs → create manual_kyc_submission record → status state machine (pending/approved/rejected) → T&S admin review queue (AP-09). No Onfido. Simple DB record + status transitions.
+241,2.1-2.2 Backend,2.1 Auth & Users,ABN + ABR lookup integration,IN,3,P0-05. Free ABR API. Cache 24h per ABN. Drives RCTI eligibility.
+242,2.1-2.2 Backend,2.1 Auth & Users,User profile + skills + service areas API,IN,5,Profile updates trigger embedding refresh job.
+243,2.1-2.2 Backend,2.1 Auth & Users,Tasker availability API,DROP,0,Availability calendar dropped.
+244,2.1-2.2 Backend,2.1 Auth & Users,Poster → Tasker upgrade backend (one-way),DROP,0,Removed per direction. Mobile upgrade flow (ID 15) also removed.
+245,2.1-2.2 Backend,2.1 Auth & Users,Re-auth gate for change-email / phone,IN,3,Requires fresh auth token. Prevents account takeover.
+246,2.1-2.2 Backend,2.2 Tasks & Extraction,Task CRUD endpoints,IN,6,State machine: draft → open → assigned → in_progress → completed.
+247,2.1-2.2 Backend,2.2 Tasks & Extraction,AI extraction (Gemini Flash JSON-mode),IN,6,Task description → structured JSON. Per-user 20/day quota in Redis.
+248,2.1-2.2 Backend,2.2 Tasks & Extraction,Clarifying agent loop (conditional — fires on incomplete extraction),IN,20,"Backend completeness check after AI extraction. If confidence < threshold → return follow-up questions (max 3). Simple conditional, not a full ReAct agent. Gates mobile clarifying UI (ID 56) and must be ready before camera feature (249) activates."
+249,2.1-2.2 Backend,2.2 Tasks & Extraction,Multimodal extraction from images,IN,16,Vision-language model (Gemini Vision) infers task scope from photos. Must be ready before camera UI (ID 59) ships. Backend must confirm readiness before camera mobile feature is activated.
+B-01,2.3-2.10 Backend,2.3 Matching Engine,Task embedding generation,IN,6,text-embedding-3-large on task title+description+category → 1536-d vector in pgvector. Single SDK call + upsert.
+B-02,2.3-2.10 Backend,2.3 Matching Engine,Tasker embedding generation + refresh,IN,4,Bio + skills + job history → embedding. Refresh triggered on profile save. Same SDK pattern as B-01.
+B-03,2.3-2.10 Backend,2.3 Matching Engine,pgvector kNN similarity search,IN,8,HNSW index. cosine_similarity: top-K taskers for task vector. Hard filters applied first.
+B-04,2.3-2.10 Backend,2.3 Matching Engine,Composite ranker (scoring function),IN,10,score = semantic_sim×0.4 + distance×0.2 + win_rate×0.2 + budget×0.1 + trust×0.1.
+B-05,2.3-2.10 Backend,2.3 Matching Engine,Auto-invite pipeline (cold-start),IN★,6,BullMQ job fires at T+2h if bids=0. Pushes to top-20 matched taskers.
+B-06,2.3-2.10 Backend,2.3 Matching Engine,Discovery API (ranked feed + map),IN,5,Per-tasker Redis cache (TTL 30s). Invalidation on new task publish.
+B-07,2.3-2.10 Backend,2.3 Matching Engine,Cold-start broadcast fallback (low-supply suburbs),IN,4,<10 matched taskers → broadcast to all category-matched taskers within 50km.
+B-08,2.3-2.10 Backend,2.4 Payments,PaymentIntent orchestration (Mode 1),IN,8,On bid accept: create PaymentIntent (manual capture). Idempotent.
+B-09,2.3-2.10 Backend,2.4 Payments,SetupIntent flow (Mode 2 — task >7 days),IN,8,CRITICAL: Stripe auth expires in 7 days. SetupIntent avoids this.
+B-10,2.3-2.10 Backend,2.4 Payments,Milestone payment (Mode 3),POST,10,Post-launch. Most complex payment path — defer until Mode 1 and Mode 2 are stable in prod.
+B-11,2.3-2.10 Backend,2.4 Payments,Auth expiry BullMQ job (T-6d re-auth),IN,3,Scheduled job fires at T-6d for all uncaptured PaymentIntents.
+B-12,2.3-2.10 Backend,2.4 Payments,Stripe Connect Express onboarding API,IN,6,"Create Connect account, generate link, handle webhooks. Separate from KYC."
+B-13,2.3-2.10 Backend,2.4 Payments,Payout disbursement + reserve hold,IN,6,48h configurable reserve hold → BullMQ delayed transfer to tasker's Connected account.
+B-14,2.3-2.10 Backend,2.4 Payments,RCTI generation engine,IN,8,Auto-generates Recipient Created Tax Invoice per completed task. ATO required.
+B-15,2.3-2.10 Backend,2.4 Payments,Cancellation fee engine,IN,6,"Fee matrix in admin config. Outputs fee amount, who pays, payout split."
+B-16,2.3-2.10 Backend,2.4 Payments,Refund orchestration API,IN,5,Unified refund endpoint. Handles void / partial capture / post-capture refund. Idempotent.
+B-17,2.3-2.10 Backend,2.4 Payments,Promo code validation engine,IN,5,Server-side validation before PaymentIntent creation. Per-user Redis counter.
+B-18,2.3-2.10 Backend,2.4 Payments,Stripe webhook receiver + event routing,IN,8,Handles all Stripe event types. Stripe-Signature validation. Idempotency check.
+B-19,2.3-2.10 Backend,2.4 Payments,Webhook DLQ + retry scheduler,IN,5,5× exponential retry → Dead Letter Queue → admin replay. Non-negotiable.
+B-20,2.3-2.10 Backend,2.4 Payments,Idempotency middleware (all mutating endpoints),IN,6,Idempotency-Key header required on all POST/PATCH. Redis 24h TTL. Production blocker.
+B-21,2.3-2.10 Backend,2.5 Messaging,Socket.IO server + Redis adapter,IN,8,CRITICAL: Redis adapter required for horizontal scaling. Must be in from day one.
+B-22,2.3-2.10 Backend,2.5 Messaging,Message persistence + cursor pagination,IN,5,"Cursor-based pagination. Composite index on (task_id, created_at DESC)."
+B-23,2.3-2.10 Backend,2.5 Messaging,LLM chat moderation (real-time),IN,6,Gemini Flash / Claude Haiku classifies outgoing message in <200ms. AI router (AI-01) already built; this is one classifier endpoint wired into Socket.IO emit.
+B-24,2.3-2.10 Backend,2.5 Messaging,Thread state machine,IN,4,States: open → active → frozen (dispute) → archived.
+B-25,2.3-2.10 Backend,2.5 Messaging,Message full-text search,IN,4,GIN index on message content. Row-level security enforced.
+B-26,2.3-2.10 Backend,2.5 Messaging,File / media attachment upload service,IN,4,Backend issues presigned Azure Blob upload URL. NSFW scan async post-upload.
+B-27,2.3-2.10 Backend,2.6 Disputes,Dispute state machine API,IN,6,States: filed → ai_reviewing → ai_proposed → resolved. Immutable state history.
+B-28,2.3-2.10 Backend,2.6 Disputes,Tier-0 AI mediator agent (Claude Sonnet),IN★,12,Reads thread + photos + GPS + payment. Proposes resolution. Target: 50–70% acceptance.
+B-29,2.3-2.10 Backend,2.6 Disputes,Evidence validation (EXIF + content),IN,5,EXIF extract already done in B-45. This adds geo check (GPS within 1km of task location) + timestamp cross-reference. Incremental logic only.
+B-30,2.3-2.10 Backend,2.6 Disputes,Admin co-pilot brief generation,IN★,6,LLM generates structured brief for escalated disputes. Highest-ROI internal AI tool.
+B-31,2.3-2.10 Backend,2.6 Disputes,Dispute outcome → payment action,IN,5,Outcome triggers refund API. Both parties notified. Idempotent.
+B-32,2.3-2.10 Backend,2.6 Disputes,SLA timer + auto-escalation,IN,2,BullMQ jobs: AI proposal not responded to in 72h → auto-escalate.
+B-33,2.3-2.10 Backend,2.7 Notifications,Push notification service (FCM / APNS / Web Push),IN,6,Device token management + delivery receipt tracking. ~5–10% push failure rate.
+B-34,2.3-2.10 Backend,2.7 Notifications,Transactional email service (SendGrid),IN,5,"Template-based: signup verify, payment receipt, RCTI, dispute, reviews. DKIM + SPF."
+B-35,2.3-2.10 Backend,2.7 Notifications,SMS service (Notifyre),IN,4,OTP + critical event fallback. Notifyre is AU-registered (Blueprint §37). STOP handling.
+B-36,2.3-2.10 Backend,2.7 Notifications,Notification preference enforcement,THIN,4,Preference store per user per channel. Transactional cannot be disabled.
+B-37,2.3-2.10 Backend,2.7 Notifications,Notification event bus (central dispatcher),IN,8,BullMQ-backed dispatcher. Deduplication window prevents double-notify.
+B-38,2.3-2.10 Backend,2.8 Reviews,Review submission + blind reveal logic,IN,6,14-day timeout (Blueprint §16). Min 80 chars. Reveal triggers trust_score recompute.
+B-39,2.3-2.10 Backend,2.8 Reviews,BullMQ 14-day review reveal job,IN,2,Fires after 14 days (Blueprint §16) if both haven't submitted.
+B-40,2.3-2.10 Backend,2.8 Reviews,Trust score computation,IN,6,trust_score formula. Recomputed on each review reveal and dispute resolution. Formula is defined; implementation is a DB function + trigger.
+B-41,2.3-2.10 Backend,2.8 Reviews,Review authenticity scoring (LLM classifier),IN★,5,"Detects: collusion patterns, GPT-phrasing anomalies, burst patterns. AI router (AI-01) built; reuses B-23 classifier pattern. Prompt engineering is the effort."
+B-42,2.3-2.10 Backend,2.8 Reviews,Review moderation API,IN,3,Remove / restore review (admin only). Removal triggers trust_score recompute.
+B-43,2.3-2.10 Backend,2.9 File Storage & Media,Azure Blob storage service,IN,5,Presigned upload/download URLs. Lifecycle policies. CDN-fronted.
+B-44,2.3-2.10 Backend,2.9 File Storage & Media,NSFW / violence detection (Azure Content Safety),IN,4,"Async scan on all uploaded images via BullMQ. Violation → soft-delete blob, notify uploader."
+B-44b,2.3-2.10 Backend,2.9 File Storage & Media,PII blur on task / profile photos,IN,4,"Runs after B-44 in the same BullMQ pipeline. Azure Computer Vision detects visible text regions (phone numbers, emails, addresses, ABNs). Sharp.js applies Gaussian blur over flagged regions before CDN serving. Prevents taskers and posters from bypassing the platform via contact info visible in photos."
+B-45,2.3-2.10 Backend,2.9 File Storage & Media,EXIF validation + timestamp verification,IN,2,For completion proof: extract EXIF DateTimeOriginal + GPS via ExifTool.
+B-46,2.3-2.10 Backend,2.9 File Storage & Media,AI content-match (photo → task category),POST,12,Post-launch. Vision model checks completion photo plausibly matches task category.
+B-47,2.3-2.10 Backend,2.9 File Storage & Media,File validation + compression pipeline,IN,2,Magic-byte type validation. Max 10MB photos. Sharp.js server-side resize.
+B-48,2.3-2.10 Backend,2.10 Trust & Safety,Behavioral fraud scoring,IN★,10,"Detects: synthetic identity, collusion, platform-leakage. Flags taskers with frequent cancellations — surfaced in admin portal moderation queue."
+B-49,2.3-2.10 Backend,2.10 Trust & Safety,Graph-based anomaly detection,POST,24,Post-launch. Poster–tasker–device–IP–card graph. Needs 6+ months data.
+B-50,2.3-2.10 Backend,2.10 Trust & Safety,Rate limiting (AI + auth + API),IN,3,Per-user Redis quotas. AI extraction 20/day. Auth: 10 attempts / 15min. Redis middleware + config; shared pattern across endpoints.
+B-51,2.3-2.10 Backend,2.10 Trust & Safety,Prompt injection defense + PII scrubbing,IN,4,PII scrubbed before any user content goes to LLM.
+B-52,2.3-2.10 Backend,2.10 Trust & Safety,"Audit log service (immutable, append-only)",IN,4,No UPDATE/DELETE. Retention: 7 years (ATO).
+B-53,2.3-2.10 Backend,2.10 Trust & Safety,Moderation pipeline orchestrator,IN,4,BullMQ fan-out: new task/message/photo/review → relevant checks. B-37 notification dispatcher already establishes the fan-out pattern; this reuses it.
+B-54,2.3-2.10 Backend,2.10 Trust & Safety,TFN encryption at rest (AES + Azure Key Vault),IN,6,"[MDR §5.2] Privacy Act + ATO requirement. TFN stored AES-encrypted via Azure Key Vault. Controlled-decrypt path only — TFN never logged, never returned in API responses. Migration job for any existing unencrypted records."
+B-55,2.3-2.10 Backend,2.4 Payments,Annual income statement batch job (July),IN,8,[MDR §5.2] ATO requirement. Cron job runs 1 July each year. Aggregates all completed task earnings per contractor for the financial year. Generates PDF statement stored in Azure Blob. Download link emailed via Resend. Mobile screen M-233 provides in-app access.
+B-56,2.3-2.10 Backend,2.4 Payments,Payment lifecycle edge cases (dispute hold + release + payout-ready gate),IN,8,"[MDR §5.4] Three gaps: (1) held_indefinitely reserve state on dispute open — locks payout until dispute resolves, prevents premature transfer to tasker. (2) Auto-release reserve on dispute closure — B-31 triggers Stripe transfer after outcome recorded. (3) PAYOUT_READY gate on task completion — blocks completion if tasker Connect account not charges_enabled/payouts_enabled, shows hard error with deep-link to Connect onboarding (ID 44)."
+B-57,2.3-2.10 Backend,2.10 Trust & Safety,Auto-suspend trigger rules engine,IN,6,"[MDR §5.5] BullMQ job evaluates thresholds after each dispute resolution, no-show, review reveal, and fraud score update. Triggers: 3 disputes lost, 3 no-shows, rating < 3.0 with ≥10 reviews, fraud_score > 0.7. Auto-sets account suspended + logs reason code. Notifies tasker via push + email. Feeds reinstatement queue (AP-58)."
+B-58,2.3-2.10 Backend,2.10 Trust & Safety,Data retention enforcement pipeline,IN,8,"[MDR §5.9] Nightly BullMQ cron evaluates retention rules per data class: financial records (7yr archive→purge), thread messages (7yr), KYC docs (7yr post-closure → Azure Blob delete), PCC docs (90d post-approval → purge, retain SHA-256 hash), profile data (deletion+30d → anonymise), analytics events (2yr → delete). Each run logs deleted record counts to audit log (B-52). Deletion vs anonymisation logic per class. Privacy Act compliance."
+B-59,2.3-2.10 Backend,2.3 Matching Engine,Geographic supply check + demand signal capture,POST,6,"[MDR §5.3] On task post: PostGIS query checks contractor count within radius for category. Zero result → returns soft-block response to mobile (M-234). Waitlist signup stored in demand_signals table (suburb, category, user_id, timestamp). Nightly aggregate summary available to admin — feeds AP-55 Demand Map post-launch. Demand signals also generated on failed task searches and filter-with-no-results events."
+AP-01,3. Admin Portal,3.1 User Management,User search & lookup,IN,4,"Search by name, email, phone, or ABN. Full-text + exact match. AdminDataTable component shared with AP-14, AP-24, AP-28."
+AP-02,3. Admin Portal,3.1 User Management,Full user profile view (admin),IN,4,"Complete profile: personal info, trust tier, KYC, job history, Stripe Connect status."
+AP-03,3. Admin Portal,3.1 User Management,Manual trust tier override,IN,4,Every override written to immutable audit log. Triggers tasker notification.
+AP-04,3. Admin Portal,3.1 User Management,Suspend / ban / reactivate account,IN,3,Mandatory reason code + internal note. Suspension revokes all sessions via Redis.
+AP-05,3. Admin Portal,3.1 User Management,Support impersonation (read-only shadow session),IN,6,Admin views app exactly as a specific user — without their credentials. All actions disabled.
+AP-06,3. Admin Portal,3.1 User Management,Merge duplicate accounts,POST,16,"Post-launch. Merging job history, reviews, and payment records is complex."
+AP-07,3. Admin Portal,3.1 User Management,DSR / privacy erasure request management,IN,4,Queue of incoming Data Subject Requests. 30-day SLA timer visible.
+AP-08,3. Admin Portal,3.1 User Management,Manual account anonymisation trigger,IN,3,Requires dual-admin confirmation. Shows dry-run summary before commit.
+AP-09,3. Admin Portal,3.2 Verification Queue,Manual ID review queue,IN,6,"Admin reviews uploaded ID + selfie manually. Approve → trust tier assigned; Reject → tasker notified with reason. No Onfido automated flow — all manual. Separate from trade licence and insurance queues (AP-10, AP-11)."
+AP-09b,3. Admin Portal,3.1 User Management,Create user from admin (tasker / poster),IN,4,"Admin can create tasker (name, email, phone, skills, service areas, trust tier) or poster (name, email, phone) directly — bypasses mobile signup. Useful for manually onboarded users. Sends welcome email with set-password link. Backend user CRUD (ID 228) already supports this — UI wrapper only."
+AP-10,3. Admin Portal,3.2 Verification Queue,Trade licence upload review,IN,2,Tasker-uploaded licence documents for Tier 3 verification. No automation logic — admin manual verification only.
+AP-11,3. Admin Portal,3.2 Verification Queue,Insurance certificate review,IN,1,Public liability insurance cert. Cover amount ≥$5M required.
+AP-12,3. Admin Portal,3.2 Verification Queue,WWCC / PCC document review,IN,1,Working with Children Check / Police Check for Tier 4. All AU states.
+AP-13,3. Admin Portal,3.2 Verification Queue,Batch approve / reject with tasker notification,IN,1,Checkbox select + bulk action. Each rejection requires reason code.
+AP-14,3. Admin Portal,3.3 Job & Booking Management,"Job browse, search, filter",IN,5,"Filter by status, category, suburb, date, poster, tasker."
+AP-15,3. Admin Portal,3.3 Job & Booking Management,"Job detail view (bids, messages, payments)",IN,4,"Full job record: bids, thread, PaymentIntent ID, GPS check-ins, dispute history."
+AP-16,3. Admin Portal,3.3 Job & Booking Management,Force-cancel a job,IN,3,Admin can cancel any job in any state. Auto-triggers refund logic.
+AP-17,3. Admin Portal,3.3 Job & Booking Management,Manual refund trigger,IN,3,Admin-initiated Stripe refund. Creates RCTI credit note. Audit log mandatory.
+AP-18,3. Admin Portal,3.4 Financial & Payout,Payout dashboard,IN,4,"All tasker payouts: amount, status, reserve hold expiry. Daily GMV aggregates. Stripe API read + AdminDataTable; same pattern as AP-21."
+AP-19,3. Admin Portal,3.4 Financial & Payout,Stripe Connect account status per tasker,IN,2,"Shows charges_enabled, payouts_enabled, requirements. Flags taskers who can't receive payouts."
+AP-20,3. Admin Portal,3.4 Financial & Payout,RCTI export for ATO compliance,IN,3,Date-range query + CSV/PDF export. B-14 already generates RCTI PDFs; this is admin date-range filter + download trigger.
+AP-21,3. Admin Portal,3.4 Financial & Payout,Revenue & GMV reporting dashboard,IN,3,"Daily/weekly/monthly GMV, platform fee revenue, refund rate. Investor-grade metrics."
+AP-22,3. Admin Portal,3.4 Financial & Payout,Refund log & management,IN,2,Read-only table of all refunds. AP-17 handles admin refund actions; this is display only. Risk signal surfaced in AP-39 funnel.
+AP-23,3. Admin Portal,3.4 Financial & Payout,Payout hold / early release override,IN,3,"Extend reserve on fraud investigation or release early. Dual-admin for >$1,000."
+AP-24,3. Admin Portal,3.5 Disputes,Dispute queue,IN,5,"All active disputes with status, age, SLA timer, amount at risk."
+AP-25,3. Admin Portal,3.5 Disputes,AI mediator transcript viewer,IN,2,Full log of Claude Sonnet Tier-0 mediation conversation.
+AP-26,3. Admin Portal,3.5 Disputes,Manual arbitration tools,IN,4,Admin records outcome. Triggers payment action. Both parties notified.
+AP-27,3. Admin Portal,3.5 Disputes,"Evidence viewer (GPS, photos, messages)",IN,2,"Single-pane view: GPS check-in, photos, full message thread, payment timeline."
+AP-28,3. Admin Portal,3.6 Review Moderation,Review moderation queue,IN,4,Flagged and reported reviews. Auto-flags reviews with profanity or personal info.
+AP-29,3. Admin Portal,3.6 Review Moderation,Remove / restore review,IN,2,Removal triggers re-calculation of tasker average score.
+AP-30,3. Admin Portal,3.6 Review Moderation,Review reveal window override,IN,2,Normal reveal at 14 days (Blueprint §16). Admin can force-reveal immediately.
+AP-31,3. Admin Portal,3.7 Content & Config,Category & subcategory CRUD,IN,4,Changes propagate to SEO pages via ISR revalidation webhook.
+AP-32,3. Admin Portal,3.7 Content & Config,Service area (suburb/region) management,IN,4,Manage canonical suburb/postcode list. Sourced from ABS GNAF data.
+AP-33,3. Admin Portal,3.7 Content & Config,Platform fee & GST rate config,IN,3,Configurable fee % per category. Dual-admin approval for changes >2pp.
+AP-34,3. Admin Portal,3.7 Content & Config,Feature flag management,THIN,2,Simple boolean flags in Redis. Used to gate AI features post-deploy.
+AP-35,3. Admin Portal,3.7 Content & Config,Push notification broadcast,POST,8,Post-launch. Requires segmentation logic and unsubscribe compliance.
+AP-36,3. Admin Portal,3.7 Content & Config,Email template management,THIN,2,Edit subject + body of transactional email templates. Changes versioned in DB.
+AP-37,3. Admin Portal,3.7 Content & Config,Help centre article management (basic CMS),THIN,6,Markdown-based CMS. Published articles rendered on Next.js SEO site via API.
+AP-38,3. Admin Portal,3.8 Analytics Dashboard,DAU / MAU dashboard,IN,2,Daily/monthly active users. Retention cohort chart. Refreshed every 15 minutes.
+AP-39,3. Admin Portal,3.8 Analytics Dashboard,Funnel analytics (post → bid → book → complete → review),IN,3,Core health metric. Drop-off at each stage by category and date range.
+AP-40,3. Admin Portal,3.8 Analytics Dashboard,Trust tier distribution chart,IN,1,Count of taskers at each trust tier. Tier upgrade velocity trend.
+AP-41,3. Admin Portal,3.8 Analytics Dashboard,Review score & NPS trends,IN,2,Platform average review score over time. NPS trend (poster + tasker separately).
+AP-42,3. Admin Portal,3.8 Analytics Dashboard,Top categories & suburbs by GMV,IN,2,Ranked leaderboard. Informs marketing spend and SEO page prioritisation.
+AP-43,3. Admin Portal,3.8 Analytics Dashboard,Tasker supply / demand heatmap,POST,16,Post-launch. Needs 3–6 months data to be meaningful.
+AP-44,3. Admin Portal,3.9 System / DevOps,Webhook DLQ viewer + manual replay,IN,6,"Payload inspection per failed event. Error log + retry history per entry. One-click re-enqueue. Manual resolve with mandatory reason capture. Filter by event type, age, status. PagerDuty alert wired for payment-class DLQ entries (Blueprint §12)."
+AP-45,3. Admin Portal,3.9 System / DevOps,BullMQ job queue monitor,IN,2,"Queue depth, active jobs, failed jobs. Alert threshold for queue depth >500."
+AP-46,3. Admin Portal,3.9 System / DevOps,Admin activity & audit log,IN,6,"Immutable log of every admin action. Search + filter by actor, target, action type, time range. CSV export. Tamper-evident display with hash chain (Blueprint §27 + SRS NFR-SEC-008). Before/after diff view and monthly partition optimisation are POST."
+AP-47,3. Admin Portal,3.9 System / DevOps,Admin auth (MFA required) + role management,IN,5,"TOTP MFA mandatory. Three roles: Super Admin (full access) + Sub Admin (limited — no destructive actions, no financial overrides) + FSE Role (field sales agent — feature access controlled by Super Admin). Role permissions configurable per FSE user by Super Admin. Session timeout 4h idle."
+AP-47b,3. Admin Portal,3.9 System / DevOps,FSE Admin Role — field sales portal access,IN,6,"Field Sales Executive login to admin portal under FSE Role. Super Admin toggles which features are visible per FSE user. Default FSE access: verification queue (submit/track manual KYC for in-person onboarding), their own referred tasker list, commission tracking (pending/earned), and basic lead notes. No access to platform financials, bulk actions, or destructive operations. Replaces the separate FSE Flutter app — field agents use the same admin portal on mobile browser."
+AP-48,3. Admin Portal,3.10 Master Data — AI-Augmented,Unified Reason Codes (AI-Curated),POST,10,Post-launch. AI-curated taxonomy — not needed for MVP operations.
+AP-49,3. Admin Portal,3.10 Master Data — AI-Augmented,"Content Templates hub (AI-Generated, A/B testing)",POST,12,Post-launch. AI template generation + A/B testing — deferred.
+AP-50,3. Admin Portal,3.10 Master Data — AI-Augmented,Trust Rules management (AI-Augmented),POST,10,Post-launch. AI-augmented trust rules — manual config sufficient for MVP.
+AP-51,3. Admin Portal,3.11 Reporting & Analytics,Automated report suite (daily / weekly / monthly),IN,16,"Blueprint §31. 8 daily reports auto-emailed 7am AEST: Operations Summary, Payment, Dispute, KYC (incl. manual queue + FSE-onboarded), Webhook Health, AI Cost, Fraud Alert, Field Sales. Weekly: marketplace health, contractor performance, geographic heatmap, AI accuracy, promo performance, cohort LTV. Monthly: financial close, RCTI batch, ATO prep, compliance summary, investor metrics. Each report = templated SQL + SendGrid email; BullMQ cron handles scheduling."
+AP-52,3. Admin Portal,3.11 Reporting & Analytics,Ad-hoc Report Builder (NL queries + export),IN★,10,"Blueprint §31. Self-service: pick entity, fields, filters. NL query → parameterised SQL via LLM. AI router (AI-01) built; UI is a form + table renderer."
+AP-53,3. Admin Portal,3.12 Super User Dashboard,Super User Dashboard (24-tile REST refresh),IN,14,Blueprint §32. First screen after login. 24 tiles across 6 sections. REST polling (60s/30s intervals) — no WebSocket. Tile data sourced from existing APIs; frontend is grid layout + polling hook.
+AP-54,3. Admin Portal,3.13 AI Suggestion Inbox & Insights,AI Suggestion Inbox (unified master data),POST,10,Post-launch. Unified AI suggestion inbox — deferred with 3.10.
+AP-55,3. Admin Portal,3.13 AI Suggestion Inbox & Insights,Insights & Demand Map,POST,14,Post-launch. Demand heatmap needs 3–6 months of data to be meaningful.
+AP-56,3. Admin Portal,3.14 Two-Person Approval Rule,Two-Person Approval Rule (Maker-Checker workflow),IN,4,"Sub Admin initiates → Super Admin approves. Covers: refunds >$1,000, account hard delete, bulk operations >50 records. FSE role cannot initiate maker-checker actions. Audit log captures both actions."
+AP-57,3. Admin Portal,3.4 Financial & Payout,ATO Sharing Economy Reporting export (annual),IN,10,"[MDR §5.2] ATO SERR requirement for AU gig platforms. Aggregates contractor earnings, ABNs, TFNs per financial year. Exports in ATO-specified format. Due each July — infrastructure must be ready at launch even though first report is July 2027. Separate from RCTI export (AP-20)."
+AP-58,3. Admin Portal,3.1 User Management,Reinstatement workflow (auto-suspended accounts),IN,4,"[MDR §5.5] Queue of auto-suspended taskers awaiting review. Tasker submits remediation plan via mobile app. Senior Admin reviews + approves/denies reinstatement. Full audit trail: suspension reason, remediation plan, decision, approver identity. Separate from manual suspend/ban flow (AP-04)."
+AP-59,3. Admin Portal,3.7 Content & Config,Promo Code management (admin CRUD),IN,6,"[MDR §2.3] Admin create/edit/deactivate promo codes. Fields: code string, discount type (% or flat), discount value, usage limit (total + per-user), expiry date, category targeting (all or specific categories), min task value. Usage counter shown per code. B-17 backend validation engine already built — this is the admin UI + create/update endpoints only. AI-design workflow (Blueprint §30) deferred POST."
+AP-60,3. Admin Portal,3.3 Job & Booking Management,Override: stuck draft task — manual edit/publish,IN,3,"[MDR §2.6] Blueprint §28. Admin can edit fields on a stuck draft task and force-publish, or delete it. Triggered from job detail view. Reason code + audit log required. POST — edge case volume low at launch."
+AP-61,3. Admin Portal,3.3 Job & Booking Management,Override: open task 0 bids >48h — broadcast / lower budget / expire,IN,4,"[MDR §2.6] Blueprint §28. Three admin actions on a stale open task: (1) re-broadcast to wider radius, (2) prompt poster to lower budget, (3) force-expire with full refund. Each action logged with reason code. POST — ops can manually handle at launch volume."
+AP-62,3. Admin Portal,3.3 Job & Booking Management,Override: assigned task with unreachable contractor,IN,4,"[MDR §2.6] Blueprint §28. When contractor goes silent after assignment: (1) reassign to next-ranked bidder, (2) cancel + full refund to poster, (3) force-complete with admin note. Audit trail records which action and why. POST — rare edge case at launch."
+AP-63,3. Admin Portal,3.3 Job & Booking Management,Override: in-progress task with no completion signal,IN,3,[MDR §2.6] Blueprint §28. Admin marks task complete on behalf of tasker when GPS check-in exists but completion not triggered. Requires internal note with min 50 chars. Triggers normal payment release flow. POST — manual workaround acceptable at launch.
+AP-64,3. Admin Portal,3.3 Job & Booking Management,Override: bid submitted with poster inactive,IN,3,"[MDR §2.6] Blueprint §28. Two options: (1) auto-reject bid and notify tasker, (2) override-accept and notify poster to confirm. Triggered from bid detail view. POST — infrequent at launch volume."
+AP-65,3. Admin Portal,3.4 Financial & Payout,Override: payment authorisation expired,IN,3,"[MDR §2.6] Blueprint §28. When PaymentIntent auth expires before capture: (1) request re-auth from poster, (2) manual refund if poster unreachable. Links to AP-17 refund flow. POST — Stripe auth window (7d) gives ops time to handle manually."
+AP-66,3. Admin Portal,3.4 Financial & Payout,Override: capture failed — retry / switch method / notify,IN,4,"[MDR §2.6] Blueprint §28. When Stripe capture fails: (1) retry immediately, (2) request poster update payment method, (3) notify poster and hold payout. Each action creates audit log entry. POST — Stripe retry logic handles most cases automatically."
+AP-67,3. Admin Portal,3.4 Financial & Payout,Override: Connect account incomplete >30d,IN,3,"[MDR §2.6] Blueprint §28. When tasker Stripe Connect onboarding stalls >30d: (1) force-close Connect account, (2) initiate manual bank transfer for outstanding balance, (3) notify tasker. POST — Connect completion rate high; rare edge case."
+AP-68,3. Admin Portal,3.4 Financial & Payout,Override: refund failed at Stripe,IN,4,"[MDR §2.6] Blueprint §28. When Stripe refund API call fails: (1) retry, (2) switch to alternative method, (3) create manual ledger entry for offline resolution. Full audit trail with Stripe error code captured. POST — Stripe refund failure rate negligible."
+AP-69,3. Admin Portal,3.5 Disputes,Override: AI dispute proposal stale >7d,IN,3,"[MDR §2.6] Blueprint §28. When AI mediator proposal goes unacknowledged >7d: (1) force-accept AI resolution, (2) escalate to human arbitration queue (AP-24/26). Admin records reason. POST — deferred with AI mediation complexity."
+AP-70,3. Admin Portal,3.5 Disputes,Override: locked thread needs reopen for dispute,IN,2,[MDR §2.6] Blueprint §28. Message threads auto-lock after completion. Admin can unlock for dispute evidence collection. Unlock logged with reason; thread re-locks after dispute closes. POST — AP-26 manual arbitration handles this manually at launch.
+AP-71,3. Admin Portal,3.1 User Management,Override: user locked out — manual ID verify + reset,IN,3,"[MDR §2.6] Blueprint §28. When account locked due to failed auth attempts or fraud flag: admin triggers manual ID verification step, then resets lock. Separate from suspend/ban (AP-04) — this is account recovery not punishment. POST — low volume; ops can use AP-04 flow as workaround at launch."
+AP-72,3. Admin Portal,3.10 Master Data — AI-Augmented,Fraud graph visualization (Blueprint §14),POST,12,"[MDR §2.11] Graph UI showing entity relationships: users, devices, IPs, cards, bank accounts, addresses. Edges: signup-from, paid-with, shared-device, hired-by. Velocity anomaly overlay. Fraud case actions (suspend, escalate, review) from graph nodes. POST — auto-suspend (B-57) handles launch-volume fraud; graph viz needed at scale. Needs 3-6 months of signal data to be meaningful."
+FW-01,4. Flutter Web,4.1 Layout & Navigation,Responsive layout engine,IN,12,Breakpoints: mobile/tablet/desktop. Affects ~20 key screens. Flutter LayoutBuilder handles most of this; effort is the breakpoint config + testing on key screens.
+FW-02,4. Flutter Web,4.1 Layout & Navigation,Desktop navigation (top nav / sidebar),IN,8,Replace mobile bottom nav with persistent sidebar/topbar at ≥900px. NavigationRail widget handles the sidebar; FW-01 breakpoints already established.
+FW-03,4. Flutter Web,4.1 Layout & Navigation,URL-based routing (web navigation),IN,8,Map Flutter routes to URL paths. go_router handles URL sync cleanly. Enables browser back/forward + bookmarking.
+FW-04,4. Flutter Web,4.1 Layout & Navigation,Browser back/forward navigation guard,IN,3,Intercept browser back during checkout or form fill. Show 'Leave page?' confirmation.
+FW-05,4. Flutter Web,4.1 Layout & Navigation,Browser tab title + favicon updates,IN,1,Dynamic document.title per route. Favicon + apple-touch-icon set.
+FW-06,4. Flutter Web,4.2 Browser API Adaptations,Browser push notifications (Web Push),IN,6,"Web Push API via service worker. VAPID key pair, browser permission prompt."
+FW-07,4. Flutter Web,4.2 Browser API Adaptations,Browser geolocation API,IN,3,navigator.geolocation for GPS check-in. Requires HTTPS.
+FW-08,4. Flutter Web,4.2 Browser API Adaptations,Browser camera & file upload,IN,4,getUserMedia for camera; HTML file input for gallery/doc upload.
+FW-09,4. Flutter Web,4.2 Browser API Adaptations,Browser OAuth redirect flow,IN,4,Google/Apple sign-in uses redirect_uri on web. Separate OAuth client config.
+FW-10,4. Flutter Web,4.2 Browser API Adaptations,Stripe.js web payment integration,IN,5,flutter_stripe SDK injects Stripe.js on web. Test all three payment modes.
+FW-11,4. Flutter Web,4.2 Browser API Adaptations,Socket.IO web client validation,IN,2,"Validate real-time chat, bid notifications, job status updates work in browser."
+FW-12,4. Flutter Web,4.2 Browser API Adaptations,Web Share API,THIN,2,navigator.share(). Fallback to clipboard copy on desktop.
+FW-13,4. Flutter Web,4.3 Compliance & Accessibility,Cookie consent banner,IN,3,Required for Australian Privacy Act + Stripe / GA4 tracking cookies.
+FW-14,4. Flutter Web,4.3 Compliance & Accessibility,Keyboard navigation & accessibility (WCAG 2.1 AA),IN,6,"Tab order, focus indicators, ARIA labels. Screen reader testing required."
+FW-15,4. Flutter Web,4.4 Build & Performance,PWA manifest + service worker + install prompt,IN,5,Enables 'Add to Home Screen'. Flutter generates manifest.json; service worker caches app shell. Standard template — minimal custom logic.
+FW-16,4. Flutter Web,4.4 Build & Performance,Flutter web build pipeline + CDN hosting,IN,5,flutter build web --release with CanvasKit. Azure Static Web Apps or Vercel. GitHub Actions step + CDN config — not complex code.
+FW-17,4. Flutter Web,4.4 Build & Performance,Cross-browser testing matrix,IN,4,"Chrome, Firefox, Safari (WebKit), Edge. Flutter web has known Safari quirks."
+FW-18,4. Flutter Web,4.4 Build & Performance,SEO meta tag injection (authenticated pages),THIN,3,Inject basic og:title / og:description in index.html per route for shareable pages.
+SEO-01,5. Next.js SEO,5.1 Foundation,Next.js project setup + App Router + hosting,IN,6,Next.js 14 App Router. TypeScript. Tailwind CSS. Vercel hosting with ISR support.
+SEO-02,5. Next.js SEO,5.1 Foundation,URL strategy + Flutter web handoff,IN,4,Critical architectural decision. Shared cookie auth so logged-in users flow between apps.
+SEO-03,5. Next.js SEO,5.2 Core Pages,Homepage,IN,10,"Hero, how-it-works, category grid, testimonials, app store CTA. SSR for personalisation."
+SEO-04,5. Next.js SEO,5.2 Core Pages,Category landing pages (dynamic SSG),IN,12,/hire-a-[category]. ISR revalidation on category update webhook.
+SEO-05,5. Next.js SEO,5.2 Core Pages,Location × Category pages (programmatic SEO),IN,16,"/hire-a-[category]-[suburb]. Could be 5,000–20,000 pages. 24h ISR. Same template as SEO-04 — scale doesn't add dev hours; effort is DB query + ISR config."
+SEO-06,5. Next.js SEO,5.2 Core Pages,Tasker public profile page,IN,8,/taskers/[slug]. JSON-LD Person + Review schema for rich snippets. Schema template reused from SEO-14; page data from existing tasker profile API.
+SEO-07,5. Next.js SEO,5.2 Core Pages,How it works page,IN,2,Poster + tasker journey explained. Static page.
+SEO-08,5. Next.js SEO,5.2 Core Pages,Pricing / fees page,IN,2,Platform fee % breakdown. Config-driven so fee changes don't need code deploy.
+SEO-09,5. Next.js SEO,5.2 Core Pages,Safety & verification page,IN,2,"Trust tier explainer. WWCC, PCC badges explained."
+SEO-10,5. Next.js SEO,5.2 Core Pages,Help centre (SSG from Markdown/CMS),THIN,8,Markdown-based help articles. AP-37 admin CMS feeds this via API. SSG with ISR; same pipeline as other static pages.
+SEO-11,5. Next.js SEO,5.2 Core Pages,Blog / content hub,POST,24,Post-launch. Requires content production investment.
+SEO-12,5. Next.js SEO,5.2 Core Pages,App download / smart banner page,IN,2,Smart App Banner meta tag + branch.io SDK. Static page; meta tag injected in layout.tsx.
+SEO-13,5. Next.js SEO,5.2 Core Pages,About + legal pages,IN,2,"About, ToS, Privacy Policy, Cookie Policy. Legal review required."
+SEO-14,5. Next.js SEO,5.3 SEO Technical,Structured data (JSON-LD),IN,6,"LocalBusiness, Service, Person + Review, FAQPage schemas. JSON-LD is templated per page type; schema.org definitions are reusable across SEO pages."
+SEO-15,5. Next.js SEO,5.3 SEO Technical,Open Graph + Twitter card meta,IN,2,Dynamic og:title / og:description / og:image per page.
+SEO-16,5. Next.js SEO,5.3 SEO Technical,"Sitemap.xml (dynamic, ISR)",IN,2,Auto-generated covering all pages. Split into sitemap index for >50k URLs.
+SEO-17,5. Next.js SEO,5.3 SEO Technical,robots.txt + canonical URL management,IN,1,Disallow /app/*. Canonical tags on all programmatic pages.
+SEO-18,5. Next.js SEO,5.3 SEO Technical,Core Web Vitals optimisation,IN,6,"LCP <2.5s, CLS <0.1, FID/INP <100ms. Lighthouse CI in build pipeline."
+SEO-19,5. Next.js SEO,5.3 SEO Technical,Analytics integration (GA4 + Meta Pixel),IN,4,Gated behind cookie consent. Server-side events via Conversions API.
+SEO-20,5. Next.js SEO,5.3 SEO Technical,A/B testing infrastructure,POST,8,Post-launch. Vercel Edge Config or GrowthBook. Needs baseline traffic first.
+AI-01,6. AI Infrastructure,6.1 LLM Routing & Observability,Multi-provider LLM router,IN,8,Abstraction over Gemini Flash / Claude Haiku / Claude Sonnet / GPT-4o. Single interface.
+AI-02,6. AI Infrastructure,6.1 LLM Routing & Observability,LLM observability (Langfuse / Helicone),IN,4,"Prompt versioning, latency, token cost, error rates. Ship before any AI feature goes live. SDK integration + dashboard config; heavy on setup not code."
+AI-03,6. AI Infrastructure,6.1 LLM Routing & Observability,Prompt versioning + A/B eval harness,IN,8,Prompts as versioned artefacts in DB. Golden dataset eval script. Precision/recall tracked per version via Langfuse (AI-02 built). Effort is golden dataset curation + eval runner.
+AI-04,6. AI Infrastructure,6.1 LLM Routing & Observability,Output validators + guardrails,IN,6,JSON schema validation on all structured LLM outputs. Zod validators shared across endpoints. Base validator is reusable — effort is per-endpoint schema definition.
+AI-05,6. AI Infrastructure,6.2 ML Models & Feature Store,Feature store (matching + pricing ML),THIN,8,Postgres-backed feature table. Pre-computed features per tasker. Nightly refresh.
+AI-06,6. AI Infrastructure,6.2 ML Models & Feature Store,Budget regression model,POST,12,Post-launch. Needs ~500 completed tasks before model is meaningful.
+AI-07,6. AI Infrastructure,6.2 ML Models & Feature Store,Auto-SEO content generation per task,IN,4,"LLM generates SEO-friendly slug, meta description, FAQ block from task description."
+AI-08,6. AI Infrastructure,6.2 ML Models & Feature Store,Bid coaching assistant (tasker),POST,6,"Post-launch. LLM suggests win-rate improvements. Build after 1,000+ bids. Feature flag to activate."
+AI-09,6. AI Infrastructure,6.3 Predictive Operations,Demand forecasting (suburb × category × week),POST,24,Post-launch. Needs 6+ months of data.
+AI-10,6. AI Infrastructure,6.3 Predictive Operations,Tasker churn prediction + re-engagement,POST,16,Post-launch. Needs 3–4 months of activity data.
+AI-11,6. AI Infrastructure,6.3 Predictive Operations,LTV scoring at signup,POST,10,Post-launch. Needs real LTV data from completed cohorts.
+AI-12,6. AI Infrastructure,6.1 LLM Routing & Observability,AI cost quota enforcement,IN,4,"[MDR §3.5] Per-user daily quota (e.g., 20 AI extractions/day) enforced via Redis counters. Org-wide daily budget cap with alert thresholds at 70 / 85 / 95% spend. PagerDuty alert fires at 95% — prevents runaway AI bill. LLM router (AI-01) already routes to cheapest model per task class; this adds the quota gate and alerting layer. SRS NFR-COST compliance. (make it minimal like keep a count in tabe)"
+AI-13,6. AI Infrastructure,6.2 ML Models & Feature Store,Image content safety (Azure Content Safety),DROP,0,"Already covered in B - 44, if we need to monitor profile image and all we can consider else we dont need this."
+DEV-01,7. DevOps,7.1 CI/CD & Environments,CI/CD pipeline (GitHub Actions → Azure),IN,8,On PR: lint + tests. On merge: Docker → ACR → staging. On tag: prod. Fastlane for mobile.
+DEV-02,7. DevOps,7.1 CI/CD & Environments,Environment promotion strategy (dev → staging → prod),IN,4,Three tiers. DB migrations in staging first. Secrets per environment via Key Vault. This is runbook + pipeline YAML config — DEV-01 CI/CD already handles most of the mechanics.
+DEV-03,7. DevOps,7.1 CI/CD & Environments,Database migration strategy,IN,4,Flyway or Prisma Migrate. Expand-contract pattern. Zero-downtime migrations.
+DEV-04,7. DevOps,7.1 CI/CD & Environments,Secret management (Azure Key Vault),IN,3,All secrets in Azure Key Vault. Injected via managed identity. Standard Azure config — audit log is automatic with Key Vault.
+DEV-05,7. DevOps,7.2 Reliability & Observability,Load testing suite (k6 / Artillery),POST,5,Post-launch. Run before major releases once real traffic baselines are established.
+DEV-06,7. DevOps,7.2 Reliability & Observability,Backup + disaster recovery (RTO/RPO),IN,6,RTO: 1h. RPO: 15min. Postgres WAL archiving + daily snapshots. DR runbook tested quarterly.
+DEV-07,7. DevOps,7.2 Reliability & Observability,SLA monitoring + alerting (99.9% target),IN,4,Azure Monitor + Application Insights. PagerDuty on-call. 99.9% = 8.7h downtime/year.
+DEV-08,7. DevOps,7.2 Reliability & Observability,Log aggregation + structured logging + PII redaction,IN,4,"Structured JSON logging across all services. PII redaction (email, phone, TFN) before log storage — Privacy Act compliance requirement, cannot ship to prod without this. Log aggregation pipeline. 90d hot / 1yr cold retention. Moved from POST: PII log redaction is a launch blocker per Privacy Act obligations."
+DEV-09,7. DevOps,7.1 CI/CD & Environments,Infrastructure as Code (Terraform — Azure resources),IN,14,"[MDR §4.1] Terraform modules for all Azure resources: PostgreSQL Flexible Server, Redis Cache, Blob Storage (with lifecycle policies), App Service Plan + slots, Static Web Apps, Container Registry, Key Vault, Application Insights, Virtual Network + subnets. Environment promotion via Terraform workspaces (dev/staging/prod). State stored in Azure Blob backend with locking. Enables full environment rebuild from scratch for DR."
+DEV-10,7. DevOps,7.1 CI/CD & Environments,Network edge (Azure Front Door + WAF + API Management),IN,10,"[MDR §4.2] Azure Front Door: global load balancing, SSL termination, CDN for static assets, health probes. WAF policy: OWASP Core Rule Set 3.2, custom rules for AU-only traffic patterns. Azure API Management: rate limiting, API versioning, request logging, subscription keys for future third-party integrations. Required for Privacy Act compliance and Stripe marketplace security expectations."
+DEV-11,7. DevOps,7.1 CI/CD & Environments,Compute topology (BullMQ worker pool + scaling + sticky sessions),IN,6,[MDR §4.3] Separate Azure App Service for BullMQ workers (job processing isolated from API traffic — prevents queue saturation starving API responses). Horizontal scaling rules for both API and worker plans (CPU/memory thresholds). Azure Application Gateway sticky sessions for Socket.IO (required for real-time messaging across multi-instance deployments). All configured via DEV-09 Terraform modules.
+DEV-12,7. DevOps,7.2 Reliability & Observability,Sentry error tracking + PII scrubbing,IN,3,"[MDR §4.5] Sentry SDK integrated into Flutter mobile, React admin, and Node.js backend. PII scrubbing rules configured (email, phone, name, TFN redacted from error payloads before transmission to Sentry) — required for Privacy Act compliance. Source maps uploaded for readable stack traces. Alert routing: critical errors → PagerDuty, warnings → Slack."
+DEV-13,7. DevOps,7.1 CI/CD & Environments,Customer-managed keys (CMK) for sensitive document storage,IN,2,"[MDR §4.4] Azure Blob Storage containers holding KYC documents (ID scans, selfies), TFN records, and PCC/WWCC uploads configured with customer-managed encryption keys via Azure Key Vault. CMK rotation policy (annual). Separate from standard Key Vault secret management (DEV-04). Privacy Act + ATO requirement for highest-sensitivity data classes."
+FSE-01,8. FSE Module,8.1 FSE App,FSE Flutter app flavor (separate build),POST,20,Post-launch. FSE module excluded from MVP scope.
+FSE-02,8. FSE Module,8.1 FSE App,Lead management (CRM-lite),POST,16,Post-launch. FSE module excluded from MVP scope.
+FSE-03,8. FSE Module,8.1 FSE App,Territory management,POST,8,Post-launch. FSE module excluded from MVP scope.
+FSE-04,8. FSE Module,8.1 FSE App,GPS-stamped visit tracking,POST,6,Post-launch. FSE module excluded from MVP scope.
+FSE-05,8. FSE Module,8.2 In-Person Registration Flow,In-person registration form (step 1 of 3),POST,8,Post-launch. FSE module excluded from MVP scope.
+FSE-06,8. FSE Module,8.2 In-Person Registration Flow,Camera-only document capture (step 2 of 3),POST,12,Post-launch. FSE module excluded from MVP scope.
+FSE-07,8. FSE Module,8.2 In-Person Registration Flow,Banking info capture → Stripe Connect (step 3 of 3),POST,6,Post-launch. FSE module excluded from MVP scope.
+FSE-08,8. FSE Module,8.2 In-Person Registration Flow,Digital signature with GPS + timestamp,POST,4,Post-launch. FSE module excluded from MVP scope.
+FSE-09,8. FSE Module,8.2 In-Person Registration Flow,Onboarding draft save / resume,POST,4,Post-launch. FSE module excluded from MVP scope.
+FSE-10,8. FSE Module,8.2 In-Person Registration Flow,Submit to T&S review queue,POST,4,Post-launch. FSE module excluded from MVP scope.
+FSE-11,8. FSE Module,8.3 Commission & Performance,Commission tracking (FSE earnings),POST,8,Post-launch. FSE module excluded from MVP scope.
+FSE-12,8. FSE Module,8.3 Commission & Performance,FSE performance dashboard (admin),POST,8,Post-launch. FSE module excluded from MVP scope.
+FSE-13,8. FSE Module,8.4 Manual KYC Backend,Sales onboarding backend APIs,POST,12,Post-launch. FSE module excluded from MVP scope.
+FSE-14,8. FSE Module,8.4 Manual KYC Backend,Manual KYC AI pre-checks pipeline,POST,20,Post-launch. FSE module excluded from MVP scope.
+FSE-15,8. FSE Module,8.4 Manual KYC Backend,Hybrid KYC Decision Engine (routing),POST,8,Post-launch. FSE module excluded from MVP scope.
+FSE-16,8. FSE Module,8.4 Manual KYC Backend,High-security document storage (Azure Blob CMK),POST,8,Post-launch. FSE module excluded from MVP scope.
+FSE-17,8. FSE Module,8.4 Manual KYC Backend,Manual KYC T&S review workflow,POST,14,Post-launch. FSE module excluded from MVP scope.
+FSE-18,8. FSE Module,8.4 Manual KYC Backend,KYC appeal workflow,POST,6,Post-launch. FSE module excluded from MVP scope.
+FSE-19,8. FSE Module,8.4 Manual KYC Backend,KYC decision notifications,POST,4,Post-launch. FSE module excluded from MVP scope.
+FSE-20,8. FSE Module,8.4 Manual KYC Backend,Daily Field Sales Report (auto-emailed),POST,4,Post-launch. FSE module excluded from MVP scope.
+,,,,,,
+,,,,,,
+EFFORT SUMMARY  ·  Edit Call column above — Raw Hours & AI-Tooled recalculate automatically,,,,,,
+Platform / Component,Total Features,"In-Scope Count
+(not POST / DROP)",Raw Hours (MVP),"AI-Tooled hrs
+(Raw × 0.6)","Post-Launch
+Hours (est.)",
+1. Mobile App,234,202,458,275,46,
+2.1–2.2 Backend (Auth+Tasks),22,20,107,64,0,
+2.3–2.10 Backend (Matching+),60,56,311,187,52,
+  ↳ Backend Subtotal,82,76,418,251,52,
+3. Admin Portal,74,65,255,153,108,
+4. Flutter Web (web-specific),18,18,84,50,0,
+5. Next.js SEO Layer,20,18,95,57,32,
+6. AI Infrastructure,13,7,42,25,68,
+7. DevOps & Infrastructure,13,12,68,41,5,
+8. FSE Module  (MVP per §43),20,0,0,0,180,
+GRAND TOTAL,474,398,"1,420",852,491,
+"★  How to use: Change the ""Call"" column (E) for any row → totals in this summary update automatically.  POST items show estimated hours (italic) but are excluded from Raw Hours / AI-Tooled.  AI-Tooled = Raw × 0.6  (~40 % efficiency gain from GitHub Copilot + Claude Code).  Calls:  IN = Must build  ·  IN★ = AI-dependent  ·  THIN = Simplified version  ·  POST = Post-launch  ·  DROP = Removed from scope  ·  🟡 Amber rows = new items added from Missing & Deferred Items Report (v1.2)",,,,,,

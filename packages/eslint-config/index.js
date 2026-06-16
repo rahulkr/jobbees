@@ -6,7 +6,10 @@
  *   // apps/<name>/eslint.config.js
  *   const base = require('@jobbees/eslint-config');
  *   module.exports = [...base, { ... overrides ... }];
+ *
+ * This file uses require() because ESLint flat-config files run as CommonJS.
  */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const js = require('@eslint/js');
 const tseslint = require('typescript-eslint');
 const securityPlugin = require('eslint-plugin-security');
@@ -37,7 +40,10 @@ module.exports = [
       'security/detect-buffer-noassert': 'error',
 
       // TypeScript
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'warn',
 
