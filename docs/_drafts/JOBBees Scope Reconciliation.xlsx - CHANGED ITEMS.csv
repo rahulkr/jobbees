@@ -1,0 +1,13 @@
+CHANGED ITEMS — built differently than estimated,,,,
+Area,Blueprint / Estimate said,Booklet builds,Why it matters,Confirm?
+Admin roles,L1–L7 + Superadmin hierarchy,Single admin role (super-admin post-MVP),Simplifies RBAC; removes two-person rule basis. Test AUTH-032 collapses to single-vs-super boundary.,
+KYC / identity,Manual doc review queue + items 21/22,Stripe Connect handles all identity,Cleanest resolution; eliminates manual queue + CMK docs. Connect states become sole trust-gate.,
+Moderation,Gemini-Flash LLM classifier,Regex off-platform detection,Regex misses coded/unicode variants; harder to get right. Reframe AIE-004 as regex-coverage + evasion corpus.,
+Messaging scale,Socket.IO + Redis adapter (multi-node),Single-node Socket.IO,Won't horizontally scale; MSG-017 multi-instance test N/A. Document scaling limit.,
+Edge / cloud,Azure Front Door + WAF + APIM,Cloudflare Pro WAF,Different edge stack; WAF/DDoS/bot covered. APIM gateway features absent.,
+File storage,Azure Blob from start,Local filesystem -> Blob at S10,Migration-integrity risk at S10; no sensitive data should sit on local disk interim.,
+Config engine,"Versioned, approval-gated platform",Flat admin-editable settings (audited),Live + audited but no version history / approval gate. ADM-034 depth reduced.,
+Pen test,Pre-launch (Sprint 13),Within 60 days POST-launch,HIGHEST RISK: real money + PII flow before adversarial security validation. Recommend scoped pre-launch test of payment+auth+PII.,
+Super dashboard,24-tile REST refresh,KPI overview + health panel,Present in spirit; full tile set can follow.,
+Support,RAG agent (in-app chat),Email at MVP,Stated deferral; acceptable.,
+Review authenticity,AI authenticity scoring (B-41),Manual review removal only,No automated fake-review detection; relies on reports + manual queue.,

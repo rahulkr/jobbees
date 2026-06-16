@@ -4,7 +4,7 @@
 
 **Dates:** Mon 3 Aug → Fri 14 Aug 2026 (10 working days)
 **Theme:** A tasker opens the app, sees ranked jobs matched to their skills + location, makes an offer (gated by license verification for licensed-trade categories), and the client accepts it.
-**Hours budget:** ~121 (60 mobile, 56 backend, 5 admin scaffolding)
+**Hours budget:** ~145 (60 mobile, 56 backend, 5 admin scaffolding, 16 Flutter Web parity, 8 AI-05 feature store THIN per 14 Jun Estimation v1.2 verification)
 **Mid-sprint demo:** Fri 7 Aug
 **End-of-sprint demo:** Fri 14 Aug
 
@@ -72,6 +72,17 @@ By Friday 14 Aug, a tasker logged in sees a ranked feed of jobs they're well-mat
 | **534** | **License Review Queue (scaffold only — full UI in S9)** | **IN** | **5** | Admin views PENDING License rows, cross-checks against AU state register (NSW Fair Trading etc. — URL link), approve/reject/needs-more, AuditLog with actorId + register URL recorded in reviewer notes |
 
 **Admin total: ~5h**
+
+### Flutter Web parity (added per founder direction 14 Jun 2026)
+
+| ID    | Item                                                                                                                                                                                                                                                                                                                                                   | Call | Hrs | Notes                                                                                                                                   |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- | --- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| FW-13 | **Web parity — ranked feed, map view (Google Maps JS), list view, filters, sort, saved jobs, search bar, share link, hide-job**                                                                                                                                                                                                                        | IN   | 7   | Shareable web URLs for ranked feed make the SEO surface meaningful for taskers + clients.                                               |
+| FW-14 | **Web parity — offer placement, offers list, edit/withdraw offer, offer review (client), accept/decline, offer expiry handling, public Q&A**                                                                                                                                                                                                           | IN   | 6   | Offer creation on web is identical to mobile; web also picks up the public Q&A surface naturally as part of indexable job pages.        |
+| FW-15 | **Web parity — license upload UI + licensed-trade category selector** (per ADR 005)                                                                                                                                                                                                                                                                    | IN   | 3   | Web file picker for license image; same backend `/licenses/upload` endpoint. License badge rendering shared with public tasker profile. |
+| AI-05 | **Feature store (matching + pricing ML) — THIN** (re-scoped IN per 14 Jun Estimation v1.2 verification — was V2; THIN call) — Postgres-backed feature table. Pre-computed features per tasker (win rate, response time, completion rate, average rating, recent skill changes). Nightly BullMQ refresh. Read by the composite ranker (B-04, Sprint 4). | THIN | 8   | Estimate v1.2 marks THIN — minimal feature set at MVP. LightGBM ranker / learned ranking remains POST.                                  |
+
+**Flutter Web parity + ML store total: ~24h**
 
 ### Schema additions
 

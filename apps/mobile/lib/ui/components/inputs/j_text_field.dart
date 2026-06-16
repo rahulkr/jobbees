@@ -1,0 +1,168 @@
+/// JTextField — the standard single-line input.
+///
+/// Has a label above, helper or error text below.
+/// 56px tall, brand corner radius, focus state in primary color.
+///
+/// Usage:
+///   JTextField(
+///     label: 'Email',
+///     controller: emailController,
+///     hintText: 'you@example.com',
+///     keyboardType: TextInputType.emailAddress,
+///   )
+///
+/// With error:
+///   JTextField(
+///     label: 'Email',
+///     controller: emailController,
+///     errorText: 'This email is already in use',
+///   )
+
+import 'package:flutter/material.dart';
+import '../../tokens/tokens.dart';
+
+class JTextField extends StatefulWidget {
+  const JTextField({
+    required this.label,
+    required this.controller,
+    this.hintText,
+    this.helperText,
+    this.errorText,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.obscureText = false,
+    this.keyboardType,
+    this.textInputAction,
+    this.autofillHints,
+    this.maxLength,
+    this.onChanged,
+    this.onSubmitted,
+    this.enabled = true,
+    super.key,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String? hintText;
+  final String? helperText;
+  final String? errorText;
+  final IconData? prefixIcon;
+  final Widget? suffixIcon;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final Iterable<String>? autofillHints;
+  final int? maxLength;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final bool enabled;
+
+  @override
+  State<JTextField> createState() => _JTextFieldState();
+}
+
+class _JTextFieldState extends State<JTextField> {
+  final _focus = FocusNode();
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() => setState(() => _focused = _focus.hasFocus));
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final hasError = widget.errorText != null;
+
+    final borderColor = hasError
+        ? scheme.error
+        : _focused
+            ? scheme.primary
+            : Colors.transparent;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Label
+        Text(
+          widget.label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: scheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: JSpacing.xs),
+
+        // Field
+        Container(
+          height: 56,
+          decoration: BoxDecoration(
+            color: widget.enabled ? scheme.surfaceContainerHighest : scheme.surfaceContainer,
+            borderRadius: JRadius.buttonMdAll,
+            border: Border.all(color: borderColor, width: 2),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: JSpacing.base),
+          child: Row(
+            children: [
+              if (widget.prefixIcon != null) ...[
+                Icon(
+                  widget.prefixIcon,
+                  size: 20,
+                  color: _focused ? scheme.primary : scheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: JSpacing.md),
+              ],
+              Expanded(
+                child: TextField(
+                  controller: widget.controller,
+                  focusNode: _focus,
+                  enabled: widget.enabled,
+                  obscureText: widget.obscureText,
+                  keyboardType: widget.keyboardType,
+                  textInputAction: widget.textInputAction,
+                  autofillHints: widget.autofillHints,
+                  maxLength: widget.maxLength,
+                  onChanged: widget.onChanged,
+                  onSubmitted: widget.onSubmitted,
+                  style: TextStyle(fontSize: 16, color: scheme.onSurface),
+                  decoration: InputDecoration(
+                    hintText: widget.hintText,
+                    hintStyle: TextStyle(color: scheme.onSurfaceVariant),
+                    border: InputBorder.none,
+                    counterText: '',
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+              if (widget.suffixIcon != null) ...[
+                const SizedBox(width: JSpacing.sm),
+                widget.suffixIcon!,
+              ],
+            ],
+          ),
+        ),
+
+        // Helper / error text
+        if (widget.errorText != null || widget.helperText != null) ...[
+          const SizedBox(height: JSpacing.xs),
+          Text(
+            widget.errorText ?? widget.helperText!,
+            style: TextStyle(
+              fontSize: 12,
+              color: hasError ? scheme.error : scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}

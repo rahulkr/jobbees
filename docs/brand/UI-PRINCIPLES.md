@@ -226,9 +226,134 @@ apps/mobile/lib/theme/
 
 Plus `pubspec.yaml` additions: `google_fonts`, `shimmer`, `lucide_icons_flutter` (or `lucide_flutter`).
 
+## 2026 patterns to bake in
+
+Above and beyond Material 3 defaults, these are the specific patterns that lift the app from "2022 generic" to "2026 modern." When the AI builds a screen, it should default to these.
+
+### Bottom-sheet-first navigation
+
+When a flow can fit in a bottom sheet, prefer that over a new screen. Sheet-first means:
+
+- The user never loses the surrounding context (their feed, their thread, their map)
+- Three discrete heights (`peek`, `half`, `full`) — never an awkward in-between state
+- Snap to the nearest height on drag release; never let the sheet float at 47%
+- Tap outside or drag-down to dismiss
+- For multi-step flows inside the sheet, push within the sheet (not over the top)
+
+Reference: Apple Maps directions sheet (perfect 3-snap behaviour).
+
+Applies to: AI extraction confirm (S3), offer placement (S4), payment confirm (S5), reviews submission (S7), all settings sub-flows.
+
+### Optimistic UI by default
+
+For any action where success is the overwhelmingly likely outcome (95%+), update the UI instantly and reconcile on backend response:
+
+| Action                  | Optimistic update                             | Reconcile if                                              |
+| ----------------------- | --------------------------------------------- | --------------------------------------------------------- |
+| Send message            | Add to thread immediately, grey out until ACK | Server returns 4xx → toast "Couldn't send" + retry button |
+| Like / save / favourite | Toggle icon state instantly                   | Server fails → revert + toast                             |
+| Mark notification read  | Hide badge instantly                          | (no reconcile needed — server eventually consistent)      |
+| Withdraw offer          | Remove from list instantly                    | Server returns 4xx → restore + toast                      |
+
+Never: payment actions (never optimistic — too high stakes), offer accept (server-of-record), license upload (sensitive).
+
+### Skeleton everywhere, spinners almost never
+
+Default loading state is a skeleton in the exact shape of the content that's coming. Use spinners only when:
+
+1. The action is < 1 second (button press while saving)
+2. There's no predictable shape (e.g., AI response streaming)
+3. The user has explicitly triggered something (pull-to-refresh)
+
+Every list, every grid, every profile page has a skeleton state. Use `shimmer` package as already specced above.
+
+### Haptics as language
+
+Different actions get different haptic patterns. The pattern becomes part of the action's signature — users learn it.
+
+(Already covered in the Haptics table above. Reiterating: be disciplined. Don't fire haptics on every tap or it loses meaning.)
+
+### Spring physics, never linear
+
+For any non-trivial transition (bottom sheet, modal, drag-to-dismiss, list reorder), use spring physics. Flutter's `SpringSimulation` or `flutter_animate` package, or the M3 motion tokens.
+
+Linear ease feels mechanical. Spring feels responsive.
+
+### Conversational confirmations
+
+Confirm modals never show "OK" or "Cancel." Always restate the action in the affirmative button.
+
+| Bad                            | Good                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------------- |
+| Are you sure? [OK] [Cancel]    | Withdraw your offer? [Yes, withdraw] [Keep it open]                             |
+| Confirm payment? [OK] [Cancel] | Pay $84 now? [Yes, pay $84] [Not yet]                                           |
+| Delete account? [OK] [Cancel]  | Delete your account? This can't be reversed. [Yes, delete it] [Keep my account] |
+
+(Covered in `VOICE.md` too — reiterating because it's the single most common AI miss.)
+
+### Reduced motion respect
+
+If the user has reduced motion enabled at the OS level:
+
+- Skip page transition animations (cut to destination)
+- Skip skeleton shimmer (show static skeleton, then content)
+- Skip spring physics (snap to destination state)
+- Keep haptic feedback (different accessibility need)
+- Keep loading spinners (informational, not decorative)
+
+Test: iOS Settings → Accessibility → Motion → Reduce Motion → ON.
+
+### Adaptive density
+
+Compact phones (< 380dp width) and tablets (> 600dp width) need different density:
+
+- Compact: tighter padding, smaller touch targets at the minimum (44px), single-column layouts
+- Regular: defaults (per the spacing scale above)
+- Wide: 2-column for lists, side-by-side detail panes, larger images
+
+Use `LayoutBuilder` + `MediaQuery.of(context).size.width` breakpoints. Don't hardcode — drive from the spacing scale.
+
+### Dark mode parity from day one
+
+We ship light at MVP but every component should be dark-mode-ready. When you build a screen:
+
+1. Use `Theme.of(context).colorScheme.*` not hardcoded colors
+2. Test in both modes via dev menu (we'll add a hidden toggle in Widgetbook)
+3. If something doesn't read in dark mode, that's a real bug, not a "we'll fix later"
+
+Flipping the production switch later becomes a 1-line change in `app_theme.dart`.
+
+### Native components for natively-good things
+
+When the OS provides a thing, use the OS thing:
+
+- Date picker: native iOS / Android pickers (use `showDatePicker()` which adapts per platform)
+- Photo picker: native (file picker / gallery / camera)
+- Share sheet: native (`share_plus` package wraps both)
+- Notifications: native (no in-app banner replacements)
+- Authentication prompts (Touch ID / Face ID): `local_auth` package
+
+Never reinvent these. The native experience is what users expect.
+
+### Anti-patterns specifically for 2026
+
+These were fashionable but read as dated:
+
+- ❌ Glass-morphism on every card (was 2022; reads cheap now)
+- ❌ Gradient mesh backgrounds (overused; reserved for hero / paywall moments only)
+- ❌ Custom in-app web views for OAuth (use system browser — security AND polish)
+- ❌ Skeuomorphic anything (we're not Notes 2010)
+- ❌ Confetti / particle effects on every success (Cash App does this once at signup — that's the bar)
+- ❌ "Coach mark" tutorials that block the screen (contextual tooltips at 5-6 moments only — already in S11)
+- ❌ Modal upsells for trial / paid features (we're a marketplace; this isn't our problem at MVP)
+- ❌ Force-modal "Rate the app" prompts (one per cohort, well-timed)
+- ❌ Custom toast positioning (top-or-bottom OS-native; consistent)
+
 ## References
 
 - Material 3 design: https://m3.material.io/
 - Flutter Material 3 migration: https://docs.flutter.dev/release/breaking-changes/material-3-migration
 - WCAG 2.1 AA quick reference: https://www.w3.org/WAI/WCAG21/quickref/
 - Apple HIG (for iOS-specific patterns we adapt): https://developer.apple.com/design/human-interface-guidelines
+- Inspiration references: [`docs/brand/inspiration/README.md`](./inspiration/README.md)
+- Voice + microcopy guide: [`docs/brand/VOICE.md`](./VOICE.md)

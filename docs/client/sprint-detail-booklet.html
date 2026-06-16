@@ -417,6 +417,15 @@
             Companion document to the <em>JOBBees MVP — Development sprint plan</em>.
           </p>
           <p class="cover-meta" style="margin-top: 18pt">Prepared 12 June 2026</p>
+          <p class="cover-meta" style="margin-top: 4pt">
+            Revision: <strong>14 June 2026</strong> &nbsp;— incorporates the resolutions from the
+            Scope Reconciliation review and a direct row-by-row verification against
+            Estimation v1.2 (474 features, 398 in-scope, 1,420 raw hours). 4 items previously
+            deferred to V2 were re-scoped back into MVP, and 17 items genuinely missing from
+            sprint docs were added. <strong>Flutter Web</strong> and
+            <strong>Next.js public SEO site</strong> are also in MVP scope. Soft-launch:
+            <strong>Fri 8 Jan 2027</strong>.
+          </p>
         </div>
       </div>
       <div class="page-footer">
@@ -459,6 +468,52 @@
           <em>POST</em> (post-MVP) in the inventory is listed in the appendix at the back, not in
           any sprint.
         </p>
+
+        <h1 style="margin-top: 18pt">Scope reconciliation — what this revision incorporates</h1>
+        <p class="muted">
+          The Scope Reconciliation review (June 2026) compared Estimation v1.2 against this
+          booklet and surfaced 28 items needing decisions. This revision incorporates the
+          resolutions; you'll see "added per scope reconciliation" tags throughout the
+          sprint-by-sprint pages. Plus, on 14 June, the founder reinstated Flutter Web and
+          the Next.js public SEO site into MVP scope — those rows show the
+          "founder re-scope 14 Jun" tag.
+        </p>
+        <ul>
+          <li>
+            <strong>12 items reinstated from the reconciliation review</strong> into named
+            sprints — product analytics, crash reporting, deep linking, mobile a11y (S2); LLM
+            observability, prompt versioning + eval harness, cost quotas, output validators,
+            prompt-injection defence (S3); webhook dead-letter queue + regex evasion corpus (S5);
+            per-class retention crons + push token rotation (S8); webhook replay viewer + queue
+            monitor + weekly/monthly reports (S9); maintenance mode, offline indicator, a11y
+            audit, scoped pre-launch pen test (S11); database-level audit-log immutability (S1).
+          </li>
+          <li>
+            <strong>Founder 14 Jun re-scope — Flutter Web + Next.js SEO site reinstated</strong>
+            — Flutter Web (~127h spread across S1-S8 + S11 polish), Next.js public SEO site
+            (~50h split between S3 public job pages and S11 full bundle), AI auto-SEO content
+            generation (~6h S11). Soft-launch shifts from Fri 4 Dec 2026 to Fri 8 Jan 2027.
+          </li>
+          <li>
+            <strong>Direct Estimation v1.2 verification (14 Jun)</strong> — after reading the
+            full v1.2 estimate, 4 items previously deferred to V2 were re-scoped back into
+            MVP (behavioural fraud scoring B-48 → S7, device fingerprinting M-229 → S8,
+            two-person approval AP-56 → S9, RAG support agent #194 → S8), and 17 missing items
+            were added across S1-S10. ~136h absorbed into existing sprints — no further
+            calendar slip.
+          </li>
+          <li>
+            <strong>5 items remaining in V2</strong> — NL ad-hoc report builder, ML feature
+            store, LLM message-moderation upgrade (regex covers MVP), 24-tile super dashboard,
+            full SLA alerting + log scrubbing tooling. Full rationale in the post-MVP
+            appendix. (Note: all 5 of these are also marked POST or THIN in Estimation v1.2.)
+          </li>
+          <li>
+            <strong>6 items confirmed already in scope</strong> — pen test (within 60d
+            post-launch), KYC via Stripe Connect, single admin role, per-class retention
+            durations, four-role enum, Cloudflare WAF.
+          </li>
+        </ul>
 
         <h1 style="margin-top: 18pt">Feature coverage matrix</h1>
         <p class="muted">
@@ -812,7 +867,11 @@
             <li>Account suspension and ban endpoints</li>
             <li>Session revocation (logout-from-all-devices)</li>
             <li>Re-authentication gate for sensitive changes (change email, change phone)</li>
-            <li>Immutable audit log capturing every authentication and role-change event</li>
+            <li>
+              Immutable audit log capturing every authentication and role-change event — enforced
+              both at the application layer and at the database layer (the application database
+              role has its UPDATE and DELETE permissions revoked on the audit-log table)
+            </li>
             <li>
               Integration tests covering happy path, unauthenticated, unauthorised, and
               replay-protection scenarios
@@ -824,6 +883,27 @@
           <div class="surface">Admin (gate only)</div>
           <ul>
             <li>Admin login with session timeout (the full admin console arrives in Sprint 9)</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Flutter Web — foundation (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>
+              <strong>Flutter Web build target enabled + responsive layout primitives</strong> —
+              same Flutter codebase, two target surfaces (mobile app + browser). Required before
+              Sprint 2 can land web parity for each screen.
+            </li>
+            <li>
+              <strong>Web auth via HttpOnly cookie + CSRF</strong> — backend auth surface is
+              cookie-aware; mobile uses Bearer tokens, web uses Set-Cookie + double-submit
+              token. Same endpoints, dispatched by surface header. (Per ADR 006.)
+            </li>
+            <li>
+              <strong>Web routing — clean URLs and deep-link routes</strong> — go_router with
+              <code>setUrlStrategy(PathUrlStrategy())</code>, browser back/forward respected,
+              shareable URLs.
+            </li>
           </ul>
         </div>
 
@@ -844,6 +924,10 @@
             </li>
             <li>Continuous integration is green on the merge commit</li>
             <li>Security review checklist passes</li>
+            <li>
+              Flutter Web shell loads in Chrome at <code>localhost:5555</code>, responsive layout
+              breakpoints work, web auth round-trip succeeds via cookie + CSRF
+            </li>
             <li>
               Sprint 2 mobile-side mockups walked through so the client sees what's coming the
               following Friday
@@ -942,6 +1026,57 @@
           </ul>
         </div>
 
+        <div class="feature-group">
+          <div class="surface">Flutter Web parity (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>
+              Welcome carousel, signup (email + Google + Apple), login, OAuth, OTP entry, role
+              select, suspended/banned, account deletion screens — all on web at parity with
+              mobile
+            </li>
+            <li>Client profile setup, edit, public profile view, verification badges on web</li>
+            <li>Client → Tasker upgrade flow + ABN entry + verification status on web</li>
+            <li>
+              Stripe Connect onboarding via Stripe-hosted redirect flow (web-native, not
+              webview)
+            </li>
+            <li>
+              Tasker profile setup wizard, public tasker profile, portfolio, reviews placeholder,
+              held-funds banner on web
+            </li>
+            <li>
+              <em>Same Flutter codebase as mobile</em> — responsive breakpoints adapt layouts;
+              biometric falls back to WebAuthn passkey where available, otherwise password
+            </li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Cross-cutting (added per scope reconciliation)</div>
+          <ul>
+            <li>
+              <strong>Product analytics</strong> — PostHog SDK wired into mobile + backend + admin
+              from the start. Funnel events fire as we build each screen
+              (signup_started → signup_completed → connect_started → etc.). Without this we lose
+              historical funnel data forever.
+            </li>
+            <li>
+              <strong>Crash reporting</strong> — Sentry SDK wired into mobile + admin. Production
+              DSNs swapped in Sprint 11; foundations laid now.
+            </li>
+            <li>
+              <strong>Deep linking</strong> — Universal Links (iOS) and App Links (Android)
+              configured to handle <code>/job/:id</code>, <code>/share/:token</code>, and
+              notification-tap routes. Needed by share links from Sprint 3 and notifications from
+              Sprint 8.
+            </li>
+            <li>
+              <strong>Mobile accessibility foundations</strong> — semantic widgets, focus order,
+              contrast targets baked in as we build (WCAG 2.1 AA). Full audit pass in Sprint 11.
+            </li>
+          </ul>
+        </div>
+
         <div class="section-title">
           Friday demo will confirm (Fri 17 Jul) — first user-visible demo
         </div>
@@ -991,7 +1126,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 3</div>
           <h2>Job posting + AI extraction + guest mode</h2>
-          <div class="dates">Mon 20 Jul — Fri 31 Jul 2026</div>
+          <div class="dates">Mon 20 Jul — Fri 7 Aug 2026 (3 weeks — extended to absorb AI infrastructure + Flutter Web parity + SEO phase 1)</div>
         </div>
 
         <p class="muted">
@@ -1045,6 +1180,85 @@
           </ul>
         </div>
 
+        <div class="feature-group">
+          <div class="surface">Flutter Web parity (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>
+              Guest browse (the highest-traffic web surface — shareable URLs, no auth required),
+              posting entry, category picker, title + description form, AI extraction confirmation,
+              ReAct clarifying-question loop on web
+            </li>
+            <li>
+              Photo upload (multi), camera-based posting (browser <code>getUserMedia()</code> on
+              desktop, file picker fallback), voice path (browser <code>MediaRecorder</code> API)
+            </li>
+            <li>
+              Location/address picker (Google Maps JS API), date picker, budget, special
+              requirements, review-and-publish, save-as-draft + resume on web
+            </li>
+            <li>
+              "Sign up to publish" modal + local draft persistence via browser localStorage +
+              auth-on-publish flow — even more important on web than mobile (no app-store
+              friction; makes shareable URLs convertible)
+            </li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Next.js SEO public site — phase 1 (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>
+              <strong>Public job detail page (Next.js, server-rendered, indexable)</strong> — URL
+              <code>/jobs/&lt;id&gt;-&lt;slug&gt;</code>; uses the same public read endpoint as
+              Flutter Web guest browse.
+            </li>
+            <li>
+              <strong>Schema.org structured data — JobPosting + LocalBusiness markup</strong> in
+              JSON-LD so Google can render rich result cards in search.
+            </li>
+            <li>
+              <strong>Open Graph + Twitter card metadata per job</strong> — image (first photo or
+              generated card), title, description, canonical URL. Drives sharing CTR on
+              Facebook / WhatsApp / Twitter / LinkedIn.
+            </li>
+            <li>
+              <strong>Slug generation on job publish</strong> — backend populates
+              <code>Job.slug</code> from title with collision handling.
+            </li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">AI infrastructure cluster (added per scope reconciliation)</div>
+          <ul>
+            <li>
+              <strong>LLM observability (Langfuse)</strong> — every external AI call is traced, with
+              model, prompt version, tokens, latency, and cost recorded. Source of truth for AI
+              behaviour and spend in production.
+            </li>
+            <li>
+              <strong>Prompt versioning and evaluation harness</strong> — every prompt lives in a
+              versioned file; a continuous-integration evaluation runner checks new prompt versions
+              against a fixture set and gates merges. Required for safe AI iteration.
+            </li>
+            <li>
+              <strong>AI cost-quota service</strong> — daily caps per user and globally. Vision and
+              voice are roughly 10× the cost of text, so cost runaway is a real risk. Quota checks
+              run before every AI call.
+            </li>
+            <li>
+              <strong>Output validators on every AI surface</strong> — schema validation across
+              extraction, ReAct, vision, voice, future dispute mediator, and admin co-pilot. Single
+              retry with corrective re-prompt; if still invalid, the surface falls back gracefully.
+            </li>
+            <li>
+              <strong>Prompt-injection defence</strong> — every place user-supplied text is embedded
+              in a prompt goes through a hardening helper (delimiters, instruction reminder,
+              control-character strip). Tested against the standard prompt-injection corpus.
+            </li>
+          </ul>
+        </div>
+
         <div class="section-title">Friday demo will confirm (Fri 31 Jul)</div>
         <div class="demo-checklist">
           <ul>
@@ -1087,7 +1301,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 4</div>
           <h2>Discovery + offers + public Q&amp;A + licence verification</h2>
-          <div class="dates">Mon 3 Aug — Fri 14 Aug 2026</div>
+          <div class="dates">Mon 10 Aug — Fri 21 Aug 2026 (shifted +1 week by Sprint 3 extension)</div>
         </div>
 
         <p class="muted">
@@ -1151,7 +1365,25 @@
           </ul>
         </div>
 
-        <div class="section-title">Friday demo will confirm (Fri 14 Aug)</div>
+        <div class="feature-group">
+          <div class="surface">Flutter Web parity (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>
+              Ranked feed, map view (Google Maps JS), list view, filters, sort, saved jobs,
+              search, share link, hide-job on web
+            </li>
+            <li>
+              Offer placement, offers list, edit/withdraw, offer review (client side),
+              accept/decline, offer expiry, public Q&amp;A on web
+            </li>
+            <li>
+              Licence upload UI + licensed-trade category selector on web (web file picker;
+              same backend endpoint as mobile)
+            </li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 21 Aug)</div>
         <div class="demo-checklist">
           <ul>
             <li>Tasker opens app, ranked feed shows jobs matched to their skills and location</li>
@@ -1203,7 +1435,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 5</div>
           <h2>Messaging + payments core + real OTP</h2>
-          <div class="dates">Mon 17 Aug — Fri 28 Aug 2026</div>
+          <div class="dates">Mon 24 Aug — Fri 4 Sep 2026 (shifted +1 week)</div>
         </div>
 
         <p class="muted">
@@ -1241,7 +1473,11 @@
             <li>Message persistence with Redis adapter groundwork</li>
             <li>Attachment upload + virus scan (local at MVP; Azure Content Safety in Sprint 8)</li>
             <li>Thread state machine (open / frozen / closed)</li>
-            <li>Off-platform regex detection (phone numbers, emails, etc.)</li>
+            <li>
+              Off-platform regex detection (phone numbers, emails, etc.) — with a
+              <strong>coded-variant + unicode evasion corpus</strong> in the test suite to catch
+              creative bypasses like "zero four one two" and emoji-substituted digits
+            </li>
             <li>Stripe PaymentIntent (create, capture, void)</li>
             <li>Stripe Refund (full and partial)</li>
             <li>Manual capture flow within Stripe's 7-day authorisation window</li>
@@ -1250,8 +1486,33 @@
             <li>Payment state machine with full audit log</li>
             <li>Idempotency middleware (Redis-backed)</li>
             <li>Stripe webhook signature verification</li>
+            <li>
+              <strong>Webhook dead-letter queue</strong> — failed webhook handlers retry with
+              exponential back-off, then land in a dead-letter queue with raw payload + attempt
+              history. Admin replay viewer arrives in Sprint 9. Added per scope reconciliation —
+              payment reliability foundation.
+            </li>
             <li>Application fee / platform fee logic</li>
             <li>Production OTP provider swap with safeguard checks</li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Flutter Web parity (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>
+              Inbox, conversation view (text + photo + file), read receipts, report/block,
+              off-platform warning, message search, thread freeze on web — full messaging
+              parity with mobile
+            </li>
+            <li>
+              Stripe Elements (web-native) for add/remove/default card, Apple Pay (Safari)
+              and Google Pay (Chrome) via Stripe
+            </li>
+            <li>
+              Payout history, earnings summary, transaction history, receipt PDF viewer (native
+              browser PDF) on web
+            </li>
           </ul>
         </div>
 
@@ -1295,7 +1556,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 6</div>
           <h2>Job execution + tax / RCTI / GST / ATO</h2>
-          <div class="dates">Mon 31 Aug — Fri 11 Sep 2026</div>
+          <div class="dates">Mon 7 Sep — Fri 18 Sep 2026 (shifted +1 week)</div>
         </div>
 
         <p class="muted">
@@ -1345,7 +1606,22 @@
           </ul>
         </div>
 
-        <div class="section-title">Friday demo will confirm (Fri 11 Sep)</div>
+        <div class="feature-group">
+          <div class="surface">Flutter Web parity (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>
+              Read-only job tracker (client follows tasker progress on web), completion proof
+              viewer, tax invoice PDF viewer, RCTI PDF viewer
+            </li>
+            <li>Cancellation flow with fee preview + dispute trigger on web</li>
+            <li>
+              <em>Geofence check-in + live location remain mobile-only</em> — desktop
+              geolocation is unreliable and the use case is intrinsically mobile.
+            </li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 18 Sep)</div>
         <div class="demo-checklist">
           <ul>
             <li>
@@ -1393,7 +1669,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 7</div>
           <h2>Reviews + AI-assisted disputes (Tier-0 mediator)</h2>
-          <div class="dates">Mon 14 Sep — Fri 25 Sep 2026</div>
+          <div class="dates">Mon 21 Sep — Fri 2 Oct 2026 (shifted +1 week)</div>
         </div>
 
         <p class="muted">
@@ -1446,7 +1722,18 @@
           </ul>
         </div>
 
-        <div class="section-title">Friday demo will confirm (Fri 25 Sep)</div>
+        <div class="feature-group">
+          <div class="surface">Flutter Web parity (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>Review submission, blind reveal, response, public review viewer on web</li>
+            <li>
+              Dispute opening, evidence upload (drag-drop on web — actually nicer than mobile),
+              Tier-0 proposal viewer, accept/reject, escalation flow on web
+            </li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 2 Oct)</div>
         <div class="demo-checklist">
           <ul>
             <li>Job completes; review prompts appear on both sides</li>
@@ -1490,7 +1777,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 8</div>
           <h2>Notifications + trust &amp; safety + privacy</h2>
-          <div class="dates">Mon 28 Sep — Fri 9 Oct 2026</div>
+          <div class="dates">Mon 5 Oct — Fri 16 Oct 2026 (shifted +1 week)</div>
         </div>
 
         <p class="muted">
@@ -1504,7 +1791,11 @@
         <div class="feature-group">
           <div class="surface">Mobile</div>
           <ul>
-            <li>Push notification setup (iOS APNS, Android FCM)</li>
+            <li>
+              Push notification setup (iOS APNS, Android FCM) — with
+              <strong>explicit token rotation handling</strong> on app boot and a 60-day
+              unused-token prune cron (added per scope reconciliation)
+            </li>
             <li>In-app notification centre</li>
             <li>Per-channel toggle (push, email, SMS, in-app)</li>
             <li>Email unsubscribe</li>
@@ -1539,12 +1830,29 @@
             <li>DSR endpoints (access, delete, correct) with proof of execution</li>
             <li>Anonymisation job (financial data retained 7 years per ATO)</li>
             <li>Hard delete vs anonymise logic</li>
+            <li>
+              <strong>Per-class retention enforcement crons</strong> (added per scope reconciliation)
+              — implementing the retention policy as actual scheduled jobs: annual anonymise of
+              financial + audit data beyond 7 years, quarterly hard-delete of jobs / disputes /
+              messages beyond 2 years. Each run writes a summary audit-log entry.
+            </li>
             <li>Consent ledger</li>
             <li>PII redaction layer in front of every external LLM call</li>
           </ul>
         </div>
 
-        <div class="section-title">Friday demo will confirm (Fri 9 Oct)</div>
+        <div class="feature-group">
+          <div class="surface">Flutter Web parity (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>
+              Web Push (Service Worker + APNS for Safari since macOS 13), in-app notification
+              center, per-channel toggle, badges, deep-link from notification to screen
+            </li>
+            <li>DSR access (data download) + account deletion request on web</li>
+          </ul>
+        </div>
+
+        <div class="section-title">Friday demo will confirm (Fri 16 Oct)</div>
         <div class="demo-checklist">
           <ul>
             <li>Push notification arrives on a real device for a new bid</li>
@@ -1589,7 +1897,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 9</div>
           <h2>Admin console end-to-end</h2>
-          <div class="dates">Mon 12 Oct — Fri 23 Oct 2026</div>
+          <div class="dates">Mon 19 Oct — Fri 30 Oct 2026 (shifted +1 week)</div>
         </div>
 
         <p class="muted">
@@ -1628,8 +1936,22 @@
             <li>Flagged messages queue with manual review and thread freeze / unfreeze</li>
             <li>Payment list, detail, refund processing, manual capture / void</li>
             <li>Payout tracking; held-funds dashboard</li>
-            <li>Daily reconciliation report</li>
+            <li>
+              Daily reconciliation report, plus <strong>weekly and monthly variants</strong>
+              emailed to founder + accountant (added per scope reconciliation)
+            </li>
             <li>Stripe webhook delivery log</li>
+            <li>
+              <strong>Webhook dead-letter-queue replay viewer</strong> (added per scope
+              reconciliation) — list every entry from the Sprint 5 webhook DLQ with raw payload,
+              attempt count, last error. Admin can replay or drop with a reason; every action
+              audited.
+            </li>
+            <li>
+              <strong>Background queue monitor (bull-board)</strong> (added per scope
+              reconciliation) — mounted under the admin console, role-guarded, lets the operator
+              inspect every BullMQ queue: notifications, embeddings, dead-letter, retention, etc.
+            </li>
             <li>Promo code admin (CRUD with usage tracking)</li>
             <li>Tax invoice listing; RCTI status per tasker; RCTI re-generation</li>
             <li>ATO report preview, download, and submission log</li>
@@ -1703,7 +2025,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 10</div>
           <h2>Cloud deployment + WAF</h2>
-          <div class="dates">Mon 26 Oct — Fri 6 Nov 2026</div>
+          <div class="dates">Mon 2 Nov — Fri 13 Nov 2026 (shifted +1 week)</div>
         </div>
 
         <p class="muted">
@@ -1802,7 +2124,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 11</div>
           <h2>TestFlight + bug fix + launch hardening</h2>
-          <div class="dates">Mon 9 Nov — Fri 20 Nov 2026</div>
+          <div class="dates">Mon 16 Nov — Fri 4 Dec 2026 (3 weeks — extended to absorb full SEO bundle + Flutter Web final polish)</div>
         </div>
 
         <p class="muted">
@@ -1833,6 +2155,18 @@
             <li>Contextual tooltips at 5-6 key first-use moments</li>
             <li>"How it works" page (in-app + on public web)</li>
             <li>Expanded instructive empty states</li>
+            <li>
+              <strong>Maintenance mode screen + offline indicator</strong> (added per scope
+              reconciliation) — server-side feature flag flips the app into a maintenance state
+              with friendly copy; a connectivity provider drives an unobtrusive offline banner
+              when the network drops.
+            </li>
+            <li>
+              <strong>Mobile accessibility audit pass (WCAG 2.1 AA)</strong> (added per scope
+              reconciliation) — TalkBack on Android, VoiceOver on iOS, focus-order check on every
+              screen, contrast verified, audit report committed. Foundations were laid in
+              Sprint 2; this is the formal pass.
+            </li>
           </ul>
         </div>
 
@@ -1844,6 +2178,82 @@
             <li>Static analysis (Semgrep, CodeQL) clean</li>
             <li>npm vulnerability audit clean</li>
             <li>Tax advisor sign-off on the entire RCTI / GST / ATO code path</li>
+            <li>
+              <strong>Scoped pre-launch penetration test</strong> (added per scope reconciliation) —
+              a 2-3 day boutique-firm engagement covering payments, authentication, and PII
+              endpoints specifically. Findings triaged immediately; any critical-severity finding
+              blocks the Sprint 12 launch. The full external pen test still runs within 60 days
+              post-launch as already planned.
+            </li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Next.js SEO — full bundle (added per 14 Jun founder re-scope; phase 1 shipped in S3)</div>
+          <ul>
+            <li>
+              <strong>Public marketing landing page (full)</strong> — hero, value props for
+              client + tasker, "How it works" embedded, social proof, Sydney suburb expansion
+              teaser, dual CTA (Post a job / Become a tasker)
+            </li>
+            <li>
+              <strong>Programmatic category × location landing pages</strong>
+              (<code>/find/cleaners-in-bondi</code>, <code>/find/plumbers-in-newtown</code>) —
+              generated for every active (category, suburb) combination. The primary low-CAC
+              organic acquisition engine.
+            </li>
+            <li>
+              <strong>AI-generated SEO content per job (auto-SEO)</strong> — Gemini Flash
+              composes a one-paragraph SEO description from structured job data, validated for
+              length + tone + keyword inclusion; cached; not regenerated unless the job is edited.
+            </li>
+            <li>
+              <strong>Cookie consent banner</strong> — legally required the moment the web
+              surface ships. GDPR + Australian Privacy Act compliant. Analytics only fire
+              after consent.
+            </li>
+            <li>
+              <strong>Web accessibility audit pass (WCAG 2.1 AA)</strong> — Lighthouse, axe
+              DevTools, keyboard navigation, screen-reader pass. Audit report committed.
+            </li>
+            <li>
+              Schema.org structured data (JobPosting, LocalBusiness, FAQPage, BreadcrumbList)
+              across all public pages
+            </li>
+            <li>
+              Open Graph + Twitter cards on every public surface (landing, category pages,
+              location pages, tasker public profiles, FAQ — jobs covered in S3)
+            </li>
+            <li>
+              Full sitemap.xml + robots.txt + sitemap index, pinged to Google Search Console +
+              Bing on every job publish
+            </li>
+            <li>
+              Blog CMS scaffold (Sanity or Decap) so non-technical authors can publish later;
+              one seed post live at launch
+            </li>
+            <li>
+              Production indexing verification — Google Search Console + Bing Webmaster verified,
+              sitemap submitted, first crawl confirmed
+            </li>
+          </ul>
+        </div>
+
+        <div class="feature-group">
+          <div class="surface">Flutter Web final polish (added per 14 Jun founder re-scope)</div>
+          <ul>
+            <li>
+              Browser smoke test matrix — full happy path verified on Safari (macOS + iOS),
+              Chrome, Edge, Firefox. The web equivalent of TestFlight.
+            </li>
+            <li>
+              Responsive polish on every screen — final desktop / tablet / mobile-web pass to
+              tighten any layouts that look phone-shaped on desktop
+            </li>
+            <li>
+              PWA manifest + service worker for installability — the web app can be added to
+              home screen from Safari + Chrome, behaves like a native shell
+            </li>
           </ul>
         </div>
 
@@ -1857,13 +2267,27 @@
           </ul>
         </div>
 
-        <div class="section-title">Friday demo will confirm (Fri 20 Nov)</div>
+        <div class="section-title">Friday demo will confirm (Fri 4 Dec)</div>
         <div class="demo-checklist">
           <ul>
             <li>Client installs the app on their own iPhone via TestFlight invite</li>
             <li>Client runs the happy-path end-to-end on a real device</li>
+            <li>
+              Same happy-path runs end-to-end on the web app (browser of choice: Safari,
+              Chrome, Edge, Firefox) — proves Flutter Web parity holds
+            </li>
             <li>Onboarding tooltips fire on first use of each major flow</li>
             <li>"How it works" page is accessible from the home screen and public web</li>
+            <li>
+              Public job pages indexed in Google Search Console; programmatic category × location
+              pages render with correct meta + Schema.org markup
+            </li>
+            <li>Cookie consent banner displays on first web visit; analytics fire only after consent</li>
+            <li>Mobile + web a11y audit reports committed to the repo, critical findings fixed</li>
+            <li>
+              Scoped pre-launch pen test report received; no critical findings open (or
+              explicitly accepted with founder + dev sign-off)
+            </li>
             <li>App Store listing screenshots and copy approved</li>
             <li>Lawyer-approved Terms and Privacy Policy published</li>
             <li>Tax advisor sign-off on file</li>
@@ -1899,7 +2323,7 @@
         <div class="sprint-header">
           <div class="sprint-num">Sprint 12</div>
           <h2>Soft launch + first real users + retrospective</h2>
-          <div class="dates">Mon 23 Nov — Fri 4 Dec 2026</div>
+          <div class="dates">Mon 7 Dec 2026 — Fri 8 Jan 2027 (3 weeks incl. Christmas / New Year break — fewer working days)</div>
         </div>
 
         <p class="muted">
@@ -1984,6 +2408,38 @@
             <li>Referral code management</li>
             <li>Synthetic supply seeding workflow</li>
           </ul>
+          <p style="margin-top: 8pt">
+            <strong>Additional items deferred from the June Scope Reconciliation review</strong>
+            (full rationale + revisit triggers in the post-MVP appendix document):
+          </p>
+          <ul>
+            <li>
+              <strong>NL ad-hoc report builder</strong> — KPI dashboard + daily / weekly / monthly
+              reconciliation crons cover urgent reporting at MVP.
+            </li>
+            <li>
+              <strong>ML feature store</strong> — pgvector embeddings + the hand-tuned ranker work
+              at MVP scale without it.
+            </li>
+            <li>
+              <strong>LLM message-moderation upgrade</strong> — regex with the new evasion corpus
+              ships in Sprint 5; LLM-classifier upgrade is V2 if regex coverage proves
+              insufficient.
+            </li>
+            <li>
+              <strong>24-tile super dashboard</strong> — simpler KPI + system-health panel ships
+              in Sprint 9; full tile set is V2 only if the operator needs it.
+            </li>
+            <li>
+              <strong>Full SLA alerting + log scrubbing tooling</strong> — App Insights + manual
+              SLA review at MVP. Full tooling is V2 maturity.
+            </li>
+          </ul>
+          <p style="margin-top: 8pt">
+            <strong>Items reinstated on 14 Jun</strong> (no longer in V2): behavioural fraud
+            scoring (Sprint 7), device fingerprinting (Sprint 8), two-person approval rule
+            (Sprint 9), RAG support agent (Sprint 8).
+          </p>
         </div>
       </div>
       <div class="page-footer">

@@ -1,0 +1,14 @@
+TEST IMPACT — how each gap re-points the Master Test Plan v2.0,,
+Gap / change,Test families affected,Action on test suite
+Stripe-handled KYC,TC-KYC-003..019,"RETIRE manual-ID, selfie, officer-decision, CMK, PCC-purge, doc-access TCs (mark N/A). KEEP ABN (AUTH-037..039) + Connect-state gating (PAY-026..029)."
+Single admin role,"TC-AUTH-032, TC-ADM-050/051",Collapse L1–L7 RBAC matrix to single-vs-super. RETIRE two-person TCs unless reinstated.
+Regex moderation,"TC-MSG-004, TC-BID-003, AIE-004",Reframe from LLM precision/recall to regex-coverage + add coded/unicode EVASION CORPUS.
+Single-node Socket.IO,TC-MSG-017,Mark multi-instance routing N/A; add single-node load-ceiling test + documented limit.
+Local->Blob storage,(new),ADD S10 migration-integrity test; assert no sensitive data on local disk interim.
+AI obs/eval/quota absent,"AIE-001..010, NFR-C01",BLOCKER: AI-eval gates cannot run without AI-03 harness + AI-02 traces. Reinstate or these tests are unexecutable.
+Fraud scoring absent,"TC-TS-001/002, TC-JOB-004",Reduce to EXIF + content-safety assertions; mark velocity/device/graph TCs N/A unless B-48 reinstated.
+Review authenticity absent,"TC-REV-006/007, AIE-008",Mark authenticity-scoring TCs N/A; keep manual-removal moderation (AP-28) tests.
+Flutter Web missing,TC-WEB-001..014,Mark whole TC-WEB family N/A (parked) unless web reinstated.
+Next.js SEO missing,TC-SEO-T01..T12,Mark whole TC-SEO family N/A (parked) unless SEO reinstated.
+Pen test post-launch,TC-NFR-S01..S12,Re-time security suite. Recommend scoped pre-launch pen test of payment+auth+PII; full suite post-launch.
+13-sprint calendar,Execution Overlay,Re-point all surviving TC-IDs onto S0–S12; fold testing into each Friday demo (no dedicated test sprints).
