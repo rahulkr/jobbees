@@ -16,6 +16,27 @@ async function bootstrap(): Promise<void> {
   // Parse cookies (web/admin session auth — ADR 006).
   app.use(cookieParser());
 
+  const config = app.get(ConfigService);
+
+  // CORS for credentialed browser clients (admin / web). Same-site subdomains
+  // in prod; localhost:3001 (admin dev) by default.
+  const corsOrigins = config
+    .get<string>('CORS_ORIGINS', '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  app.enableCors({
+    origin: corsOrigins.length > 0 ? corsOrigins : ['http://localhost:3001'],
+    credentials: true,
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Surface',
+      'X-XSRF-TOKEN',
+      'Idempotency-Key',
+    ],
+  });
+
   // Reject unknown / malformed payloads everywhere; transform to DTO instances.
   app.useGlobalPipes(
     new ValidationPipe({
@@ -39,7 +60,6 @@ async function bootstrap(): Promise<void> {
     .build();
   SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, swaggerConfig));
 
-  const config = app.get(ConfigService);
   const port = config.get<number>('PORT', 3000);
   await app.listen(port);
 }
