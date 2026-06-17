@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   HttpException,
   HttpStatus,
@@ -12,6 +13,7 @@ import { type SignupDto, type LoginDto, type UserProfileDto } from './dto/auth.d
 import { EmailVerificationService } from './email-verification.service';
 import { LockoutService } from './lockout.service';
 import { OtpService } from './otp/otp.service';
+import { ReauthService } from './reauth.service';
 import { PasswordService } from './password.service';
 import { type IssueContext, type TokenPair, TokenService } from './token.service';
 
@@ -25,6 +27,7 @@ export class AuthService {
     private readonly lockout: LockoutService,
     private readonly otp: OtpService,
     private readonly emailVerification: EmailVerificationService,
+    private readonly reauthService: ReauthService,
   ) {}
 
   async signup(dto: SignupDto, ctx: IssueContext): Promise<TokenPair> {
@@ -112,6 +115,44 @@ export class AuthService {
 
   async logout(refreshToken: string): Promise<void> {
     await this.tokens.revoke(refreshToken);
+  }
+
+  async logoutAll(userId: string, ctx: IssueContext): Promise<void> {
+    await this.tokens.revokeAllForUser(userId);
+    await this.audit.record({
+      actorId: userId,
+      action: 'auth.logout_all',
+      resourceType: 'User',
+      resourceId: userId,
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
+  }
+
+  /** Step-up auth: re-verify the password to unlock sensitive actions. */
+  async reauth(
+    userId: string,
+    password: string,
+    ctx: IssueContext,
+  ): Promise<{ validForSeconds: number }> {
+    const user = await this.users.findById(userId);
+    if (!user?.passwordHash) {
+      throw new BadRequestException('Password re-authentication is unavailable for this account');
+    }
+    if (!(await this.passwords.verify(user.passwordHash, password))) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    const validForSeconds = await this.reauthService.grant(userId);
+    await this.audit.record({
+      actorId: userId,
+      action: 'auth.reauth',
+      resourceType: 'User',
+      resourceId: userId,
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
+    return { validForSeconds };
   }
 
   async requestPhoneOtp(userId: string, phone: string): Promise<{ sent: true }> {

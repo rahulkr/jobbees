@@ -52,6 +52,13 @@ export class RefreshDto {
   refreshToken!: string;
 }
 
+export class ReauthDto {
+  @ApiProperty({ description: 'Current password, to unlock sensitive actions.' })
+  @IsString()
+  @MinLength(1)
+  password!: string;
+}
+
 export class TokenPairDto {
   @ApiProperty()
   accessToken!: string;
