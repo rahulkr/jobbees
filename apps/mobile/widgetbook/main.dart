@@ -3,8 +3,10 @@
 /// Run with:
 ///   flutter run -t widgetbook/main.dart -d chrome
 ///
-/// Add a new component page in widgetbook/components/<category>/j_<name>_page.dart,
+/// Add a new component page in `widgetbook/components/<category>/j_<name>_page.dart`,
 /// then import + register below.
+
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -19,6 +21,7 @@ import 'components/inputs/j_text_field_page.dart';
 import 'components/containers/j_card_page.dart';
 import 'components/containers/j_bottom_sheet_page.dart';
 import 'components/feedback/j_empty_state_page.dart';
+import 'components/showcase/home_feed_page.dart';
 
 void main() {
   runApp(const _WidgetbookApp());
@@ -37,8 +40,12 @@ class _WidgetbookApp extends StatelessWidget {
             WidgetbookTheme(name: 'Light', data: JobbeesTheme.light()),
             WidgetbookTheme(name: 'Dark', data: JobbeesTheme.dark()),
           ],
-          themeBuilder: (context, theme, child) => Theme(data: theme, child: child),
+          themeBuilder: (context, theme, child) =>
+              Theme(data: theme, child: child),
         ),
+        // ViewportAddon migration tracked separately; DeviceFrameAddon still
+        // works and is dev-only catalog tooling, not shipped code.
+        // ignore: deprecated_member_use
         DeviceFrameAddon(
           devices: [
             Devices.ios.iPhone13,
@@ -58,25 +65,17 @@ class _WidgetbookApp extends StatelessWidget {
         ),
       ],
       directories: [
+        WidgetbookCategory(name: 'Showcase', children: [homeFeedShowcase()]),
         WidgetbookCategory(
           name: 'Components',
           children: [
-            WidgetbookFolder(
-              name: 'Buttons',
-              children: [jButtonPage()],
-            ),
-            WidgetbookFolder(
-              name: 'Inputs',
-              children: [jTextFieldPage()],
-            ),
+            WidgetbookFolder(name: 'Buttons', children: [jButtonPage()]),
+            WidgetbookFolder(name: 'Inputs', children: [jTextFieldPage()]),
             WidgetbookFolder(
               name: 'Containers',
               children: [jCardPage(), jBottomSheetPage()],
             ),
-            WidgetbookFolder(
-              name: 'Feedback',
-              children: [jEmptyStatePage()],
-            ),
+            WidgetbookFolder(name: 'Feedback', children: [jEmptyStatePage()]),
           ],
         ),
       ],

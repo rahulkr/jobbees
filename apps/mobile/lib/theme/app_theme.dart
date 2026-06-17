@@ -8,6 +8,8 @@
 /// See `docs/brand/UI-PRINCIPLES.md` for the design philosophy and
 /// `docs/brand/COLORS.md` for color usage rules.
 
+library;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -26,10 +28,13 @@ class JobbeesTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
-      scaffoldBackgroundColor:
-          brightness == Brightness.light
-              ? JobbeesColors.bgScreenLight
-              : JobbeesColors.bgScreenDark,
+      // Inter is the brand face — set as the base family so any raw TextStyle
+      // (component labels not using the M3 type scale) still inherits it
+      // instead of silently falling back to the platform default.
+      fontFamily: GoogleFonts.inter().fontFamily,
+      scaffoldBackgroundColor: brightness == Brightness.light
+          ? JobbeesColors.bgScreenLight
+          : JobbeesColors.bgScreenDark,
       textTheme: textTheme,
 
       // Generous corners everywhere
@@ -88,10 +93,9 @@ class JobbeesTheme {
       // Input fields: 56px, dark-50 background, transparent border → primary on focus
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor:
-            brightness == Brightness.light
-                ? JobbeesColors.bgInputLight
-                : JobbeesColors.bgInputDark,
+        fillColor: brightness == Brightness.light
+            ? JobbeesColors.bgInputLight
+            : JobbeesColors.bgInputDark,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
@@ -135,10 +139,9 @@ class JobbeesTheme {
 
       // Chips (categories, filters)
       chipTheme: ChipThemeData(
-        backgroundColor:
-            brightness == Brightness.light
-                ? JobbeesColors.dark50
-                : JobbeesColors.dark700,
+        backgroundColor: brightness == Brightness.light
+            ? JobbeesColors.dark50
+            : JobbeesColors.dark700,
         selectedColor: scheme.primary,
         labelStyle: GoogleFonts.inter(
           fontSize: 14,
@@ -163,22 +166,19 @@ class JobbeesTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           return GoogleFonts.inter(
             fontSize: 11,
-            fontWeight:
-                states.contains(WidgetState.selected)
-                    ? FontWeight.w600
-                    : FontWeight.w500,
-            color:
-                states.contains(WidgetState.selected)
-                    ? scheme.primary
-                    : JobbeesColors.dark600,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w600
+                : FontWeight.w500,
+            color: states.contains(WidgetState.selected)
+                ? scheme.primary
+                : JobbeesColors.dark600,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           return IconThemeData(
-            color:
-                states.contains(WidgetState.selected)
-                    ? scheme.primary
-                    : JobbeesColors.dark400,
+            color: states.contains(WidgetState.selected)
+                ? scheme.primary
+                : JobbeesColors.dark400,
             size: 24,
           );
         }),
@@ -241,19 +241,15 @@ class JobbeesTheme {
 
       // Dividers
       dividerTheme: DividerThemeData(
-        color:
-            brightness == Brightness.light
-                ? JobbeesColors.dark100
-                : JobbeesColors.dark700,
+        color: brightness == Brightness.light
+            ? JobbeesColors.dark100
+            : JobbeesColors.dark700,
         thickness: 1,
         space: 1,
       ),
 
       // Icon theme
-      iconTheme: IconThemeData(
-        color: scheme.onSurface,
-        size: 24,
-      ),
+      iconTheme: IconThemeData(color: scheme.onSurface, size: 24),
 
       // App bar (used minimally — most screens have custom top bars)
       appBarTheme: AppBarTheme(

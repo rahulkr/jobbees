@@ -15,7 +15,12 @@
 /// With loading:
 ///   JButton.primary(label: 'Saving...', onPressed: null, loading: true)
 
+library;
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../theme/colors.dart';
+import '../../platform/j_pressable.dart';
 import '../../tokens/tokens.dart';
 
 enum JButtonVariant { primary, secondary, danger, ghost }
@@ -31,6 +36,7 @@ class JButton extends StatelessWidget {
     this.icon,
     this.loading = false,
     this.expanded = false,
+    this.gradient = false,
     super.key,
   });
 
@@ -42,18 +48,19 @@ class JButton extends StatelessWidget {
     IconData? icon,
     bool loading = false,
     bool expanded = false,
+    bool gradient = false,
     Key? key,
-  }) =>
-      JButton._(
-        label: label,
-        onPressed: onPressed,
-        variant: JButtonVariant.primary,
-        size: size,
-        icon: icon,
-        loading: loading,
-        expanded: expanded,
-        key: key,
-      );
+  }) => JButton._(
+    label: label,
+    onPressed: onPressed,
+    variant: JButtonVariant.primary,
+    size: size,
+    icon: icon,
+    loading: loading,
+    expanded: expanded,
+    gradient: gradient,
+    key: key,
+  );
 
   /// Secondary — neutral. Use for "not now", "back", lower-emphasis actions.
   factory JButton.secondary({
@@ -64,17 +71,16 @@ class JButton extends StatelessWidget {
     bool loading = false,
     bool expanded = false,
     Key? key,
-  }) =>
-      JButton._(
-        label: label,
-        onPressed: onPressed,
-        variant: JButtonVariant.secondary,
-        size: size,
-        icon: icon,
-        loading: loading,
-        expanded: expanded,
-        key: key,
-      );
+  }) => JButton._(
+    label: label,
+    onPressed: onPressed,
+    variant: JButtonVariant.secondary,
+    size: size,
+    icon: icon,
+    loading: loading,
+    expanded: expanded,
+    key: key,
+  );
 
   /// Danger — destructive. Use for delete / cancel / withdraw.
   /// Label MUST restate the action per VOICE.md ("Yes, delete it" not "OK").
@@ -86,17 +92,16 @@ class JButton extends StatelessWidget {
     bool loading = false,
     bool expanded = false,
     Key? key,
-  }) =>
-      JButton._(
-        label: label,
-        onPressed: onPressed,
-        variant: JButtonVariant.danger,
-        size: size,
-        icon: icon,
-        loading: loading,
-        expanded: expanded,
-        key: key,
-      );
+  }) => JButton._(
+    label: label,
+    onPressed: onPressed,
+    variant: JButtonVariant.danger,
+    size: size,
+    icon: icon,
+    loading: loading,
+    expanded: expanded,
+    key: key,
+  );
 
   /// Ghost — minimal. Text-only. Use for tertiary actions ("Skip", "Learn more").
   factory JButton.ghost({
@@ -107,17 +112,16 @@ class JButton extends StatelessWidget {
     bool loading = false,
     bool expanded = false,
     Key? key,
-  }) =>
-      JButton._(
-        label: label,
-        onPressed: onPressed,
-        variant: JButtonVariant.ghost,
-        size: size,
-        icon: icon,
-        loading: loading,
-        expanded: expanded,
-        key: key,
-      );
+  }) => JButton._(
+    label: label,
+    onPressed: onPressed,
+    variant: JButtonVariant.ghost,
+    size: size,
+    icon: icon,
+    loading: loading,
+    expanded: expanded,
+    key: key,
+  );
 
   final String label;
   final VoidCallback? onPressed;
@@ -129,16 +133,36 @@ class JButton extends StatelessWidget {
   /// If true, the button expands to fill its parent's width.
   final bool expanded;
 
+  /// If true (primary only), fills with the brand coral gradient.
+  /// Reserved for hero moments per docs/brand/UI-PRINCIPLES.md § Elevation.
+  final bool gradient;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isDisabled = onPressed == null || loading;
 
     final (bg, fg, border) = switch (variant) {
-      JButtonVariant.primary => (scheme.primary, scheme.onPrimary, Colors.transparent),
-      JButtonVariant.secondary => (scheme.surfaceContainerHighest, scheme.onSurface, Colors.transparent),
-      JButtonVariant.danger => (scheme.error, scheme.onError, Colors.transparent),
-      JButtonVariant.ghost => (Colors.transparent, scheme.primary, Colors.transparent),
+      JButtonVariant.primary => (
+        scheme.primary,
+        scheme.onPrimary,
+        Colors.transparent,
+      ),
+      JButtonVariant.secondary => (
+        scheme.surfaceContainerHighest,
+        scheme.onSurface,
+        Colors.transparent,
+      ),
+      JButtonVariant.danger => (
+        scheme.error,
+        scheme.onError,
+        Colors.transparent,
+      ),
+      JButtonVariant.ghost => (
+        Colors.transparent,
+        scheme.primary,
+        Colors.transparent,
+      ),
     };
 
     final (height, hPadding, fontSize) = switch (size) {
@@ -147,53 +171,70 @@ class JButton extends StatelessWidget {
       JButtonSize.lg => (56.0, JSpacing.xl, 16.0),
     };
 
-    final radius = size == JButtonSize.lg ? JRadius.buttonLgAll : JRadius.buttonMdAll;
+    final radius = size == JButtonSize.lg
+        ? JRadius.buttonLgAll
+        : JRadius.buttonMdAll;
 
-    final button = Material(
-      color: isDisabled ? bg.withValues(alpha: 0.4) : bg,
-      borderRadius: radius,
-      child: InkWell(
-        onTap: isDisabled ? null : onPressed,
+    final content = Container(
+      height: height,
+      padding: EdgeInsets.symmetric(horizontal: hPadding),
+      decoration: BoxDecoration(
         borderRadius: radius,
-        splashFactory: InkSparkle.splashFactory,
-        child: Container(
-          height: height,
-          padding: EdgeInsets.symmetric(horizontal: hPadding),
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            border: variant == JButtonVariant.ghost
-                ? null
-                : Border.all(color: border, width: 1),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (loading) ...[
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: isDisabled ? fg.withValues(alpha: 0.6) : fg,
-                  ),
-                ),
-                const SizedBox(width: JSpacing.sm),
-              ] else if (icon != null) ...[
-                Icon(icon, size: 18, color: isDisabled ? fg.withValues(alpha: 0.6) : fg),
-                const SizedBox(width: JSpacing.sm),
-              ],
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w600,
-                  color: isDisabled ? fg.withValues(alpha: 0.6) : fg,
-                ),
+        border: variant == JButtonVariant.ghost
+            ? null
+            : Border.all(color: border, width: 1),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (loading) ...[
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: isDisabled ? fg.withValues(alpha: 0.6) : fg,
               ),
-            ],
+            ),
+            const SizedBox(width: JSpacing.sm),
+          ] else if (icon != null) ...[
+            Icon(
+              icon,
+              size: 18,
+              color: isDisabled ? fg.withValues(alpha: 0.6) : fg,
+            ),
+            const SizedBox(width: JSpacing.sm),
+          ],
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: fontSize,
+              fontWeight: FontWeight.w600,
+              color: isDisabled ? fg.withValues(alpha: 0.6) : fg,
+            ),
           ),
-        ),
+        ],
+      ),
+    );
+
+    final useGradient =
+        gradient && variant == JButtonVariant.primary && !isDisabled;
+
+    final button = JPressable(
+      onTap: isDisabled ? null : onPressed,
+      child: Material(
+        color: useGradient
+            ? Colors.transparent
+            : (isDisabled ? bg.withValues(alpha: 0.4) : bg),
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: useGradient
+            ? DecoratedBox(
+                decoration: const BoxDecoration(gradient: gradientPrimary),
+                child: content,
+              )
+            : content,
       ),
     );
 

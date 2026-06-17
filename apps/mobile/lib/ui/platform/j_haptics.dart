@@ -5,6 +5,8 @@
 /// Every interactive moment in the app should call one of these methods,
 /// not raw `HapticFeedback.lightImpact()`.
 
+library;
+
 import 'package:flutter/services.dart';
 
 class JHaptics {

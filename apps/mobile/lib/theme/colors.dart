@@ -8,6 +8,8 @@
 /// Do NOT introduce new brand colors here without updating `docs/brand/COLORS.md`
 /// AND the matching Tailwind tokens in apps/admin + apps/web.
 
+library;
+
 import 'package:flutter/material.dart';
 
 class JobbeesColors {

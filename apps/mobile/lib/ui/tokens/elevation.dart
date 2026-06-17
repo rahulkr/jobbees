@@ -5,6 +5,8 @@
 ///
 /// Reference: `docs/brand/UI-PRINCIPLES.md` § Elevation.
 
+library;
+
 class JElevation {
   JElevation._();
 
