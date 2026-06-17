@@ -19,6 +19,7 @@ import 'components/inputs/j_text_field_page.dart';
 import 'components/containers/j_card_page.dart';
 import 'components/containers/j_bottom_sheet_page.dart';
 import 'components/feedback/j_empty_state_page.dart';
+import 'components/showcase/home_feed_page.dart';
 
 void main() {
   runApp(const _WidgetbookApp());
@@ -58,6 +59,10 @@ class _WidgetbookApp extends StatelessWidget {
         ),
       ],
       directories: [
+        WidgetbookCategory(
+          name: 'Showcase',
+          children: [homeFeedShowcase()],
+        ),
         WidgetbookCategory(
           name: 'Components',
           children: [

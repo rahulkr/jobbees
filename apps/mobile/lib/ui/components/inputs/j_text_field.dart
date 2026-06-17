@@ -103,12 +103,25 @@ class _JTextFieldState extends State<JTextField> {
         const SizedBox(height: JSpacing.xs),
 
         // Field
-        Container(
+        AnimatedContainer(
+          duration: JMotion.pressFeedback,
+          curve: JMotion.easeOut,
           height: 56,
           decoration: BoxDecoration(
             color: widget.enabled ? scheme.surfaceContainerHighest : scheme.surfaceContainer,
             borderRadius: JRadius.buttonMdAll,
             border: Border.all(color: borderColor, width: 2),
+            // Soft focus halo in the accent (or error) colour.
+            boxShadow: _focused
+                ? [
+                    BoxShadow(
+                      color: (hasError ? scheme.error : scheme.primary)
+                          .withValues(alpha: 0.16),
+                      blurRadius: 0,
+                      spreadRadius: 3,
+                    ),
+                  ]
+                : null,
           ),
           padding: const EdgeInsets.symmetric(horizontal: JSpacing.base),
           child: Row(

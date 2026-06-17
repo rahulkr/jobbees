@@ -46,6 +46,15 @@ WidgetbookComponent jButtonPage() {
           expanded: true,
         )),
       ),
+      WidgetbookUseCase(
+        name: 'Primary — gradient (hero moment)',
+        builder: (ctx) => _frame(JButton.primary(
+          label: 'Make an offer',
+          onPressed: () {},
+          gradient: true,
+          expanded: true,
+        )),
+      ),
 
       // --- Secondary ---
       WidgetbookUseCase(

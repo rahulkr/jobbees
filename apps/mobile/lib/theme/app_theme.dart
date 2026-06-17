@@ -26,6 +26,10 @@ class JobbeesTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
+      // Inter is the brand face — set as the base family so any raw TextStyle
+      // (component labels not using the M3 type scale) still inherits it
+      // instead of silently falling back to the platform default.
+      fontFamily: GoogleFonts.inter().fontFamily,
       scaffoldBackgroundColor:
           brightness == Brightness.light
               ? JobbeesColors.bgScreenLight

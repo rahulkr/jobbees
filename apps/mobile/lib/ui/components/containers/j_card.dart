@@ -11,6 +11,7 @@
 /// Reference: docs/brand/UI-PRINCIPLES.md § Elevation, § Cards.
 
 import 'package:flutter/material.dart';
+import '../../platform/j_pressable.dart';
 import '../../tokens/tokens.dart';
 
 class JCard extends StatelessWidget {
@@ -58,35 +59,37 @@ class JCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = scheme.brightness == Brightness.dark;
+
+    // Dark-mode elevation is expressed as lightness, not shadow: a raised
+    // surface steps *up* the neutral ramp so it separates from the near-black
+    // background. Light mode keeps the original white-card-on-white look.
+    // Elevated cards step one tone higher still.
+    final Color fill = isDark
+        ? (elevated ? scheme.surfaceContainerHigh : scheme.surfaceContainer)
+        : scheme.surface;
+
+    // Shadows read on light backgrounds but vanish on dark ones, so dark cards
+    // always keep a hairline for definition; light flat cards rely on it too.
+    final bool showBorder = isDark || !elevated;
+    final Color borderColor = isDark ? scheme.outline : scheme.outlineVariant;
 
     final card = Container(
       decoration: BoxDecoration(
-        color: scheme.surface,
+        color: fill,
         borderRadius: JRadius.cardAll,
-        border: elevated ? null : Border.all(color: scheme.outlineVariant, width: 1),
-        boxShadow: elevated
-            ? [
-                BoxShadow(
-                  color: scheme.shadow.withValues(alpha: 0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
+        border: showBorder ? Border.all(color: borderColor, width: 1) : null,
+        boxShadow: elevated && !isDark ? JShadows.lifted : null,
       ),
       padding: padding,
       child: child,
     );
 
     if (onTap != null) {
-      return Material(
-        color: Colors.transparent,
-        borderRadius: JRadius.cardAll,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: JRadius.cardAll,
-          child: card,
-        ),
+      return JPressable(
+        onTap: onTap,
+        haptic: false,
+        child: card,
       );
     }
     return card;

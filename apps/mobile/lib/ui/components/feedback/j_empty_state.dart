@@ -51,10 +51,12 @@ class JEmptyState extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
+              // Soft brand-coral tint — a single warm accent that also keeps
+              // the icon legible in dark mode (grey-on-dark washes out).
+              color: scheme.primary.withValues(alpha: 0.10),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 40, color: scheme.onSurfaceVariant),
+            child: Icon(icon, size: 40, color: scheme.primary),
           ),
           const SizedBox(height: JSpacing.lg),
 

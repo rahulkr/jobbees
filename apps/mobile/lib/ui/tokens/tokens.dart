@@ -12,3 +12,4 @@ export 'spacing.dart';
 export 'radius.dart';
 export 'motion.dart';
 export 'elevation.dart';
+export 'shadows.dart';
