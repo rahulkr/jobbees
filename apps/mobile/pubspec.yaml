@@ -32,12 +32,25 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  flutter_web_plugins: # web URL strategy (FW-03); no-op import on mobile
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   widgetbook: ^3.21.0
   widgetbook_annotation: ^3.10.0
+
+  # App foundation (locked stack — see root + apps/mobile CLAUDE.md). Introduced
+  # by the Flutter Web foundation work (FW-01..03, Sprint 1).
+  # NOTE: using modern non-codegen Riverpod (Notifier/Provider). @riverpod
+  # codegen is blocked today — widgetbook_generator pins build_runner 2.15
+  # (build ^4.0.0), which conflicts with stable riverpod_generator 2.x
+  # (build ^2.0.0). See docs/adrs/009-riverpod-without-codegen.md.
+  flutter_riverpod: ^2.6.1 # state management
+  go_router: ^14.8.1 # declarative routing + web URL strategy
+  dio: ^5.7.0 # HTTP client (per-surface auth interceptor)
+  web: ^1.1.0 # web-only document.cookie access for CSRF double-submit
   google_fonts: ^8.1.0
   shimmer: ^3.0.0
 
