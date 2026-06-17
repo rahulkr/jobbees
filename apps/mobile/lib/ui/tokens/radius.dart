@@ -3,6 +3,8 @@
 /// Single source of truth for corner radii.
 /// Naming follows `docs/brand/UI-PRINCIPLES.md` § Shape.
 
+library;
+
 import 'package:flutter/widgets.dart';
 
 class JRadius {

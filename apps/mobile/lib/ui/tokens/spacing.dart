@@ -5,6 +5,8 @@
 ///
 /// Naming follows the same scale as `docs/brand/UI-PRINCIPLES.md` § Spacing.
 
+library;
+
 class JSpacing {
   JSpacing._();
 

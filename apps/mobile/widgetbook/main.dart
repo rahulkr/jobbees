@@ -3,8 +3,10 @@
 /// Run with:
 ///   flutter run -t widgetbook/main.dart -d chrome
 ///
-/// Add a new component page in widgetbook/components/<category>/j_<name>_page.dart,
+/// Add a new component page in `widgetbook/components/<category>/j_<name>_page.dart`,
 /// then import + register below.
+
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -41,6 +43,9 @@ class _WidgetbookApp extends StatelessWidget {
           themeBuilder: (context, theme, child) =>
               Theme(data: theme, child: child),
         ),
+        // ViewportAddon migration tracked separately; DeviceFrameAddon still
+        // works and is dev-only catalog tooling, not shipped code.
+        // ignore: deprecated_member_use
         DeviceFrameAddon(
           devices: [
             Devices.ios.iPhone13,

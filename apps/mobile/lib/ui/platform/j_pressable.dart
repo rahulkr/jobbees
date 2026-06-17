@@ -12,6 +12,8 @@
 /// Usage:
 ///   JPressable(onTap: () => ..., child: someWidget)
 
+library;
+
 import 'package:flutter/material.dart';
 
 import '../tokens/tokens.dart';

@@ -5,6 +5,8 @@
 ///
 /// Reference: `docs/brand/UI-PRINCIPLES.md` § Motion.
 
+library;
+
 import 'package:flutter/animation.dart';
 
 class JMotion {

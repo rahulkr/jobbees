@@ -17,6 +17,8 @@
 ///     ),
 ///   )
 
+library;
+
 import 'package:flutter/material.dart';
 import '../../tokens/tokens.dart';
 

@@ -8,6 +8,8 @@
 /// See `docs/brand/UI-PRINCIPLES.md` for the design philosophy and
 /// `docs/brand/COLORS.md` for color usage rules.
 
+library;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

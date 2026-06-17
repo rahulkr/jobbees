@@ -1,7 +1,9 @@
 /// Template for adding a new Widgetbook component page.
 ///
-/// Copy this file to widgetbook/components/<category>/j_<name>_page.dart,
+/// Copy this file to `widgetbook/components/<category>/j_<name>_page.dart`,
 /// rename the function + class, fill in the use cases, then register in main.dart.
+
+library;
 
 import 'package:flutter/material.dart';
 import 'package:widgetbook/widgetbook.dart';

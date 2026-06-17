@@ -10,6 +10,8 @@
 ///
 /// Reference: docs/brand/UI-PRINCIPLES.md § Elevation, § Cards.
 
+library;
+
 import 'package:flutter/material.dart';
 import '../../platform/j_pressable.dart';
 import '../../tokens/tokens.dart';

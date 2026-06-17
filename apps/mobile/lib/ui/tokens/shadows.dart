@@ -11,6 +11,8 @@
 ///
 /// Reference: `docs/brand/UI-PRINCIPLES.md` § Elevation.
 
+library;
+
 import 'package:flutter/widgets.dart';
 
 import '../../theme/colors.dart';

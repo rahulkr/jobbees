@@ -15,6 +15,8 @@
 /// With loading:
 ///   JButton.primary(label: 'Saving...', onPressed: null, loading: true)
 
+library;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../theme/colors.dart';

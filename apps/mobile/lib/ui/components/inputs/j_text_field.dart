@@ -18,6 +18,8 @@
 ///     errorText: 'This email is already in use',
 ///   )
 
+library;
+
 import 'package:flutter/material.dart';
 import '../../tokens/tokens.dart';
 

@@ -7,6 +7,8 @@
 ///
 /// Toggle Light/Dark in the Widgetbook toolbar to review both themes.
 
+library;
+
 import 'package:flutter/material.dart';
 import 'package:widgetbook/widgetbook.dart';
 
