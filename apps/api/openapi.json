@@ -1,0 +1,799 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Liveness + database readiness probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "operationId": "AuthController_signup",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Register with email + password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Log in with email + password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Exchange a refresh token for a new token pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Revoke a refresh token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout-all": {
+      "post": {
+        "operationId": "AuthController_logoutAll",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke every session for the current user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/reauth": {
+      "post": {
+        "operationId": "AuthController_reauth",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReauthDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Step-up: re-verify password for sensitive actions",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Current authenticated user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/otp/send": {
+      "post": {
+        "operationId": "OtpController_send",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpSendDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a phone OTP (tasker only)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/otp/verify": {
+      "post": {
+        "operationId": "OtpController_verify",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpVerifyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verify a phone OTP (tasker only)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/oauth/{provider}": {
+      "post": {
+        "operationId": "OAuthController_login",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Sign in with a provider (provider = google | apple)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/email/verify": {
+      "post": {
+        "operationId": "EmailVerificationController_verify",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Verify an email address",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/email/resend": {
+      "post": {
+        "operationId": "EmailVerificationController_resend",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resend the verification email to the current user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/password/forgot": {
+      "post": {
+        "operationId": "PasswordResetController_forgot",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Request a password-reset email",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/password/reset": {
+      "post": {
+        "operationId": "PasswordResetController_reset",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Reset the password with a token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/admin/users/{id}/suspend": {
+      "post": {
+        "operationId": "AdminUsersController_suspend",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspendUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Suspend a user (revokes their sessions)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/reinstate": {
+      "post": {
+        "operationId": "AdminUsersController_reinstate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Required on mutating requests; replays the response on retry.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reinstate a suspended user",
+        "tags": [
+          "admin"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "JOBBees API",
+    "description": "JOBBees backend — auth foundation (Sprint 1)",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "SignupDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "jordan@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "a-strong-passphrase",
+            "minLength": 10,
+            "maxLength": 200
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jordan"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Lee"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "CLIENT",
+              "TASKER"
+            ],
+            "default": "CLIENT"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "firstName",
+          "lastName"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "jordan@example.com"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RefreshDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "The opaque refresh token issued at login."
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "ReauthDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "Current password, to unlock sensitive actions."
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
+      "OtpSendDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+61400000000"
+          }
+        },
+        "required": [
+          "phone"
+        ]
+      },
+      "OtpVerifyDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+61400000000"
+          },
+          "code": {
+            "type": "string",
+            "example": "000000",
+            "description": "Dev: any phone accepts 000000"
+          }
+        },
+        "required": [
+          "phone",
+          "code"
+        ]
+      },
+      "OAuthLoginDto": {
+        "type": "object",
+        "properties": {
+          "idToken": {
+            "type": "string",
+            "description": "Provider ID token obtained by the client SDK."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "CLIENT",
+              "TASKER"
+            ],
+            "default": "CLIENT",
+            "description": "Role to assign on first-time signup."
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Client-supplied name (Apple sends it only on first auth)."
+          },
+          "lastName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "idToken"
+        ]
+      },
+      "VerifyEmailDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The token from the verification email."
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "jordan@example.com"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The token from the password-reset email."
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "token",
+          "newPassword"
+        ]
+      },
+      "SuspendUserDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Reason recorded on the user + in the audit log."
+          }
+        }
+      }
+    }
+  }
+}
