@@ -86,6 +86,12 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   APPLE_CLIENT_IDS = '';
+
+  // Comma-separated allowed browser origins for CORS (credentialed). Empty in
+  // dev → defaults to the admin dev server (http://localhost:3001).
+  @IsString()
+  @IsOptional()
+  CORS_ORIGINS = '';
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {
