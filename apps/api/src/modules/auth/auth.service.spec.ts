@@ -1,8 +1,10 @@
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, HttpException, UnauthorizedException } from '@nestjs/common';
 import { UserRole } from '@jobbees/prisma';
 import { AuditLogService } from '../../common/audit/audit-log.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { LockoutService } from './lockout.service';
+import { OtpService } from './otp/otp.service';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
 
@@ -14,6 +16,7 @@ function build() {
     findByEmail: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
+    markPhoneVerified: jest.fn().mockResolvedValue({}),
   };
   const passwords = { hash: jest.fn(), verify: jest.fn() };
   const tokens = {
@@ -22,13 +25,27 @@ function build() {
     revoke: jest.fn(),
   };
   const audit = { record: jest.fn().mockResolvedValue(undefined) };
+  const lockout = {
+    isLoginLocked: jest.fn().mockResolvedValue(false),
+    recordFailedLogin: jest.fn().mockResolvedValue({ locked: false }),
+    clearLogin: jest.fn().mockResolvedValue(undefined),
+    isOtpLocked: jest.fn().mockResolvedValue(false),
+    recordFailedOtp: jest.fn().mockResolvedValue({ locked: false }),
+    clearOtp: jest.fn().mockResolvedValue(undefined),
+  };
+  const otp = {
+    send: jest.fn().mockResolvedValue(undefined),
+    verify: jest.fn(),
+  };
   const service = new AuthService(
     users as unknown as UsersService,
     passwords as unknown as PasswordService,
     tokens as unknown as TokenService,
     audit as unknown as AuditLogService,
+    lockout as unknown as LockoutService,
+    otp as unknown as OtpService,
   );
-  return { service, users, passwords, tokens, audit };
+  return { service, users, passwords, tokens, audit, lockout, otp };
 }
 
 describe('AuthService', () => {
@@ -137,6 +154,72 @@ describe('AuthService', () => {
       const { service, users } = build();
       users.findById.mockResolvedValue(null);
       await expect(service.me('gone')).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+  });
+
+  describe('lockout', () => {
+    it('blocks login (429) when the account is locked', async () => {
+      const { service, lockout, users } = build();
+      lockout.isLoginLocked.mockResolvedValue(true);
+      await expect(
+        service.login({ email: 'u1@example.com', password: 'x' }, CTX),
+      ).rejects.toBeInstanceOf(HttpException);
+      expect(users.findByEmail).not.toHaveBeenCalled();
+    });
+
+    it('records a failed login on wrong password', async () => {
+      const { service, users, passwords, lockout } = build();
+      users.findByEmail.mockResolvedValue({
+        id: 'u1',
+        role: UserRole.CLIENT,
+        passwordHash: 'hashed',
+      });
+      passwords.verify.mockResolvedValue(false);
+      await expect(
+        service.login({ email: 'u1@example.com', password: 'wrong' }, CTX),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(lockout.recordFailedLogin).toHaveBeenCalledWith('u1@example.com', CTX);
+    });
+
+    it('clears the counter on successful login', async () => {
+      const { service, users, passwords, lockout } = build();
+      users.findByEmail.mockResolvedValue({
+        id: 'u1',
+        role: UserRole.CLIENT,
+        passwordHash: 'hashed',
+      });
+      passwords.verify.mockResolvedValue(true);
+      await service.login({ email: 'u1@example.com', password: 'right' }, CTX);
+      expect(lockout.clearLogin).toHaveBeenCalledWith('u1@example.com');
+    });
+  });
+
+  describe('phone OTP', () => {
+    it('verifies + marks the phone verified on the magic code', async () => {
+      const { service, otp, users, lockout } = build();
+      otp.verify.mockResolvedValue(true);
+      const res = await service.verifyPhoneOtp('u1', '+61400000000', '000000');
+      expect(res).toEqual({ phoneVerified: true });
+      expect(users.markPhoneVerified).toHaveBeenCalledWith('u1', '+61400000000');
+      expect(lockout.clearOtp).toHaveBeenCalledWith('u1');
+    });
+
+    it('records a failed OTP and rejects a wrong code', async () => {
+      const { service, otp, lockout } = build();
+      otp.verify.mockResolvedValue(false);
+      await expect(service.verifyPhoneOtp('u1', '+61400000000', '111111')).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+      expect(lockout.recordFailedOtp).toHaveBeenCalled();
+    });
+
+    it('blocks OTP verify (429) when OTP-locked', async () => {
+      const { service, lockout, otp } = build();
+      lockout.isOtpLocked.mockResolvedValue(true);
+      await expect(service.verifyPhoneOtp('u1', '+61400000000', '000000')).rejects.toBeInstanceOf(
+        HttpException,
+      );
+      expect(otp.verify).not.toHaveBeenCalled();
     });
   });
 });

@@ -23,6 +23,13 @@ export enum NodeEnv {
   Production = 'production',
 }
 
+export enum OtpProvider {
+  Mock = 'mock',
+  Firebase = 'firebase',
+  Notifyre = 'notifyre',
+  Twilio = 'twilio',
+}
+
 export class EnvironmentVariables {
   @IsEnum(NodeEnv)
   @IsOptional()
@@ -61,6 +68,13 @@ export class EnvironmentVariables {
   @Min(1)
   @IsOptional()
   JWT_REFRESH_TTL_DAYS = 30;
+
+  // Phone-OTP provider. `mock` (dev, accepts 000000) through Sprint 4; the real
+  // provider is chosen in Sprint 5 (ADR 008). App refuses to boot if this is
+  // `mock` while NODE_ENV=production.
+  @IsEnum(OtpProvider)
+  @IsOptional()
+  OTP_PROVIDER: OtpProvider = OtpProvider.Mock;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {
