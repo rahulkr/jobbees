@@ -85,8 +85,8 @@ class _JTextFieldState extends State<JTextField> {
     final borderColor = hasError
         ? scheme.error
         : _focused
-            ? scheme.primary
-            : Colors.transparent;
+        ? scheme.primary
+        : Colors.transparent;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,7 +108,9 @@ class _JTextFieldState extends State<JTextField> {
           curve: JMotion.easeOut,
           height: 56,
           decoration: BoxDecoration(
-            color: widget.enabled ? scheme.surfaceContainerHighest : scheme.surfaceContainer,
+            color: widget.enabled
+                ? scheme.surfaceContainerHighest
+                : scheme.surfaceContainer,
             borderRadius: JRadius.buttonMdAll,
             border: Border.all(color: borderColor, width: 2),
             // Soft focus halo in the accent (or error) colour.

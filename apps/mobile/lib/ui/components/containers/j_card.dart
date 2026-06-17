@@ -29,13 +29,7 @@ class JCard extends StatelessWidget {
     required VoidCallback onTap,
     EdgeInsets padding = const EdgeInsets.all(JSpacing.base),
     Key? key,
-  }) =>
-      JCard(
-        padding: padding,
-        onTap: onTap,
-        key: key,
-        child: child,
-      );
+  }) => JCard(padding: padding, onTap: onTap, key: key, child: child);
 
   /// Elevated card variant — for modals + overlays only.
   /// Default flat-with-border is preferred everywhere else.
@@ -43,13 +37,7 @@ class JCard extends StatelessWidget {
     required Widget child,
     EdgeInsets padding = const EdgeInsets.all(JSpacing.base),
     Key? key,
-  }) =>
-      JCard(
-        padding: padding,
-        elevated: true,
-        key: key,
-        child: child,
-      );
+  }) => JCard(padding: padding, elevated: true, key: key, child: child);
 
   final Widget child;
   final EdgeInsets padding;
@@ -86,11 +74,7 @@ class JCard extends StatelessWidget {
     );
 
     if (onTap != null) {
-      return JPressable(
-        onTap: onTap,
-        haptic: false,
-        child: card,
-      );
+      return JPressable(onTap: onTap, haptic: false, child: card);
     }
     return card;
   }

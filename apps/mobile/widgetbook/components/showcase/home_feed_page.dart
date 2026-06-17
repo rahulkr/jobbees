@@ -76,15 +76,26 @@ class _HomeFeed extends StatelessWidget {
                   borderRadius: JRadius.buttonMdAll,
                 ),
                 alignment: Alignment.center,
-                child: const Text('A',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 18)),
+                child: const Text(
+                  'A',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                  ),
+                ),
               ),
               const SizedBox(width: JSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Good morning', style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                    Text(
+                      'Good morning',
+                      style: text.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
                     Text('What needs doing?', style: text.titleLarge),
                   ],
                 ),
@@ -99,7 +110,9 @@ class _HomeFeed extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: gradientPrimary,
               borderRadius: JRadius.heroAll,
-              boxShadow: theme.brightness == Brightness.light ? JShadows.lifted : null,
+              boxShadow: theme.brightness == Brightness.light
+                  ? JShadows.lifted
+                  : null,
             ),
             child: Padding(
               padding: const EdgeInsets.all(JSpacing.lg),
@@ -109,11 +122,20 @@ class _HomeFeed extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Post a job in 60 seconds',
-                            style: text.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+                        Text(
+                          'Post a job in 60 seconds',
+                          style: text.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         const SizedBox(height: JSpacing.xs),
-                        Text('Speak it, snap a photo, or type it.',
-                            style: text.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.9))),
+                        Text(
+                          'Speak it, snap a photo, or type it.',
+                          style: text.bodyMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -125,7 +147,11 @@ class _HomeFeed extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.22),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.mic_none_rounded, color: Colors.white, size: 28),
+                    child: const Icon(
+                      Icons.mic_none_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                 ],
               ),
@@ -138,7 +164,10 @@ class _HomeFeed extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Popular near you', style: text.titleMedium),
-              Text('See all', style: text.labelLarge?.copyWith(color: scheme.primary)),
+              Text(
+                'See all',
+                style: text.labelLarge?.copyWith(color: scheme.primary),
+              ),
             ],
           ),
           const SizedBox(height: JSpacing.md),
@@ -157,22 +186,37 @@ class _HomeFeed extends StatelessWidget {
                         color: scheme.primary.withValues(alpha: 0.10),
                         borderRadius: JRadius.buttonMdAll,
                       ),
-                      child: Icon(Icons.tv_rounded, color: scheme.primary, size: 28),
+                      child: Icon(
+                        Icons.tv_rounded,
+                        color: scheme.primary,
+                        size: 28,
+                      ),
                     ),
                     const SizedBox(width: JSpacing.base),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Mount a 65" TV on the wall', style: text.titleSmall),
+                          Text(
+                            'Mount a 65" TV on the wall',
+                            style: text.titleSmall,
+                          ),
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              Icon(Icons.star_rounded, size: 16, color: JobbeesColors.warning),
+                              Icon(
+                                Icons.star_rounded,
+                                size: 16,
+                                color: JobbeesColors.warning,
+                              ),
                               const SizedBox(width: 2),
                               Text('4.9', style: text.labelMedium),
-                              Text('  ·  2.1 km away',
-                                  style: text.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                              Text(
+                                '  ·  2.1 km away',
+                                style: text.labelMedium?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -189,9 +233,21 @@ class _HomeFeed extends StatelessWidget {
                 Wrap(
                   spacing: JSpacing.sm,
                   children: [
-                    _Pill(label: 'Handyman', bg: scheme.surfaceContainerHighest, fg: scheme.onSurfaceVariant),
-                    _Pill(label: 'Today · 2pm', bg: scheme.surfaceContainerHighest, fg: scheme.onSurfaceVariant),
-                    _Pill(label: 'Indoor', bg: scheme.surfaceContainerHighest, fg: scheme.onSurfaceVariant),
+                    _Pill(
+                      label: 'Handyman',
+                      bg: scheme.surfaceContainerHighest,
+                      fg: scheme.onSurfaceVariant,
+                    ),
+                    _Pill(
+                      label: 'Today · 2pm',
+                      bg: scheme.surfaceContainerHighest,
+                      fg: scheme.onSurfaceVariant,
+                    ),
+                    _Pill(
+                      label: 'Indoor',
+                      bg: scheme.surfaceContainerHighest,
+                      fg: scheme.onSurfaceVariant,
+                    ),
                   ],
                 ),
                 const SizedBox(height: JSpacing.base),
@@ -218,21 +274,35 @@ class _HomeFeed extends StatelessWidget {
                     color: scheme.surfaceContainerHighest,
                     borderRadius: JRadius.buttonMdAll,
                   ),
-                  child: Icon(Icons.chair_rounded, color: scheme.onSurfaceVariant),
+                  child: Icon(
+                    Icons.chair_rounded,
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(width: JSpacing.base),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Assemble an Ikea bookshelf', style: text.titleSmall),
+                      Text(
+                        'Assemble an Ikea bookshelf',
+                        style: text.titleSmall,
+                      ),
                       const SizedBox(height: 2),
-                      Text('Surry Hills · Tomorrow',
-                          style: text.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                      Text(
+                        'Surry Hills · Tomorrow',
+                        style: text.labelMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                _Pill(label: '\$60', bg: scheme.primary.withValues(alpha: 0.12), fg: scheme.primary),
+                _Pill(
+                  label: '\$60',
+                  bg: scheme.primary.withValues(alpha: 0.12),
+                  fg: scheme.primary,
+                ),
               ],
             ),
           ),
@@ -255,7 +325,10 @@ class _Pill extends StatelessWidget {
       decoration: BoxDecoration(color: bg, borderRadius: JRadius.chipAll),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: fg, fontWeight: FontWeight.w600),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

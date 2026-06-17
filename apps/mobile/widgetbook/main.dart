@@ -38,7 +38,8 @@ class _WidgetbookApp extends StatelessWidget {
             WidgetbookTheme(name: 'Light', data: JobbeesTheme.light()),
             WidgetbookTheme(name: 'Dark', data: JobbeesTheme.dark()),
           ],
-          themeBuilder: (context, theme, child) => Theme(data: theme, child: child),
+          themeBuilder: (context, theme, child) =>
+              Theme(data: theme, child: child),
         ),
         DeviceFrameAddon(
           devices: [
@@ -59,29 +60,17 @@ class _WidgetbookApp extends StatelessWidget {
         ),
       ],
       directories: [
-        WidgetbookCategory(
-          name: 'Showcase',
-          children: [homeFeedShowcase()],
-        ),
+        WidgetbookCategory(name: 'Showcase', children: [homeFeedShowcase()]),
         WidgetbookCategory(
           name: 'Components',
           children: [
-            WidgetbookFolder(
-              name: 'Buttons',
-              children: [jButtonPage()],
-            ),
-            WidgetbookFolder(
-              name: 'Inputs',
-              children: [jTextFieldPage()],
-            ),
+            WidgetbookFolder(name: 'Buttons', children: [jButtonPage()]),
+            WidgetbookFolder(name: 'Inputs', children: [jTextFieldPage()]),
             WidgetbookFolder(
               name: 'Containers',
               children: [jCardPage(), jBottomSheetPage()],
             ),
-            WidgetbookFolder(
-              name: 'Feedback',
-              children: [jEmptyStatePage()],
-            ),
+            WidgetbookFolder(name: 'Feedback', children: [jEmptyStatePage()]),
           ],
         ),
       ],

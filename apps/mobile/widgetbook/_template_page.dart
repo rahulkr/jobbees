@@ -8,12 +8,12 @@ import 'package:widgetbook/widgetbook.dart';
 
 WidgetbookComponent jTemplatePage() {
   return WidgetbookComponent(
-    name: 'JTemplate',  // Change to component name
+    name: 'JTemplate', // Change to component name
     useCases: [
       WidgetbookUseCase(
         name: 'Default',
         builder: (context) => _frame(
-          const Placeholder(),  // Replace with the component
+          const Placeholder(), // Replace with the component
         ),
       ),
       // Add more use cases — every variant, every state

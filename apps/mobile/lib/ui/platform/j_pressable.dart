@@ -58,7 +58,9 @@ class _JPressableState extends State<JPressable> {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final scale = (_pressed && _enabled && !reduceMotion) ? widget.pressedScale : 1.0;
+    final scale = (_pressed && _enabled && !reduceMotion)
+        ? widget.pressedScale
+        : 1.0;
 
     return GestureDetector(
       onTapDown: (_) => _setPressed(true),

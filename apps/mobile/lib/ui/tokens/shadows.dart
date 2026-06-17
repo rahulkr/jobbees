@@ -23,29 +23,29 @@ class JShadows {
 
   /// Resting elevation — cards, raised tiles. Barely-there lift.
   static List<BoxShadow> get soft => [
-        BoxShadow(
-          color: _tint.withValues(alpha: 0.05),
-          blurRadius: 3,
-          offset: const Offset(0, 1),
-        ),
-        BoxShadow(
-          color: _tint.withValues(alpha: 0.07),
-          blurRadius: 14,
-          offset: const Offset(0, 6),
-        ),
-      ];
+    BoxShadow(
+      color: _tint.withValues(alpha: 0.05),
+      blurRadius: 3,
+      offset: const Offset(0, 1),
+    ),
+    BoxShadow(
+      color: _tint.withValues(alpha: 0.07),
+      blurRadius: 14,
+      offset: const Offset(0, 6),
+    ),
+  ];
 
   /// Lifted elevation — modal-like surfaces, elevated cards, menus.
   static List<BoxShadow> get lifted => [
-        BoxShadow(
-          color: _tint.withValues(alpha: 0.08),
-          blurRadius: 6,
-          offset: const Offset(0, 3),
-        ),
-        BoxShadow(
-          color: _tint.withValues(alpha: 0.12),
-          blurRadius: 28,
-          offset: const Offset(0, 12),
-        ),
-      ];
+    BoxShadow(
+      color: _tint.withValues(alpha: 0.08),
+      blurRadius: 6,
+      offset: const Offset(0, 3),
+    ),
+    BoxShadow(
+      color: _tint.withValues(alpha: 0.12),
+      blurRadius: 28,
+      offset: const Offset(0, 12),
+    ),
+  ];
 }

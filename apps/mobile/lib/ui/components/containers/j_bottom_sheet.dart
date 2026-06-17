@@ -43,19 +43,18 @@ class JBottomSheet extends StatelessWidget {
     Widget? primaryAction,
     Widget? secondaryAction,
     bool isDismissible = true,
-  }) =>
-      showModalBottomSheet<T>(
-        context: context,
-        isDismissible: isDismissible,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (ctx) => JBottomSheet(
-          title: title,
-          primaryAction: primaryAction,
-          secondaryAction: secondaryAction,
-          child: child,
-        ),
-      );
+  }) => showModalBottomSheet<T>(
+    context: context,
+    isDismissible: isDismissible,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => JBottomSheet(
+      title: title,
+      primaryAction: primaryAction,
+      secondaryAction: secondaryAction,
+      child: child,
+    ),
+  );
 
   final Widget child;
   final String? title;
@@ -68,7 +67,9 @@ class JBottomSheet extends StatelessWidget {
 
     return AnimatedPadding(
       duration: JMotion.bottomSheet,
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: SafeArea(
         top: false,
         child: Container(
