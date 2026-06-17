@@ -13,8 +13,19 @@ pre-commit:
     typecheck:
       glob: '*.{ts,tsx}'
       run: pnpm typecheck
+    dart-format:
+      # Mirror CI's `dart format --set-exit-if-changed`. Caught locally so a
+      # mobile PR can't reach CI unformatted (see #10/#11 post-mortem).
+      glob: 'apps/mobile/**/*.dart'
+      run: dart format --output=none --set-exit-if-changed {staged_files}
 
 pre-push:
   commands:
     test:
       run: pnpm test
+    flutter-analyze:
+      # Mirror CI's strict analyze. Pre-push (not pre-commit) because it
+      # analyses the whole package and is too slow per-commit. Only runs when
+      # the push touches Dart files.
+      glob: 'apps/mobile/**/*.dart'
+      run: cd apps/mobile && flutter analyze --fatal-infos --fatal-warnings
