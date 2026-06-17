@@ -25,6 +25,27 @@ concurrency:
 
 jobs:
   # ---------------------------------------------------------------------------
+  # Changes — detect which workspaces a PR touches, to gate heavier jobs by
+  # PATH rather than by PR title. Title-based gating silently skipped the
+  # Flutter job for #10 and let an unformatted/unanalyzed UI layer merge.
+  # ---------------------------------------------------------------------------
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      mobile: ${{ steps.filter.outputs.mobile }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Filter paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            mobile:
+              - 'apps/mobile/**'
+
+  # ---------------------------------------------------------------------------
   # Secrets — runs first because if there's a leak, the rest of the run is moot
   # ---------------------------------------------------------------------------
   secrets:
@@ -148,12 +169,13 @@ jobs:
   flutter:
     name: Analyze / test (Flutter)
     runs-on: ubuntu-latest
-    # Mobile development starts in Sprint 2; this job is gated to PRs that
-    # touch the mobile workspace. Saves CI minutes on backend-only PRs.
+    # Gated on changed PATHS (not PR title). Runs whenever apps/mobile/** is
+    # touched, or on manual dispatch. Saves CI minutes on backend-only PRs
+    # without the title-keyword fragility that let #10 slip through unchecked.
+    needs: changes
     if: |
-      github.event_name == 'push' ||
-      contains(github.event.pull_request.title, 'mobile') ||
-      contains(toJson(github.event.pull_request.labels.*.name), 'mobile')
+      github.event_name == 'workflow_dispatch' ||
+      needs.changes.outputs.mobile == 'true'
 
     defaults:
       run:
@@ -221,7 +243,7 @@ jobs:
 
           echo "secrets: $secrets_result"
           echo "node:    $node_result"
-          echo "flutter: $flutter_result  (skipped is OK — Flutter job runs only on mobile-tagged PRs)"
+          echo "flutter: $flutter_result  (skipped is OK — Flutter job runs only when apps/mobile/** changed)"
 
           # Hard gates: secrets + node MUST be success
           if [ "$secrets_result" != "success" ]; then
