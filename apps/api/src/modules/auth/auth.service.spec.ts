@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -150,6 +151,20 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'ghost@example.com', password: 'x' }, CTX),
       ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('rejects a suspended user (403) even with the right password', async () => {
+      const { service, users, passwords } = build();
+      users.findByEmail.mockResolvedValue({
+        id: 'u1',
+        role: UserRole.CLIENT,
+        passwordHash: 'hashed',
+        suspendedAt: new Date(),
+      });
+      passwords.verify.mockResolvedValue(true);
+      await expect(
+        service.login({ email: 'u1@example.com', password: 'right' }, CTX),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 
