@@ -25,9 +25,12 @@
     "@nestjs/common": "^11.1.26",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.26",
+    "@nestjs/jwt": "^11.0.2",
     "@nestjs/platform-express": "^11.1.26",
     "@nestjs/swagger": "^11.4.4",
+    "@paralleldrive/cuid2": "^3.3.0",
     "@prisma/adapter-pg": "^7.8.0",
+    "argon2": "^0.44.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "ioredis": "^5.11.1",
@@ -69,6 +72,9 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^@paralleldrive/cuid2$": "<rootDir>/../test/cuid2.mock.ts"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../common/auth/public.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 
 interface HealthResponse {
@@ -17,6 +18,7 @@ interface HealthResponse {
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 
+  @Public()
   @Get()
   @ApiOperation({ summary: 'Liveness + database readiness probe' })
   async check(): Promise<HealthResponse> {

@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { AuditModule } from './common/audit/audit.module';
 import { CommonModule } from './common/common.module';
 import { buildLoggerConfig } from './common/logger/logger.config';
 import { validateEnv } from './config/env.validation';
 import { HealthController } from './health/health.controller';
+import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -24,6 +26,8 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     PrismaModule,
     CommonModule,
+    AuditModule,
+    AuthModule,
   ],
   controllers: [HealthController],
 })

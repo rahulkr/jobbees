@@ -1,5 +1,14 @@
-import { plainToInstance } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min, validateSync } from 'class-validator';
+import { plainToInstance, Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  MinLength,
+  validateSync,
+} from 'class-validator';
 
 /**
  * Typed, validated environment configuration.
@@ -19,6 +28,7 @@ export class EnvironmentVariables {
   @IsOptional()
   NODE_ENV: NodeEnv = NodeEnv.Development;
 
+  @Type(() => Number)
   @IsInt()
   @Min(0)
   @Max(65535)
@@ -31,6 +41,26 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   REDIS_URL = 'redis://localhost:6379';
+
+  // Signs short-lived access JWTs. Required — no insecure default (prod injects
+  // a real secret via Key Vault; dev sets it in .env.local).
+  @IsString()
+  @MinLength(32)
+  JWT_ACCESS_SECRET!: string;
+
+  // Access-token lifetime in seconds (default 900 = 15 minutes).
+  @Type(() => Number)
+  @IsInt()
+  @Min(60)
+  @IsOptional()
+  JWT_ACCESS_TTL_SECONDS = 900;
+
+  // Refresh-token lifetime in days (opaque token, hashed + stored in Postgres).
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  JWT_REFRESH_TTL_DAYS = 30;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {
