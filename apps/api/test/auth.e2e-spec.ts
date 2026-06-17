@@ -12,9 +12,12 @@ import { PrismaService } from './../src/prisma/prisma.service';
 describe('Auth (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
-  const email = `e2e-auth-${Date.now()}@example.com`;
+  // Unique per run so the 24h idempotency cache (shared Redis) never replays a
+  // previous run's response — keeps the suite deterministic on a persistent DB.
+  const run = Date.now();
+  const email = `e2e-auth-${run}@example.com`;
   const password = 'a-strong-passphrase';
-  const idem = (key: string) => ['Idempotency-Key', key] as const;
+  const idem = (key: string) => ['Idempotency-Key', `${key}-${run}`] as const;
 
   let access = '';
   let refresh = '';
@@ -120,5 +123,46 @@ describe('Auth (e2e)', () => {
       .set(...idem('e2e-refresh-reuse'))
       .send({ refreshToken: refresh })
       .expect(401);
+  });
+
+  it('client is blocked from OTP routes (403 — @Roles TASKER)', () =>
+    request(server())
+      .post('/auth/otp/send')
+      .set('Authorization', `Bearer ${access}`)
+      .set(...idem('e2e-client-otp'))
+      .send({ phone: '+61400000001' })
+      .expect(403));
+
+  it('tasker can send + verify a phone OTP', async () => {
+    const taskerEmail = `e2e-tasker-${Date.now()}@example.com`;
+    const signup = await request(server())
+      .post('/auth/signup')
+      .set(...idem('e2e-tasker-signup'))
+      .send({
+        email: taskerEmail,
+        password,
+        firstName: 'E2E',
+        lastName: 'Tasker',
+        role: 'TASKER',
+      })
+      .expect(201);
+    const taskerToken = signup.body.accessToken;
+
+    await request(server())
+      .post('/auth/otp/send')
+      .set('Authorization', `Bearer ${taskerToken}`)
+      .set(...idem('e2e-tasker-otp-send'))
+      .send({ phone: '+61400000099' })
+      .expect(200);
+
+    const verified = await request(server())
+      .post('/auth/otp/verify')
+      .set('Authorization', `Bearer ${taskerToken}`)
+      .set(...idem('e2e-tasker-otp-verify'))
+      .send({ phone: '+61400000099', code: '000000' })
+      .expect(200);
+    expect(verified.body.phoneVerified).toBe(true);
+
+    await prisma.user.deleteMany({ where: { email: taskerEmail } });
   });
 });

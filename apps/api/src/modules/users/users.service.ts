@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { type User, type UserRole } from '@jobbees/prisma';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -35,6 +35,20 @@ export class UsersService {
         role: input.role,
         // countryCode defaults to "AU" in the schema.
       },
+    });
+  }
+
+  /** Sets the phone + marks it verified. Phone is unique — reject if taken. */
+  async markPhoneVerified(userId: string, phone: string): Promise<User> {
+    const owner = await this.prisma.user.findFirst({
+      where: { phone, deletedAt: null },
+    });
+    if (owner && owner.id !== userId) {
+      throw new ConflictException('Phone number already in use');
+    }
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { phone, phoneVerified: true },
     });
   }
 }
