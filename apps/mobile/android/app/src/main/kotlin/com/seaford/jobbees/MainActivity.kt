@@ -1,4 +1,4 @@
-package com.jobbees.jobbees_mobile
+package com.seaford.jobbees
 
 import io.flutter.embedding.android.FlutterActivity
 

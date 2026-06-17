@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.jobbees" "\0"
+            VALUE "CompanyName", "Seaford" "\0"
             VALUE "FileDescription", "jobbees_mobile" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "jobbees_mobile" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.jobbees. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Seaford. All rights reserved." "\0"
             VALUE "OriginalFilename", "jobbees_mobile.exe" "\0"
             VALUE "ProductName", "jobbees_mobile" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
