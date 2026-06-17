@@ -46,10 +46,13 @@ export class LoginDto {
 }
 
 export class RefreshDto {
-  @ApiProperty({ description: 'The opaque refresh token issued at login.' })
+  @ApiPropertyOptional({
+    description: 'Opaque refresh token (mobile/Bearer). Web reads the jb_refresh cookie.',
+  })
+  @IsOptional()
   @IsString()
   @MinLength(1)
-  refreshToken!: string;
+  refreshToken?: string;
 }
 
 export class ReauthDto {

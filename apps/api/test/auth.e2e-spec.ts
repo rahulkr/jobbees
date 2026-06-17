@@ -2,6 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserRole } from '@jobbees/prisma';
 import * as argon2 from 'argon2';
+import * as cookieParser from 'cookie-parser';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { MailService } from './../src/modules/auth/mail/mail.service';
@@ -67,6 +68,7 @@ describe('Auth (e2e)', () => {
       })
       .compile();
     app = moduleRef.createNestApplication();
+    app.use(cookieParser());
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -393,5 +395,50 @@ describe('Auth (e2e)', () => {
     ).rejects.toThrow();
     await expect(prisma.auditLog.delete({ where: { id } })).rejects.toThrow();
     // The row is intentionally left behind — it cannot be deleted (that's the point).
+  });
+
+  it('web surface: cookie session, CSRF enforcement, refresh + logout', async () => {
+    const agent = request.agent(server());
+
+    // Web login → HttpOnly cookies + a csrfToken in the body (no raw tokens).
+    const login = await agent
+      .post('/auth/login')
+      .set('X-Surface', 'web')
+      .set(...idem('e2e-web-login'))
+      .send({ email, password })
+      .expect(200);
+    expect(login.body.csrfToken).toEqual(expect.any(String));
+    expect(login.body).not.toHaveProperty('accessToken');
+    expect((login.headers['set-cookie'] as unknown as string[]).join(';')).toMatch(/jb_access=/);
+    let csrf = login.body.csrfToken as string;
+
+    // /me authenticates via the jb_access cookie (agent resends it).
+    const me = await agent.get('/auth/me').set('X-Surface', 'web').expect(200);
+    expect(me.body.email).toBe(email);
+
+    // A cookie-auth mutating request without the CSRF header is rejected.
+    await agent
+      .post('/auth/logout-all')
+      .set('X-Surface', 'web')
+      .set(...idem('e2e-web-nocsrf'))
+      .expect(403);
+
+    // Refresh via cookie + CSRF rotates the session (new csrfToken issued).
+    const refreshed = await agent
+      .post('/auth/refresh')
+      .set('X-Surface', 'web')
+      .set('X-XSRF-TOKEN', csrf)
+      .set(...idem('e2e-web-refresh'))
+      .expect(200);
+    csrf = refreshed.body.csrfToken as string;
+
+    // Logout clears the cookies.
+    const out = await agent
+      .post('/auth/logout')
+      .set('X-Surface', 'web')
+      .set('X-XSRF-TOKEN', csrf)
+      .set(...idem('e2e-web-logout'))
+      .expect(204);
+    expect((out.headers['set-cookie'] as unknown as string[]).join(';')).toMatch(/jb_access=;/);
   });
 });

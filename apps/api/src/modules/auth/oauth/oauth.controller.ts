@@ -1,10 +1,11 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Param, Post, Req, Res } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { Public } from '../../../common/auth/public.decorator';
 import { RateLimit } from '../../../common/rate-limit/rate-limit.decorator';
 import { TokenPairDto } from '../dto/auth.dto';
 import { OAuthLoginDto } from '../dto/oauth.dto';
+import { SessionCookieService } from '../session-cookie.service';
 import { type IssueContext } from '../token.service';
 import { OAuthService } from './oauth.service';
 
@@ -15,7 +16,10 @@ function contextFrom(req: Request): IssueContext {
 @ApiTags('auth')
 @Controller('auth/oauth')
 export class OAuthController {
-  constructor(private readonly oauth: OAuthService) {}
+  constructor(
+    private readonly oauth: OAuthService,
+    private readonly session: SessionCookieService,
+  ) {}
 
   @Public()
   @Post(':provider')
@@ -27,11 +31,13 @@ export class OAuthController {
     required: true,
     description: 'Required on mutating requests; replays the response on retry.',
   })
-  login(
+  async login(
     @Param('provider') provider: string,
     @Body() dto: OAuthLoginDto,
     @Req() req: Request,
-  ): Promise<TokenPairDto> {
-    return this.oauth.login(provider, dto, contextFrom(req));
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<TokenPairDto | { csrfToken: string }> {
+    const pair = await this.oauth.login(provider, dto, contextFrom(req));
+    return this.session.deliver(req, res, pair);
   }
 }
