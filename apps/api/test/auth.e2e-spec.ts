@@ -2,8 +2,15 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
+import { MailService } from './../src/modules/auth/mail/mail.service';
 import { GoogleVerifier } from './../src/modules/auth/oauth/google.verifier';
 import { PrismaService } from './../src/prisma/prisma.service';
+
+// Captures the tokens the mock mailer would have sent (never in API responses).
+const mailTokens = {
+  verify: new Map<string, string>(),
+  reset: new Map<string, string>(),
+};
 
 /**
  * Route-level auth flow (security-review skill §L1). Requires local Postgres +
@@ -40,6 +47,18 @@ describe('Auth (e2e)', () => {
             firstName: 'O',
             lastName: 'Auth',
           }),
+      })
+      // Capture tokens the mailer would send so the e2e can complete the flows.
+      .overrideProvider(MailService)
+      .useValue({
+        sendEmailVerification: (to: string, token: string) => {
+          mailTokens.verify.set(to, token);
+          return Promise.resolve();
+        },
+        sendPasswordReset: (to: string, token: string) => {
+          mailTokens.reset.set(to, token);
+          return Promise.resolve();
+        },
       })
       .compile();
     app = moduleRef.createNestApplication();
@@ -203,4 +222,58 @@ describe('Auth (e2e)', () => {
       .set(...idem('e2e-oauth-bad'))
       .send({ idToken: 'x' })
       .expect(400));
+
+  it('verifies email with the emailed token', async () => {
+    const token = mailTokens.verify.get(email);
+    expect(token).toBeDefined();
+    await request(server())
+      .post('/auth/email/verify')
+      .set(...idem('e2e-email-verify'))
+      .send({ token })
+      .expect(200);
+
+    const me = await request(server())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${access}`)
+      .expect(200);
+    expect(me.body.emailVerified).toBe(true);
+  });
+
+  it('forgot + reset password, then login with the new password', async () => {
+    const resetEmail = `e2e-reset-${run}@example.com`;
+    const newPassword = 'a-brand-new-passphrase';
+    await request(server())
+      .post('/auth/signup')
+      .set(...idem('e2e-reset-signup'))
+      .send({ email: resetEmail, password, firstName: 'R', lastName: 'Set' })
+      .expect(201);
+
+    await request(server())
+      .post('/auth/password/forgot')
+      .set(...idem('e2e-reset-forgot'))
+      .send({ email: resetEmail })
+      .expect(200);
+    const token = mailTokens.reset.get(resetEmail);
+    expect(token).toBeDefined();
+
+    await request(server())
+      .post('/auth/password/reset')
+      .set(...idem('e2e-reset-do'))
+      .send({ token, newPassword })
+      .expect(200);
+
+    // Old password no longer works; new one does.
+    await request(server())
+      .post('/auth/login')
+      .set(...idem('e2e-reset-oldpw'))
+      .send({ email: resetEmail, password })
+      .expect(401);
+    await request(server())
+      .post('/auth/login')
+      .set(...idem('e2e-reset-newpw'))
+      .send({ email: resetEmail, password: newPassword })
+      .expect(200);
+
+    await prisma.user.deleteMany({ where: { email: resetEmail } });
+  });
 });

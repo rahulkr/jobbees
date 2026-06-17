@@ -9,6 +9,7 @@ import { type User, UserRole } from '@jobbees/prisma';
 import { AuditLogService } from '../../common/audit/audit-log.service';
 import { UsersService } from '../users/users.service';
 import { type SignupDto, type LoginDto, type UserProfileDto } from './dto/auth.dto';
+import { EmailVerificationService } from './email-verification.service';
 import { LockoutService } from './lockout.service';
 import { OtpService } from './otp/otp.service';
 import { PasswordService } from './password.service';
@@ -23,6 +24,7 @@ export class AuthService {
     private readonly audit: AuditLogService,
     private readonly lockout: LockoutService,
     private readonly otp: OtpService,
+    private readonly emailVerification: EmailVerificationService,
   ) {}
 
   async signup(dto: SignupDto, ctx: IssueContext): Promise<TokenPair> {
@@ -48,6 +50,13 @@ export class AuthService {
       ipAddress: ctx.ipAddress,
       userAgent: ctx.userAgent,
     });
+
+    // Fire the verification email (best-effort — never block signup on mail).
+    try {
+      await this.emailVerification.issue(user.id, user.email);
+    } catch {
+      // Swallowed intentionally; user can request a resend.
+    }
 
     return this.tokens.issueForUser(user.id, user.role, ctx);
   }

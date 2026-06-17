@@ -101,6 +101,14 @@ export class TokenService {
     });
   }
 
+  /** Revokes every active session for a user (logout-all / password reset). */
+  async revokeAllForUser(userId: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
   verifyAccess(token: string): Promise<AccessPayload> {
     return this.jwt.verifyAsync<AccessPayload>(token, {
       secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),

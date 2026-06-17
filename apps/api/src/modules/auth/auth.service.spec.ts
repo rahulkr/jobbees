@@ -3,6 +3,7 @@ import { UserRole } from '@jobbees/prisma';
 import { AuditLogService } from '../../common/audit/audit-log.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { EmailVerificationService } from './email-verification.service';
 import { LockoutService } from './lockout.service';
 import { OtpService } from './otp/otp.service';
 import { PasswordService } from './password.service';
@@ -37,6 +38,7 @@ function build() {
     send: jest.fn().mockResolvedValue(undefined),
     verify: jest.fn(),
   };
+  const emailVerification = { issue: jest.fn().mockResolvedValue(undefined) };
   const service = new AuthService(
     users as unknown as UsersService,
     passwords as unknown as PasswordService,
@@ -44,8 +46,9 @@ function build() {
     audit as unknown as AuditLogService,
     lockout as unknown as LockoutService,
     otp as unknown as OtpService,
+    emailVerification as unknown as EmailVerificationService,
   );
-  return { service, users, passwords, tokens, audit, lockout, otp };
+  return { service, users, passwords, tokens, audit, lockout, otp, emailVerification };
 }
 
 describe('AuthService', () => {
