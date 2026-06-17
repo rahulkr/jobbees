@@ -382,4 +382,16 @@ describe('Auth (e2e)', () => {
 
     await prisma.user.deleteMany({ where: { email: targetEmail } });
   });
+
+  it('AuditLog is append-only (update + delete blocked at the DB)', async () => {
+    const id = `al-e2e-${run}`;
+    await prisma.auditLog.create({
+      data: { id, action: 'test.write', resourceType: 'User', resourceId: 'u-test' },
+    });
+    await expect(
+      prisma.auditLog.update({ where: { id }, data: { action: 'tampered' } }),
+    ).rejects.toThrow();
+    await expect(prisma.auditLog.delete({ where: { id } })).rejects.toThrow();
+    // The row is intentionally left behind — it cannot be deleted (that's the point).
+  });
 });
