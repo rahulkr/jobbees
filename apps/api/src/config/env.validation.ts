@@ -75,6 +75,17 @@ export class EnvironmentVariables {
   @IsEnum(OtpProvider)
   @IsOptional()
   OTP_PROVIDER: OtpProvider = OtpProvider.Mock;
+
+  // Comma-separated accepted audiences for social-login ID-token verification.
+  // Empty in dev (social login returns 503 until set); populated from the
+  // Google Cloud / Apple Developer client IDs in Sprint 2.
+  @IsString()
+  @IsOptional()
+  GOOGLE_OAUTH_CLIENT_IDS = '';
+
+  @IsString()
+  @IsOptional()
+  APPLE_CLIENT_IDS = '';
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

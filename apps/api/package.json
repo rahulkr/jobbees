@@ -33,7 +33,9 @@
     "argon2": "^0.44.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "google-auth-library": "^10.7.0",
     "ioredis": "^5.11.1",
+    "jose": "^6.2.3",
     "nestjs-pino": "^4.6.1",
     "pino-http": "^11.0.0",
     "rate-limiter-flexible": "^11.2.0",
@@ -74,7 +76,8 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "moduleNameMapper": {
-      "^@paralleldrive/cuid2$": "<rootDir>/../test/cuid2.mock.ts"
+      "^@paralleldrive/cuid2$": "<rootDir>/../test/cuid2.mock.ts",
+      "^jose$": "<rootDir>/../test/jose.mock.ts"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
