@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { CommonModule } from './common/common.module';
 import { buildLoggerConfig } from './common/logger/logger.config';
 import { validateEnv } from './config/env.validation';
 import { HealthController } from './health/health.controller';
@@ -22,6 +23,7 @@ import { PrismaModule } from './prisma/prisma.module';
         buildLoggerConfig(config.get<string>('NODE_ENV', 'development')),
     }),
     PrismaModule,
+    CommonModule,
   ],
   controllers: [HealthController],
 })
