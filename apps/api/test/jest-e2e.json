@@ -7,6 +7,7 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "^@paralleldrive/cuid2$": "<rootDir>/cuid2.mock.ts"
+    "^@paralleldrive/cuid2$": "<rootDir>/cuid2.mock.ts",
+    "^jose$": "<rootDir>/jose.mock.ts"
   }
 }

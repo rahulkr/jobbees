@@ -11,6 +11,14 @@ export interface CreateUserInput {
   role: UserRole;
 }
 
+export interface CreateOAuthUserInput {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  emailVerified: boolean;
+}
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -34,6 +42,21 @@ export class UsersService {
         lastName: input.lastName,
         role: input.role,
         // countryCode defaults to "AU" in the schema.
+      },
+    });
+  }
+
+  /** Creates a social-login user (no password — OAuth only). */
+  createOAuthUser(input: CreateOAuthUserInput): Promise<User> {
+    return this.prisma.user.create({
+      data: {
+        id: createId(),
+        email: input.email,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        role: input.role,
+        emailVerified: input.emailVerified,
+        passwordHash: null,
       },
     });
   }

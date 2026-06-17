@@ -6,6 +6,10 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LockoutService } from './lockout.service';
+import { AppleVerifier } from './oauth/apple.verifier';
+import { GoogleVerifier } from './oauth/google.verifier';
+import { OAuthController } from './oauth/oauth.controller';
+import { OAuthService } from './oauth/oauth.service';
 import { MockOtpService } from './otp/mock-otp.service';
 import { OtpController } from './otp/otp.controller';
 import { OtpService } from './otp/otp.service';
@@ -19,12 +23,15 @@ import { TokenService } from './token.service';
     // Secrets are passed per sign/verify call (TokenService), not registered here.
     JwtModule.register({}),
   ],
-  controllers: [AuthController, OtpController],
+  controllers: [AuthController, OtpController, OAuthController],
   providers: [
     AuthService,
     PasswordService,
     TokenService,
     LockoutService,
+    OAuthService,
+    GoogleVerifier,
+    AppleVerifier,
     // OtpService → MockOtpService for now; Sprint 5 swaps the impl (ADR 008).
     { provide: OtpService, useClass: MockOtpService },
     // Guard order matters: authenticate (JWT) before authorizing (roles).

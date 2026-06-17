@@ -2,6 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
+import { GoogleVerifier } from './../src/modules/auth/oauth/google.verifier';
 import { PrismaService } from './../src/prisma/prisma.service';
 
 /**
@@ -16,6 +17,7 @@ describe('Auth (e2e)', () => {
   // previous run's response — keeps the suite deterministic on a persistent DB.
   const run = Date.now();
   const email = `e2e-auth-${run}@example.com`;
+  const oauthEmail = `e2e-oauth-${run}@example.com`;
   const password = 'a-strong-passphrase';
   const idem = (key: string) => ['Idempotency-Key', `${key}-${run}`] as const;
 
@@ -25,7 +27,21 @@ describe('Auth (e2e)', () => {
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      // Stub Google verification — exercise the OAuth route without a real token.
+      .overrideProvider(GoogleVerifier)
+      .useValue({
+        verify: () =>
+          Promise.resolve({
+            provider: 'google',
+            providerId: 'g-e2e',
+            email: oauthEmail,
+            emailVerified: true,
+            firstName: 'O',
+            lastName: 'Auth',
+          }),
+      })
+      .compile();
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(
       new ValidationPipe({
@@ -55,7 +71,7 @@ describe('Auth (e2e)', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany({ where: { email } });
+    await prisma.user.deleteMany({ where: { email: { in: [email, oauthEmail] } } });
     await app.close();
   });
 
@@ -165,4 +181,26 @@ describe('Auth (e2e)', () => {
 
     await prisma.user.deleteMany({ where: { email: taskerEmail } });
   });
+
+  it('google OAuth signs up a new user + issues tokens', async () => {
+    const res = await request(server())
+      .post('/auth/oauth/google')
+      .set(...idem('e2e-oauth-google'))
+      .send({ idToken: 'stub-token-verified-by-override' })
+      .expect(200);
+    expect(res.body.accessToken).toEqual(expect.any(String));
+
+    const me = await request(server())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${res.body.accessToken}`)
+      .expect(200);
+    expect(me.body.email).toBe(oauthEmail);
+  });
+
+  it('rejects an unsupported OAuth provider (400)', () =>
+    request(server())
+      .post('/auth/oauth/facebook')
+      .set(...idem('e2e-oauth-bad'))
+      .send({ idToken: 'x' })
+      .expect(400));
 });
