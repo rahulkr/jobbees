@@ -1,6 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags, ApiHeader } from '@nestjs/swagger';
-import type { Request } from 'express';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Request, Response } from 'express';
 import { CurrentUser, type CurrentUserData } from '../../common/auth/current-user.decorator';
 import { Public } from '../../common/auth/public.decorator';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
@@ -13,13 +23,16 @@ import {
   TokenPairDto,
   UserProfileDto,
 } from './dto/auth.dto';
+import { readCookie, REFRESH_COOKIE, SessionCookieService } from './session-cookie.service';
 import { type IssueContext } from './token.service';
+
+/** Mobile gets the token pair in the body; web gets cookies + a csrfToken. */
+type SessionResponse = TokenPairDto | { csrfToken: string };
 
 function contextFrom(req: Request): IssueContext {
   return { ipAddress: req.ip ?? null, userAgent: req.header('user-agent') ?? null };
 }
 
-// All mutating routes require an Idempotency-Key (global interceptor).
 const IDEMPOTENCY_HEADER = {
   name: 'Idempotency-Key',
   description: 'Required on mutating requests; replays the response on retry.',
@@ -29,15 +42,23 @@ const IDEMPOTENCY_HEADER = {
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly session: SessionCookieService,
+  ) {}
 
   @Public()
   @Post('signup')
   @RateLimit({ points: 5, duration: 60 })
   @ApiOperation({ summary: 'Register with email + password' })
   @ApiHeader(IDEMPOTENCY_HEADER)
-  signup(@Body() dto: SignupDto, @Req() req: Request): Promise<TokenPairDto> {
-    return this.auth.signup(dto, contextFrom(req));
+  async signup(
+    @Body() dto: SignupDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SessionResponse> {
+    const pair = await this.auth.signup(dto, contextFrom(req));
+    return this.session.deliver(req, res, pair);
   }
 
   @Public()
@@ -46,8 +67,13 @@ export class AuthController {
   @RateLimit({ points: 5, duration: 60 })
   @ApiOperation({ summary: 'Log in with email + password' })
   @ApiHeader(IDEMPOTENCY_HEADER)
-  login(@Body() dto: LoginDto, @Req() req: Request): Promise<TokenPairDto> {
-    return this.auth.login(dto, contextFrom(req));
+  async login(
+    @Body() dto: LoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SessionResponse> {
+    const pair = await this.auth.login(dto, contextFrom(req));
+    return this.session.deliver(req, res, pair);
   }
 
   @Public()
@@ -56,8 +82,17 @@ export class AuthController {
   @RateLimit({ points: 10, duration: 60 })
   @ApiOperation({ summary: 'Exchange a refresh token for a new token pair' })
   @ApiHeader(IDEMPOTENCY_HEADER)
-  refresh(@Body() dto: RefreshDto, @Req() req: Request): Promise<TokenPairDto> {
-    return this.auth.refresh(dto.refreshToken, contextFrom(req));
+  async refresh(
+    @Body() dto: RefreshDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SessionResponse> {
+    const token = this.session.isWeb(req) ? readCookie(req, REFRESH_COOKIE) : dto.refreshToken;
+    if (!token) {
+      throw new BadRequestException('Missing refresh token');
+    }
+    const pair = await this.auth.refresh(token, contextFrom(req));
+    return this.session.deliver(req, res, pair);
   }
 
   @Public()
@@ -66,8 +101,16 @@ export class AuthController {
   @RateLimit({ points: 10, duration: 60 })
   @ApiOperation({ summary: 'Revoke a refresh token' })
   @ApiHeader(IDEMPOTENCY_HEADER)
-  async logout(@Body() dto: RefreshDto): Promise<void> {
-    await this.auth.logout(dto.refreshToken);
+  async logout(
+    @Body() dto: RefreshDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const token = this.session.isWeb(req) ? readCookie(req, REFRESH_COOKIE) : dto.refreshToken;
+    if (token) {
+      await this.auth.logout(token);
+    }
+    this.session.clear(res);
   }
 
   @Post('logout-all')
@@ -76,8 +119,13 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Revoke every session for the current user' })
   @ApiHeader(IDEMPOTENCY_HEADER)
-  async logoutAll(@CurrentUser() user: CurrentUserData, @Req() req: Request): Promise<void> {
+  async logoutAll(
+    @CurrentUser() user: CurrentUserData,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
     await this.auth.logoutAll(user.id, contextFrom(req));
+    this.session.clear(res);
   }
 
   @Post('reauth')

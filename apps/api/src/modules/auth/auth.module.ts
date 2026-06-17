@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { CsrfGuard } from './csrf.guard';
 import { EmailVerificationController } from './email-verification.controller';
 import { EmailVerificationService } from './email-verification.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -23,6 +24,7 @@ import { PasswordService } from './password.service';
 import { ReauthService } from './reauth.service';
 import { RecentAuthGuard } from './recent-auth.guard';
 import { RolesGuard } from './roles.guard';
+import { SessionCookieService } from './session-cookie.service';
 import { TokenService } from './token.service';
 
 @Module({
@@ -49,11 +51,13 @@ import { TokenService } from './token.service';
     EmailVerificationService,
     PasswordResetService,
     ReauthService,
+    SessionCookieService,
     // OtpService → MockOtpService for now; Sprint 5 swaps the impl (ADR 008).
     { provide: OtpService, useClass: MockOtpService },
     // MailService → MockMailService for now; SendGrid in Sprint 5/8.
     { provide: MailService, useClass: MockMailService },
     // Guard order matters: authenticate (JWT) → authorize (roles) → step-up.
+    { provide: APP_GUARD, useClass: CsrfGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: RecentAuthGuard },

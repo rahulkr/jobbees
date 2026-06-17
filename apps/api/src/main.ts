@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -11,6 +12,9 @@ async function bootstrap(): Promise<void> {
 
   // Route Nest's logs through pino.
   app.useLogger(app.get(Logger));
+
+  // Parse cookies (web/admin session auth — ADR 006).
+  app.use(cookieParser());
 
   // Reject unknown / malformed payloads everywhere; transform to DTO instances.
   app.useGlobalPipes(
