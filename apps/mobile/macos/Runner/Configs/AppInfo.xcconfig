@@ -8,7 +8,7 @@
 PRODUCT_NAME = jobbees_mobile
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.jobbees.jobbeesMobile
+PRODUCT_BUNDLE_IDENTIFIER = com.seaford.jobbees
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.jobbees. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 Seaford. All rights reserved.
