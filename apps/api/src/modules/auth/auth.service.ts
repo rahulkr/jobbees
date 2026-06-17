@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -94,6 +95,10 @@ export class AuthService {
       });
       await this.lockout.recordFailedLogin(email, ctx);
       throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (user.suspendedAt) {
+      throw new ForbiddenException('Account is suspended');
     }
 
     await this.lockout.clearLogin(email);
