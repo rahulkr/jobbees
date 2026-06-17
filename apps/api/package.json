@@ -14,6 +14,7 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --fix",
     "typecheck": "tsc --noEmit",
+    "export:openapi": "ts-node --transpile-only scripts/export-openapi.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
