@@ -158,6 +158,39 @@ describe('Auth (e2e)', () => {
       .set(...idem('e2e-refresh-reuse'))
       .send({ refreshToken: refresh })
       .expect(401);
+
+    refresh = rotated.body.refreshToken; // keep the current valid token
+  });
+
+  it('reauth: correct password grants a window, wrong password → 401', async () => {
+    const ok = await request(server())
+      .post('/auth/reauth')
+      .set('Authorization', `Bearer ${access}`)
+      .set(...idem('e2e-reauth-ok'))
+      .send({ password })
+      .expect(200);
+    expect(ok.body.validForSeconds).toBeGreaterThan(0);
+
+    await request(server())
+      .post('/auth/reauth')
+      .set('Authorization', `Bearer ${access}`)
+      .set(...idem('e2e-reauth-bad'))
+      .send({ password: 'not-the-password' })
+      .expect(401);
+  });
+
+  it('logout-all revokes every session (refresh then 401)', async () => {
+    await request(server())
+      .post('/auth/logout-all')
+      .set('Authorization', `Bearer ${access}`)
+      .set(...idem('e2e-logoutall'))
+      .expect(204);
+
+    await request(server())
+      .post('/auth/refresh')
+      .set(...idem('e2e-logoutall-refresh'))
+      .send({ refreshToken: refresh })
+      .expect(401);
   });
 
   it('client is blocked from OTP routes (403 — @Roles TASKER)', () =>

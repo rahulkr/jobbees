@@ -20,6 +20,8 @@ import { MockOtpService } from './otp/mock-otp.service';
 import { OtpController } from './otp/otp.controller';
 import { OtpService } from './otp/otp.service';
 import { PasswordService } from './password.service';
+import { ReauthService } from './reauth.service';
+import { RecentAuthGuard } from './recent-auth.guard';
 import { RolesGuard } from './roles.guard';
 import { TokenService } from './token.service';
 
@@ -46,13 +48,15 @@ import { TokenService } from './token.service';
     AppleVerifier,
     EmailVerificationService,
     PasswordResetService,
+    ReauthService,
     // OtpService → MockOtpService for now; Sprint 5 swaps the impl (ADR 008).
     { provide: OtpService, useClass: MockOtpService },
     // MailService → MockMailService for now; SendGrid in Sprint 5/8.
     { provide: MailService, useClass: MockMailService },
-    // Guard order matters: authenticate (JWT) before authorizing (roles).
+    // Guard order matters: authenticate (JWT) → authorize (roles) → step-up.
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: RecentAuthGuard },
   ],
 })
 export class AuthModule {}

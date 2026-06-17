@@ -5,7 +5,14 @@ import { CurrentUser, type CurrentUserData } from '../../common/auth/current-use
 import { Public } from '../../common/auth/public.decorator';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
 import { AuthService } from './auth.service';
-import { LoginDto, RefreshDto, SignupDto, TokenPairDto, UserProfileDto } from './dto/auth.dto';
+import {
+  LoginDto,
+  ReauthDto,
+  RefreshDto,
+  SignupDto,
+  TokenPairDto,
+  UserProfileDto,
+} from './dto/auth.dto';
 import { type IssueContext } from './token.service';
 
 function contextFrom(req: Request): IssueContext {
@@ -61,6 +68,30 @@ export class AuthController {
   @ApiHeader(IDEMPOTENCY_HEADER)
   async logout(@Body() dto: RefreshDto): Promise<void> {
     await this.auth.logout(dto.refreshToken);
+  }
+
+  @Post('logout-all')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @RateLimit({ points: 10, duration: 60 })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Revoke every session for the current user' })
+  @ApiHeader(IDEMPOTENCY_HEADER)
+  async logoutAll(@CurrentUser() user: CurrentUserData, @Req() req: Request): Promise<void> {
+    await this.auth.logoutAll(user.id, contextFrom(req));
+  }
+
+  @Post('reauth')
+  @HttpCode(HttpStatus.OK)
+  @RateLimit({ points: 5, duration: 60 })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Step-up: re-verify password for sensitive actions' })
+  @ApiHeader(IDEMPOTENCY_HEADER)
+  reauth(
+    @CurrentUser() user: CurrentUserData,
+    @Body() dto: ReauthDto,
+    @Req() req: Request,
+  ): Promise<{ validForSeconds: number }> {
+    return this.auth.reauth(user.id, dto.password, contextFrom(req));
   }
 
   @Get('me')

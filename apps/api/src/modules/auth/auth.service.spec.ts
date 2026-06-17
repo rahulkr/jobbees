@@ -1,4 +1,9 @@
-import { ConflictException, HttpException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserRole } from '@jobbees/prisma';
 import { AuditLogService } from '../../common/audit/audit-log.service';
 import { UsersService } from '../users/users.service';
@@ -6,6 +11,7 @@ import { AuthService } from './auth.service';
 import { EmailVerificationService } from './email-verification.service';
 import { LockoutService } from './lockout.service';
 import { OtpService } from './otp/otp.service';
+import { ReauthService } from './reauth.service';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
 
@@ -24,6 +30,7 @@ function build() {
     issueForUser: jest.fn().mockResolvedValue(TOKENS),
     rotate: jest.fn(),
     revoke: jest.fn(),
+    revokeAllForUser: jest.fn().mockResolvedValue(undefined),
   };
   const audit = { record: jest.fn().mockResolvedValue(undefined) };
   const lockout = {
@@ -39,6 +46,7 @@ function build() {
     verify: jest.fn(),
   };
   const emailVerification = { issue: jest.fn().mockResolvedValue(undefined) };
+  const reauthService = { grant: jest.fn().mockResolvedValue(300), isRecent: jest.fn() };
   const service = new AuthService(
     users as unknown as UsersService,
     passwords as unknown as PasswordService,
@@ -47,8 +55,19 @@ function build() {
     lockout as unknown as LockoutService,
     otp as unknown as OtpService,
     emailVerification as unknown as EmailVerificationService,
+    reauthService as unknown as ReauthService,
   );
-  return { service, users, passwords, tokens, audit, lockout, otp, emailVerification };
+  return {
+    service,
+    users,
+    passwords,
+    tokens,
+    audit,
+    lockout,
+    otp,
+    emailVerification,
+    reauthService,
+  };
 }
 
 describe('AuthService', () => {
@@ -223,6 +242,43 @@ describe('AuthService', () => {
         HttpException,
       );
       expect(otp.verify).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('session security', () => {
+    it('logoutAll revokes every session + audits', async () => {
+      const { service, tokens, audit } = build();
+      await service.logoutAll('u1', CTX);
+      expect(tokens.revokeAllForUser).toHaveBeenCalledWith('u1');
+      expect(audit.record).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'auth.logout_all' }),
+      );
+    });
+
+    it('reauth grants a window on the correct password', async () => {
+      const { service, users, passwords, reauthService } = build();
+      users.findById.mockResolvedValue({ id: 'u1', passwordHash: 'hashed' });
+      passwords.verify.mockResolvedValue(true);
+      await expect(service.reauth('u1', 'right', CTX)).resolves.toEqual({
+        validForSeconds: 300,
+      });
+      expect(reauthService.grant).toHaveBeenCalledWith('u1');
+    });
+
+    it('reauth rejects a wrong password', async () => {
+      const { service, users, passwords, reauthService } = build();
+      users.findById.mockResolvedValue({ id: 'u1', passwordHash: 'hashed' });
+      passwords.verify.mockResolvedValue(false);
+      await expect(service.reauth('u1', 'wrong', CTX)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+      expect(reauthService.grant).not.toHaveBeenCalled();
+    });
+
+    it('reauth is unavailable for a password-less (social) account', async () => {
+      const { service, users } = build();
+      users.findById.mockResolvedValue({ id: 'u1', passwordHash: null });
+      await expect(service.reauth('u1', 'x', CTX)).rejects.toBeInstanceOf(BadRequestException);
     });
   });
 });
