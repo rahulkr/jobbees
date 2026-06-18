@@ -19,6 +19,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/platform/j_pressable.dart';
 import '../../../ui/ui.dart';
+import '../widgets/auth_header.dart';
 
 class _RoleOption {
   const _RoleOption({
@@ -84,7 +85,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   }
 
   Widget _body(BuildContext context, {required double maxWidth}) {
-    final theme = Theme.of(context);
     final selected = _selectedRole;
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth),
@@ -94,18 +94,11 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: JSpacing.lg),
-            Text(
-              'How will you start?',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: JSpacing.sm),
-            Text(
-              'You can do both later — this just sets up your first experience.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            const AuthHeader(
+              title: 'How will you start?',
+              subtitle:
+                  'You can do both later — this just sets up your first '
+                  'experience.',
             ),
             const SizedBox(height: JSpacing.xl),
             for (final option in _options) ...[

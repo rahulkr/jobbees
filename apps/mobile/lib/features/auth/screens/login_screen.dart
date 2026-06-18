@@ -22,6 +22,7 @@ import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_error_banner.dart';
+import '../widgets/auth_header.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -107,18 +108,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: JSpacing.lg),
-                Text(
-                  'Welcome back',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: JSpacing.sm),
-                Text(
-                  'Log in to continue.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                const AuthHeader(
+                  title: 'Welcome back',
+                  subtitle: 'Log in to continue.',
                 ),
                 const SizedBox(height: JSpacing.xl),
                 if (_formError != null) ...[
