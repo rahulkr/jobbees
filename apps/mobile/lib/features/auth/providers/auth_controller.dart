@@ -176,6 +176,21 @@ class AuthController extends AsyncNotifier<UserProfile?> {
     }
   }
 
+  /// Upgrades the current client account to a tasker (one-way). Refreshes the
+  /// session so the new role lands in the access token (TASKER-only endpoints
+  /// reject a stale CLIENT token), then refetches the profile so `state` carries
+  /// the tasker role and the router/UI react.
+  Future<void> becomeTasker() async {
+    final repo = ref.read(authRepositoryProvider);
+    try {
+      await repo.becomeTasker();
+      await refreshSession();
+      state = AsyncData(await repo.fetchMe());
+    } catch (error) {
+      throw ErrorMapper.map(error);
+    }
+  }
+
   Future<void> logout() async {
     final stored = await ref.read(tokenStorageProvider).read();
     try {

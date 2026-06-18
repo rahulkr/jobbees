@@ -25,19 +25,28 @@ class FakeAuthController extends AuthController {
     this.signUpError,
     this.loginError,
     this.socialError,
+    this.becomeTaskerError,
   });
 
   final UserProfile? initialUser;
   final Object? signUpError;
   final Object? loginError;
   final Object? socialError;
+  final Object? becomeTaskerError;
   int signUpCount = 0;
   int loginCount = 0;
   int googleCount = 0;
   int appleCount = 0;
+  int becomeTaskerCount = 0;
 
   @override
   Future<UserProfile?> build() async => initialUser;
+
+  @override
+  Future<void> becomeTasker() async {
+    becomeTaskerCount++;
+    if (becomeTaskerError != null) throw becomeTaskerError!;
+  }
 
   @override
   Future<void> signInWithGoogle({UserRole? role}) async {
@@ -109,6 +118,7 @@ class FakeAuthRepository implements AuthRepository {
   final TokenPair? oauthTokens;
   final UserProfile? meUser;
   int logoutCount = 0;
+  int becomeTaskerCount = 0;
   int refreshCount = 0;
   int forgotCount = 0;
   int resendCount = 0;
@@ -178,6 +188,9 @@ class FakeAuthRepository implements AuthRepository {
   }) async {
     lastResetToken = token;
   }
+
+  @override
+  Future<void> becomeTasker() async => becomeTaskerCount++;
 
   @override
   Future<void> logout(String? refreshToken) async => logoutCount++;

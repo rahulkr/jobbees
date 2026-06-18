@@ -29,6 +29,7 @@ import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/welcome_carousel_screen.dart';
 import '../../features/shell/screens/placeholder_screen.dart';
 import '../../features/verification/screens/abn_entry_screen.dart';
+import '../../features/verification/screens/become_tasker_screen.dart';
 import '../../features/verification/screens/verification_status_screen.dart';
 
 /// Canonical entry for unauthenticated users (returning users log in; the
@@ -156,6 +157,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/verify/abn',
         builder: (context, state) => const AbnEntryScreen(),
+      ),
+      GoRoute(
+        path: '/become-tasker',
+        builder: (context, state) => const BecomeTaskerScreen(),
       ),
       GoRoute(
         path: '/post',

@@ -108,7 +108,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             lastName: _lastName.text.trim(),
             role: widget.role,
           );
-      // Success: the router redirect takes over. Nothing to navigate here.
+      // Tasker-intent signups go straight to verification (the work side needs
+      // it); clients fall through to the router redirect → home.
+      if (mounted && widget.role == UserRole.tasker) context.go('/verify');
+      // Otherwise the router redirect takes over. Nothing to navigate here.
     } on AppError catch (error) {
       if (mounted) setState(() => _formError = error.message);
     } finally {

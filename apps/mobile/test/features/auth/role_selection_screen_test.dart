@@ -12,8 +12,8 @@ void main() {
   ) async {
     await tester.pumpWidget(const MaterialApp(home: RoleSelectionScreen()));
 
-    expect(find.text('Get a job done'), findsOneWidget);
-    expect(find.text('Earn as a tasker'), findsOneWidget);
+    expect(find.text('I want to hire'), findsOneWidget);
+    expect(find.text('I want to work'), findsOneWidget);
     expect(find.text("I'll decide later"), findsOneWidget);
     expect(find.text('Pick one to continue'), findsOneWidget);
   });
@@ -21,7 +21,7 @@ void main() {
   testWidgets('selecting a role relabels the continue CTA', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: RoleSelectionScreen()));
 
-    await tester.tap(find.text('Earn as a tasker'));
+    await tester.tap(find.text('I want to work'));
     await tester.pumpAndSettle();
 
     expect(find.text('Continue as a tasker'), findsOneWidget);
@@ -54,7 +54,7 @@ void main() {
       ProviderScope(child: MaterialApp.router(routerConfig: router)),
     );
 
-    await tester.tap(find.text('Earn as a tasker'));
+    await tester.tap(find.text('I want to work'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Continue as a tasker'));
     await tester.pumpAndSettle();

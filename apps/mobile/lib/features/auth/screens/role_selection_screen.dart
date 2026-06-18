@@ -41,14 +41,14 @@ const List<_RoleOption> _options = [
   _RoleOption(
     role: 'client',
     icon: LucideIcons.clipboardList,
-    title: 'Get a job done',
-    blurb: 'Post a task and hire a local tasker.',
+    title: 'I want to hire',
+    blurb: 'Post a job and hire a local tasker.',
   ),
   _RoleOption(
     role: 'tasker',
     icon: LucideIcons.hammer,
-    title: 'Earn as a tasker',
-    blurb: 'Find work and get paid for your skills.',
+    title: 'I want to work',
+    blurb: 'Find jobs and get paid. You can post too.',
   ),
 ];
 
@@ -96,10 +96,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           children: [
             const SizedBox(height: JSpacing.lg),
             const AuthHeader(
-              title: 'How will you start?',
+              title: 'What do you want to do?',
               subtitle:
-                  'You can do both later. This just sets up your first '
-                  'experience.',
+                  'You can switch later. Working takes a quick verification.',
             ),
             const SizedBox(height: JSpacing.xl),
             for (final option in _options) ...[
