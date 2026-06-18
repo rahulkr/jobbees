@@ -20,6 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/auth/auth_token.dart';
 import '../../../core/auth/token_storage.dart';
 import '../../../core/network/error_mapper.dart';
+import '../data/social_auth_service.dart';
 import '../models/auth_models.dart';
 import 'auth_providers.dart';
 
@@ -104,6 +105,41 @@ class AuthController extends AsyncNotifier<UserProfile?> {
   Future<void> _signOut() async {
     await _clearLocal();
     state = const AsyncData(null);
+  }
+
+  /// Google sign-in: opens the provider sheet, exchanges the ID token for a
+  /// session. A cancelled sheet is a no-op (no error); a genuine failure throws
+  /// [AppError] for the screen to render. [role] applies only on first signup.
+  Future<void> signInWithGoogle({UserRole? role}) => _social(
+    () => ref.read(socialAuthServiceProvider).signInWithGoogle(),
+    role,
+  );
+
+  Future<void> signInWithApple({UserRole? role}) => _social(
+    () => ref.read(socialAuthServiceProvider).signInWithApple(),
+    role,
+  );
+
+  Future<void> _social(
+    Future<SocialCredential?> Function() getCredential,
+    UserRole? role,
+  ) async {
+    try {
+      final credential = await getCredential();
+      if (credential == null) return; // user cancelled — nothing to do
+      final repo = ref.read(authRepositoryProvider);
+      final tokens = await repo.oauthLogin(
+        provider: credential.provider,
+        idToken: credential.idToken,
+        firstName: credential.firstName,
+        lastName: credential.lastName,
+        role: role,
+      );
+      await _persist(tokens);
+      state = AsyncData(await repo.fetchMe());
+    } catch (error) {
+      throw ErrorMapper.map(error);
+    }
   }
 
   Future<void> login({required String email, required String password}) async {

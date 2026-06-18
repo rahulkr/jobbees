@@ -23,6 +23,7 @@ import '../models/auth_models.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_error_banner.dart';
 import '../widgets/auth_header.dart';
+import '../widgets/social_auth_buttons.dart';
 
 /// Mirrors the backend SignupDto password rule (`@MinLength(10)`).
 const int _kMinPasswordLength = 10;
@@ -214,6 +215,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   loading: _submitting,
                   expanded: true,
                   size: JButtonSize.lg,
+                ),
+                const SizedBox(height: JSpacing.lg),
+                SocialAuthButtons(
+                  role: widget.role,
+                  onError: (message) => setState(
+                    () => _formError = message.isEmpty ? null : message,
+                  ),
                 ),
                 const SizedBox(height: JSpacing.base),
                 Row(

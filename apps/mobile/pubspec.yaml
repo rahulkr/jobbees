@@ -55,6 +55,8 @@ dependencies:
   shimmer: ^3.0.0
   shared_preferences: ^2.3.2 # local key-value store (onboarding "seen" flag; web → localStorage)
   flutter_secure_storage: ^9.2.2 # mobile token storage (iOS Keychain / Android Keystore); web uses cookies (ADR 006)
+  google_sign_in: ^6.2.1 # Google ID token for /auth/oauth/google (v6 stable API)
+  sign_in_with_apple: ^6.1.0 # Apple ID token for /auth/oauth/apple
 
 dev_dependencies:
   flutter_test:

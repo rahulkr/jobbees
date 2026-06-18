@@ -161,4 +161,30 @@ void main() {
       expect(tokens, isNull);
     },
   );
+
+  test(
+    'oauthLogin posts the id token + names to /auth/oauth/{provider}',
+    () async {
+      final adapter = _StubAdapter(
+        (_) => (
+          status: 200,
+          body: {'accessToken': 'access-4', 'refreshToken': 'refresh-4'},
+        ),
+      );
+
+      final tokens = await _repo(adapter).oauthLogin(
+        provider: 'apple',
+        idToken: 'apple-id-token',
+        firstName: 'Jordan',
+        lastName: 'Lee',
+      );
+
+      expect(adapter.lastRequest!.path, '/auth/oauth/apple');
+      expect(adapter.lastRequest!.headers['Idempotency-Key'], 'idem-123');
+      final body = adapter.lastRequest!.data as Map<String, dynamic>;
+      expect(body['idToken'], 'apple-id-token');
+      expect(body['firstName'], 'Jordan');
+      expect(tokens!.accessToken, 'access-4');
+    },
+  );
 }
