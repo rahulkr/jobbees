@@ -110,4 +110,55 @@ void main() {
     expect(me.fullName, 'Jordan Lee');
     expect(me.role.name, 'tasker');
   });
+
+  test(
+    'login posts credentials with an Idempotency-Key and parses tokens',
+    () async {
+      final adapter = _StubAdapter(
+        (_) => (
+          status: 200,
+          body: {'accessToken': 'access-2', 'refreshToken': 'refresh-2'},
+        ),
+      );
+
+      final tokens = await _repo(
+        adapter,
+      ).login(email: 'jordan@example.com', password: 'a-strong-passphrase');
+
+      expect(adapter.lastRequest!.path, '/auth/login');
+      expect(adapter.lastRequest!.headers['Idempotency-Key'], 'idem-123');
+      expect(tokens!.accessToken, 'access-2');
+    },
+  );
+
+  test('refresh sends the refresh token and parses the new pair', () async {
+    final adapter = _StubAdapter(
+      (_) => (
+        status: 200,
+        body: {'accessToken': 'access-3', 'refreshToken': 'refresh-3'},
+      ),
+    );
+
+    final tokens = await _repo(adapter).refresh('refresh-2');
+
+    expect(adapter.lastRequest!.path, '/auth/refresh');
+    final body = adapter.lastRequest!.data as Map<String, dynamic>;
+    expect(body['refreshToken'], 'refresh-2');
+    expect(tokens!.accessToken, 'access-3');
+  });
+
+  test(
+    'refresh omits the token on web (cookie-based) and returns null',
+    () async {
+      final adapter = _StubAdapter(
+        (_) => (status: 200, body: {'csrfToken': 'z'}),
+      );
+
+      final tokens = await _repo(adapter).refresh(null);
+
+      final body = adapter.lastRequest!.data as Map<String, dynamic>;
+      expect(body.containsKey('refreshToken'), isFalse);
+      expect(tokens, isNull);
+    },
+  );
 }

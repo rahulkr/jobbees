@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/providers/auth_controller.dart';
+import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/signup_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/onboarding/providers/onboarding_providers.dart';
@@ -23,12 +24,16 @@ import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/welcome_carousel_screen.dart';
 import '../../features/shell/screens/placeholder_screen.dart';
 
-/// Where unauthenticated users are sent. The login screen lands in the next
-/// Sprint 2 PR; until then signup is the sole auth entry point.
-const String kSignInRoute = '/auth/signup';
+/// Canonical entry for unauthenticated users (returning users log in; the
+/// screen links across to signup). First-run users land on signup straight off
+/// the welcome carousel instead — see the redirect below.
+const String kSignInRoute = '/auth/login';
+
+/// First-run destination after the welcome carousel (brand-new users sign up).
+const String kSignUpRoute = '/auth/signup';
 
 /// Routes reachable while signed out.
-const Set<String> _publicRoutes = {'/auth/signup', '/auth/login'};
+const Set<String> _publicRoutes = {'/auth/login', '/auth/signup'};
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Re-run redirects when onboarding or auth state changes WITHOUT rebuilding
@@ -64,10 +69,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Hold routing decisions until the session-restore probe settles.
       if (restoring) return null;
 
-      // First-run carousel.
+      // First-run carousel → sign up (brand-new users); returning users log in.
       if (!welcomeSeen && loc != '/welcome') return '/welcome';
       if (welcomeSeen && loc == '/welcome') {
-        return authed ? '/' : kSignInRoute;
+        return authed ? '/' : kSignUpRoute;
       }
 
       // Auth gate: protected routes require a session; auth routes bounce home
@@ -86,6 +91,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/welcome',
         builder: (context, state) => const WelcomeCarouselScreen(),
+      ),
+      GoRoute(
+        path: '/auth/login',
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: '/auth/signup',

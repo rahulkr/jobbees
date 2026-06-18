@@ -1,15 +1,16 @@
 // ignore_for_file: public_member_api_docs
 
-/// Email/password signup (inventory row 2).
+/// Email/password login (inventory row 5).
 ///
-/// Creates a CLIENT/TASKER account against the Sprint 1 `/auth/signup` backend.
-/// On success the [AuthController] flips the session to authenticated and the
-/// router redirects home — this screen never navigates itself (CLAUDE.md rule
-/// 5). Phone OTP, role selection, and Google/Apple sign-in are separate rows.
+/// Authenticates against the Sprint 1 `/auth/login` backend, reusing the
+/// session foundation from the signup PR. On success [AuthController] flips the
+/// session and the router redirects home — this screen never navigates itself
+/// (CLAUDE.md rule 5). Biometric re-login (row 9), forgot-password (row 10) and
+/// Google/Apple (rows 6/7) are separate rows.
 ///
-/// Four states (CLAUDE.md rule 3): content is the form; loading is the in-flight
-/// submit (button spinner, inputs disabled); error renders inline (field-level
-/// validation + a server-error banner). There is no async "empty" state.
+/// Four states (rule 3): content is the form; loading is the in-flight submit;
+/// error renders inline (field validation + a server-error banner). No async
+/// "empty" state.
 library;
 
 import 'package:flutter/material.dart';
@@ -22,24 +23,17 @@ import '../../../ui/ui.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_error_banner.dart';
 
-/// Mirrors the backend SignupDto password rule (`@MinLength(10)`).
-const int _kMinPasswordLength = 10;
-
-class SignupScreen extends ConsumerStatefulWidget {
-  const SignupScreen({super.key});
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  ConsumerState<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _SignupScreenState extends ConsumerState<SignupScreen> {
-  final _firstName = TextEditingController();
-  final _lastName = TextEditingController();
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
 
-  String? _firstNameError;
-  String? _lastNameError;
   String? _emailError;
   String? _passwordError;
   String? _formError;
@@ -49,8 +43,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   void dispose() {
-    _firstName.dispose();
-    _lastName.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();
@@ -58,26 +50,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   bool _validate() {
     final email = _email.text.trim();
-    // Pragmatic check — the API is the source of truth on email validity.
     final emailLooksValid = RegExp(
       r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
     ).hasMatch(email);
     setState(() {
-      _firstNameError = _firstName.text.trim().isEmpty
-          ? 'Enter your first name'
-          : null;
-      _lastNameError = _lastName.text.trim().isEmpty
-          ? 'Enter your last name'
-          : null;
       _emailError = emailLooksValid ? null : 'Enter a valid email address';
-      _passwordError = _password.text.length < _kMinPasswordLength
-          ? 'Use at least $_kMinPasswordLength characters'
-          : null;
+      _passwordError = _password.text.isEmpty ? 'Enter your password' : null;
     });
-    return _firstNameError == null &&
-        _lastNameError == null &&
-        _emailError == null &&
-        _passwordError == null;
+    return _emailError == null && _passwordError == null;
   }
 
   Future<void> _submit() async {
@@ -93,13 +73,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     try {
       await ref
           .read(authControllerProvider.notifier)
-          .signUp(
-            email: _email.text.trim(),
-            password: _password.text,
-            firstName: _firstName.text.trim(),
-            lastName: _lastName.text.trim(),
-          );
-      // Success: the router redirect takes over. Nothing to navigate here.
+          .login(email: _email.text.trim(), password: _password.text);
+      // Success: the router redirect takes over.
     } on AppError catch (error) {
       if (mounted) setState(() => _formError = error.message);
     } finally {
@@ -133,14 +108,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               children: [
                 const SizedBox(height: JSpacing.lg),
                 Text(
-                  'Create your account',
+                  'Welcome back',
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: JSpacing.sm),
                 Text(
-                  'Join JOBBees to post jobs or earn as a tasker.',
+                  'Log in to continue.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -150,24 +125,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   AuthErrorBanner(message: _formError!),
                   const SizedBox(height: JSpacing.base),
                 ],
-                JTextField(
-                  label: 'First name',
-                  controller: _firstName,
-                  enabled: !_submitting,
-                  errorText: _firstNameError,
-                  textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.givenName],
-                ),
-                const SizedBox(height: JSpacing.base),
-                JTextField(
-                  label: 'Last name',
-                  controller: _lastName,
-                  enabled: !_submitting,
-                  errorText: _lastNameError,
-                  textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.familyName],
-                ),
-                const SizedBox(height: JSpacing.base),
                 JTextField(
                   label: 'Email',
                   controller: _email,
@@ -184,10 +141,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   controller: _password,
                   enabled: !_submitting,
                   errorText: _passwordError,
-                  helperText: 'At least $_kMinPasswordLength characters',
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
-                  autofillHints: const [AutofillHints.newPassword],
+                  autofillHints: const [AutofillHints.password],
                   onSubmitted: (_) => _submit(),
                   suffixIcon: IconButton(
                     onPressed: _submitting
@@ -207,7 +163,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 const SizedBox(height: JSpacing.xl),
                 JButton.primary(
-                  label: 'Create account',
+                  label: 'Log in',
                   onPressed: _submitting ? null : _submit,
                   loading: _submitting,
                   expanded: true,
@@ -218,16 +174,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account?',
+                      "Don't have an account?",
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     JButton.ghost(
-                      label: 'Log in',
+                      label: 'Sign up',
                       onPressed: _submitting
                           ? null
-                          : () => context.go('/auth/login'),
+                          : () => context.go('/auth/signup'),
                       size: JButtonSize.sm,
                     ),
                   ],

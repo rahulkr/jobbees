@@ -27,6 +27,10 @@ final authControllerProvider =
     AsyncNotifierProvider<AuthController, UserProfile?>(AuthController.new);
 
 class AuthController extends AsyncNotifier<UserProfile?> {
+  /// In-flight refresh, shared so concurrent 401s trigger a single round-trip
+  /// (single-flight). Reset when it settles.
+  Future<bool>? _refreshing;
+
   @override
   Future<UserProfile?> build() async {
     // Restore a mobile session from the keychain (no-op/null on web, which
@@ -46,13 +50,70 @@ class AuthController extends AsyncNotifier<UserProfile?> {
       return null;
     }
 
+    final repo = ref.read(authRepositoryProvider);
     try {
-      return await ref.read(authRepositoryProvider).fetchMe();
+      return await repo.fetchMe();
     } catch (_) {
-      // Stored access token expired or invalid. Silent refresh lands with the
-      // login screen PR; for now a failed probe means signed out.
+      // Stored access token likely expired — try one refresh before giving up
+      // (15-min access tokens mean returning users almost always land here).
+      if (await _tryRefresh(stored?.refreshToken)) {
+        try {
+          return await repo.fetchMe();
+        } catch (_) {
+          /* fall through to signed-out */
+        }
+      }
       await _clearLocal();
       return null;
+    }
+  }
+
+  /// Refreshes the session, coalescing concurrent callers onto one request.
+  /// Returns true if a fresh access token is now in place. On failure the
+  /// session is cleared and `state` flips to signed-out.
+  Future<bool> refreshSession() {
+    return _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
+  }
+
+  Future<bool> _doRefresh() async {
+    final stored = await _safeRead();
+    return _tryRefresh(stored?.refreshToken, signOutOnFailure: true);
+  }
+
+  Future<bool> _tryRefresh(
+    String? refreshToken, {
+    bool signOutOnFailure = false,
+  }) async {
+    // Mobile needs a stored refresh token; web sends none (cookie-based).
+    if (!kIsWeb && refreshToken == null) {
+      if (signOutOnFailure) await _signOut();
+      return false;
+    }
+    try {
+      final tokens = await ref
+          .read(authRepositoryProvider)
+          .refresh(refreshToken);
+      await _persist(tokens);
+      return true;
+    } catch (_) {
+      if (signOutOnFailure) await _signOut();
+      return false;
+    }
+  }
+
+  Future<void> _signOut() async {
+    await _clearLocal();
+    state = const AsyncData(null);
+  }
+
+  Future<void> login({required String email, required String password}) async {
+    final repo = ref.read(authRepositoryProvider);
+    try {
+      final tokens = await repo.login(email: email, password: password);
+      await _persist(tokens);
+      state = AsyncData(await repo.fetchMe());
+    } catch (error) {
+      throw ErrorMapper.map(error);
     }
   }
 
@@ -104,5 +165,13 @@ class AuthController extends AsyncNotifier<UserProfile?> {
   Future<void> _clearLocal() async {
     ref.read(accessTokenProvider.notifier).clear();
     await ref.read(tokenStorageProvider).clear();
+  }
+
+  Future<StoredTokens?> _safeRead() async {
+    try {
+      return await ref.read(tokenStorageProvider).read();
+    } catch (_) {
+      return null;
+    }
   }
 }
