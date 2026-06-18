@@ -12,6 +12,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -83,14 +84,14 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
           child: switch (_status) {
             _Status.verifying => const _Verifying(),
             _Status.verified => AuthNotice(
-              icon: Icons.verified_outlined,
+              icon: LucideIcons.badgeCheck,
               title: 'Email verified',
               body: 'Your email address is confirmed.',
               ctaLabel: 'Continue',
               onCta: _continue,
             ),
             _Status.failed => AuthNotice(
-              icon: Icons.link_off,
+              icon: LucideIcons.unlink,
               title: 'This link has expired',
               body:
                   'Verification links are single-use and time-limited. Sign in '

@@ -14,6 +14,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
@@ -31,21 +32,21 @@ class _Slide {
 
 const List<_Slide> _slides = [
   _Slide(
-    icon: Icons.assignment_outlined,
+    icon: LucideIcons.clipboardList,
     title: 'Post a job in minutes',
     body:
         'Describe what you need done. Local taskers send you offers, and you '
         'pick who does it.',
   ),
   _Slide(
-    icon: Icons.handyman_outlined,
+    icon: LucideIcons.hammer,
     title: 'Earn on your terms',
     body:
         'Become a tasker, choose the jobs that suit you, and get paid securely '
         'once the work is done.',
   ),
   _Slide(
-    icon: Icons.verified_user_outlined,
+    icon: LucideIcons.shieldCheck,
     title: 'Safe and local',
     body:
         'Verified taskers, secure payments, and support based right here in '

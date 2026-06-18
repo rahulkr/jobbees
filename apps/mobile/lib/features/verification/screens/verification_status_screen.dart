@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -72,13 +73,17 @@ class _AbnCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final (IconData icon, Color tint, String label) = switch (status) {
-      final s when s.isVerified => (Icons.verified, scheme.primary, 'Verified'),
+      final s when s.isVerified => (
+        LucideIcons.badgeCheck,
+        scheme.primary,
+        'Verified',
+      ),
       final s when s.isPending => (
-        Icons.hourglass_top,
+        LucideIcons.hourglass,
         scheme.tertiary,
         'Pending',
       ),
-      _ => (Icons.business_outlined, scheme.onSurfaceVariant, 'Not added'),
+      _ => (LucideIcons.building2, scheme.onSurfaceVariant, 'Not added'),
     };
 
     return JCard(
@@ -190,7 +195,7 @@ class _ErrorState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: JSpacing.xxl),
-          Icon(Icons.cloud_off, size: 36, color: scheme.onSurfaceVariant),
+          Icon(LucideIcons.cloudOff, size: 36, color: scheme.onSurfaceVariant),
           const SizedBox(height: JSpacing.base),
           Text(
             "Couldn't load your verification status.",

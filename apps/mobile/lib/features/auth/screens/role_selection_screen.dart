@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/responsive/responsive_layout.dart';
@@ -39,13 +40,13 @@ class _RoleOption {
 const List<_RoleOption> _options = [
   _RoleOption(
     role: 'client',
-    icon: Icons.assignment_outlined,
+    icon: LucideIcons.clipboardList,
     title: 'Get a job done',
     blurb: 'Post a task and hire a local tasker.',
   ),
   _RoleOption(
     role: 'tasker',
-    icon: Icons.handyman_outlined,
+    icon: LucideIcons.hammer,
     title: 'Earn as a tasker',
     blurb: 'Find work and get paid for your skills.',
   ),
@@ -212,7 +213,7 @@ class _RoleCard extends StatelessWidget {
                 scale: selected ? 1 : 0,
                 duration: JMotion.pressFeedback,
                 curve: JMotion.spring,
-                child: Icon(Icons.check_circle, color: scheme.primary),
+                child: Icon(LucideIcons.circleCheck, color: scheme.primary),
               ),
             ],
           ),
