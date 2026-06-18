@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -147,11 +148,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             onPressed: _submitting
                 ? null
                 : () => setState(() => _obscure = !_obscure),
-            icon: Icon(
-              _obscure
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
-            ),
+            icon: Icon(_obscure ? LucideIcons.eye : LucideIcons.eyeOff),
             tooltip: _obscure ? 'Show password' : 'Hide password',
           ),
         ),
@@ -179,7 +176,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   }
 
   Widget _success(BuildContext context) => _Notice(
-    icon: Icons.check_circle_outline,
+    icon: LucideIcons.circleCheck,
     title: 'Password updated',
     body: 'Log in with your new password.',
     cta: 'Log in',
@@ -187,7 +184,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   );
 
   Widget _invalidLink(BuildContext context) => _Notice(
-    icon: Icons.link_off,
+    icon: LucideIcons.unlink,
     title: 'This link has expired',
     body: 'Reset links are single-use and time-limited. Request a new one.',
     cta: 'Request a new link',

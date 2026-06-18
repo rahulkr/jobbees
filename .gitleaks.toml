@@ -1,0 +1,15 @@
+# Gitleaks configuration.
+#
+# Extends the full default ruleset (so real secret detection is unchanged) and
+# only allowlists generated build manifests whose high-entropy hashes — CocoaPods
+# spec checksums, Xcode object IDs — trip the default `generic-api-key` rule.
+# These files contain no secrets; they are tool-generated lockfiles.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Generated iOS build manifests (CocoaPods checksums / Xcode hashes) are not secrets"
+paths = [
+  '''apps/mobile/ios/Podfile\.lock''',
+  '''apps/mobile/ios/Runner\.xcodeproj/project\.pbxproj''',
+]

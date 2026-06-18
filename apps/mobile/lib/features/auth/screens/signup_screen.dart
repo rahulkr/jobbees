@@ -13,6 +13,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -199,9 +200,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             () => _obscurePassword = !_obscurePassword,
                           ),
                     icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+                      _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
                     ),
                     tooltip: _obscurePassword
                         ? 'Show password'
@@ -278,7 +277,7 @@ class _RoleChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isTasker ? Icons.handyman_outlined : Icons.assignment_outlined,
+            isTasker ? LucideIcons.hammer : LucideIcons.clipboardList,
             size: 16,
             color: scheme.onPrimaryContainer,
           ),

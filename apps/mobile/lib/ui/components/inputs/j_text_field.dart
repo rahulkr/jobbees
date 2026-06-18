@@ -88,7 +88,7 @@ class _JTextFieldState extends State<JTextField> {
         ? scheme.error
         : _focused
         ? scheme.primary
-        : Colors.transparent;
+        : scheme.outlineVariant;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,22 +110,15 @@ class _JTextFieldState extends State<JTextField> {
           curve: JMotion.easeOut,
           height: 56,
           decoration: BoxDecoration(
+            // Light, calm input fill (dark-50) per docs/brand UI-PRINCIPLES
+            // § Forms; a hairline outline gives definition, primary on focus.
             color: widget.enabled
-                ? scheme.surfaceContainerHighest
-                : scheme.surfaceContainer,
+                ? scheme.surfaceContainerLow
+                : scheme.surfaceContainerHigh,
             borderRadius: JRadius.buttonMdAll,
-            border: Border.all(color: borderColor, width: 2),
-            // Soft focus halo in the accent (or error) colour.
-            boxShadow: _focused
-                ? [
-                    BoxShadow(
-                      color: (hasError ? scheme.error : scheme.primary)
-                          .withValues(alpha: 0.16),
-                      blurRadius: 0,
-                      spreadRadius: 3,
-                    ),
-                  ]
-                : null,
+            // Single, clean border: hairline at rest, 2px primary on focus.
+            // No glow/shadow — it reads as a double outline.
+            border: Border.all(color: borderColor, width: _focused ? 2 : 1),
           ),
           padding: const EdgeInsets.symmetric(horizontal: JSpacing.base),
           child: Row(
@@ -154,7 +147,19 @@ class _JTextFieldState extends State<JTextField> {
                   decoration: InputDecoration(
                     hintText: widget.hintText,
                     hintStyle: TextStyle(color: scheme.onSurfaceVariant),
+                    // Null EVERY border slot: the global inputDecorationTheme
+                    // defines focused/enabled/error borders, and leaving them
+                    // unset lets the theme draw a second ring on top of this
+                    // widget's own border. The field's border is the
+                    // AnimatedContainer above.
                     border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    isCollapsed: true,
+                    filled: false,
                     counterText: '',
                     contentPadding: EdgeInsets.zero,
                   ),

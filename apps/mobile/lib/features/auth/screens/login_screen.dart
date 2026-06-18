@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -145,9 +146,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             () => _obscurePassword = !_obscurePassword,
                           ),
                     icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+                      _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
                     ),
                     tooltip: _obscurePassword
                         ? 'Show password'

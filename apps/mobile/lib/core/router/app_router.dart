@@ -91,9 +91,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Hold routing decisions until the session-restore probe settles.
       if (restoring) return null;
 
-      // First-run carousel → sign up (brand-new users); returning users log in.
-      if (!welcomeSeen && loc != '/welcome') return '/welcome';
-      if (welcomeSeen && loc == '/welcome') {
+      // First-run: the welcome carousel comes before everything (including the
+      // auth gate). Pin to /welcome until it's seen — but don't fight once we're
+      // already there, or it loops against the auth gate below.
+      if (!welcomeSeen) {
+        return loc == '/welcome' ? null : '/welcome';
+      }
+
+      // Seen users never sit on the carousel.
+      if (loc == '/welcome') {
         return authed ? '/' : kSignUpRoute;
       }
 

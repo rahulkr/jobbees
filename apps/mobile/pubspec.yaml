@@ -57,6 +57,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2 # mobile token storage (iOS Keychain / Android Keystore); web uses cookies (ADR 006)
   google_sign_in: ^6.2.1 # Google ID token for /auth/oauth/google (v6 stable API)
   sign_in_with_apple: ^6.1.0 # Apple ID token for /auth/oauth/apple
+  lucide_icons_flutter: ^3.1.14+2
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,18 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   widgetbook_generator: ^3.21.0
   build_runner: ^2.15.0
+  flutter_launcher_icons: ^0.14.1 # generates iOS/Android launcher icons
+
+# Launcher icon generation: `dart run flutter_launcher_icons`. iOS icons can't
+# have alpha, so the transparent logo is flattened onto white.
+flutter_launcher_icons:
+  image_path: "assets/icon.png"
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#FFFFFF"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -81,6 +94,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

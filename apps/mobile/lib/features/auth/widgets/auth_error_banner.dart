@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../ui/ui.dart';
 
@@ -24,7 +25,11 @@ class AuthErrorBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, size: 20, color: scheme.onErrorContainer),
+          Icon(
+            LucideIcons.circleAlert,
+            size: 20,
+            color: scheme.onErrorContainer,
+          ),
           const SizedBox(width: JSpacing.md),
           Expanded(
             child: Text(

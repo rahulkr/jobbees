@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -155,11 +156,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             color: scheme.primaryContainer,
             borderRadius: JRadius.heroAll,
           ),
-          child: Icon(
-            Icons.mark_email_read_outlined,
-            size: 36,
-            color: scheme.primary,
-          ),
+          child: Icon(LucideIcons.mailCheck, size: 36, color: scheme.primary),
         ),
         const SizedBox(height: JSpacing.lg),
         Text(

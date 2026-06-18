@@ -2,15 +2,13 @@
 
 /// Branded header for the signed-out auth funnel (signup / login / role).
 ///
-/// A gradient app-mark above the screen title + optional subtitle, so every
-/// auth screen opens with a consistent, on-brand identity rather than a bare
-/// text title. The gradient lives on the mark only — a hero element — per
-/// docs/brand/UI-PRINCIPLES.md (gradients on icons/hero, never body text).
+/// The JOBBees logo above the screen title + optional subtitle, so every auth
+/// screen opens with a consistent, on-brand identity rather than a bare text
+/// title.
 library;
 
 import 'package:flutter/material.dart';
 
-import '../../../theme/colors.dart';
 import '../../../ui/ui.dart';
 
 class AuthHeader extends StatelessWidget {
@@ -25,21 +23,11 @@ class AuthHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
+        Image.asset(
+          'assets/icon.png',
           width: 56,
           height: 56,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            gradient: gradientPrimary,
-            borderRadius: JRadius.heroAll,
-          ),
-          child: Text(
-            'J',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.onPrimary,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
+          filterQuality: FilterQuality.medium,
         ),
         const SizedBox(height: JSpacing.lg),
         Text(
