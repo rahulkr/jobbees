@@ -4,30 +4,41 @@
 ///
 /// Web-friendly URL paths mirror the deep-link surface the mobile cross-cutting
 /// work adds in Sprint 2. The clean-URL strategy ([usePathUrlStrategy]) is set
-/// in `bootstrap.dart`; here we declare the routes plus the first-run redirect
-/// (splash → welcome carousel → home). Auth-driven redirects (CLAUDE.md rule 5)
-/// are layered on when the login screen lands later in Sprint 2.
+/// in `bootstrap.dart`; here we declare the routes plus the redirect gate that
+/// sequences cold launch: splash → (first run) welcome carousel → auth → home.
+///
+/// Navigation is state-driven (CLAUDE.md rule 5): screens flip onboarding/auth
+/// state and this redirect reacts, rather than pushing routes from buttons.
 library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/providers/auth_controller.dart';
+import '../../features/auth/screens/signup_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/onboarding/providers/onboarding_providers.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/welcome_carousel_screen.dart';
 import '../../features/shell/screens/placeholder_screen.dart';
 
+/// Where unauthenticated users are sent. The login screen lands in the next
+/// Sprint 2 PR; until then signup is the sole auth entry point.
+const String kSignInRoute = '/auth/signup';
+
+/// Routes reachable while signed out.
+const Set<String> _publicRoutes = {'/auth/signup', '/auth/login'};
+
 final routerProvider = Provider<GoRouter>((ref) {
-  // Re-run redirects when onboarding state changes (splash finishing, welcome
-  // marked seen) WITHOUT rebuilding the GoRouter — rebuilding would drop the
-  // navigation stack and browser history.
+  // Re-run redirects when onboarding or auth state changes WITHOUT rebuilding
+  // the GoRouter — rebuilding would drop the navigation stack + browser history.
   final refresh = ValueNotifier<int>(0);
   ref.onDispose(refresh.dispose);
   ref
     ..listen(splashCompleteProvider, (_, _) => refresh.value++)
-    ..listen(welcomeSeenProvider, (_, _) => refresh.value++);
+    ..listen(welcomeSeenProvider, (_, _) => refresh.value++)
+    ..listen(authControllerProvider, (_, _) => refresh.value++);
 
   return GoRouter(
     initialLocation: '/splash',
@@ -36,20 +47,34 @@ final routerProvider = Provider<GoRouter>((ref) {
       final loc = state.matchedLocation;
       final splashDone = ref.read(splashCompleteProvider);
       final welcomeSeen = ref.read(welcomeSeenProvider);
+      final auth = ref.read(authControllerProvider);
+      final restoring = auth.isLoading;
+      final authed = auth.valueOrNull != null;
 
-      // Splash only gates the cold-launch entry; once its branding moment is
-      // done, move on to the carousel (first run) or home. Deep links to other
-      // routes are never bounced through splash.
+      // Splash gates only the cold-launch entry, and holds until BOTH the
+      // branding moment and the session-restore probe finish — so we route
+      // straight to the right place without an auth→home flash. Deep links to
+      // other routes are never bounced through splash.
       if (loc == '/splash') {
-        if (!splashDone) return null;
-        return welcomeSeen ? '/' : '/welcome';
+        if (!splashDone || restoring) return null;
+        if (!welcomeSeen) return '/welcome';
+        return authed ? '/' : kSignInRoute;
       }
 
-      // First-run gate: send users who haven't seen the carousel to it.
-      if (!welcomeSeen && loc == '/') return '/welcome';
+      // Hold routing decisions until the session-restore probe settles.
+      if (restoring) return null;
 
-      // Don't let the carousel reappear once it's been seen.
-      if (welcomeSeen && loc == '/welcome') return '/';
+      // First-run carousel.
+      if (!welcomeSeen && loc != '/welcome') return '/welcome';
+      if (welcomeSeen && loc == '/welcome') {
+        return authed ? '/' : kSignInRoute;
+      }
+
+      // Auth gate: protected routes require a session; auth routes bounce home
+      // once signed in.
+      final isPublic = _publicRoutes.contains(loc);
+      if (!authed && !isPublic) return kSignInRoute;
+      if (authed && isPublic) return '/';
 
       return null;
     },
@@ -62,12 +87,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/welcome',
         builder: (context, state) => const WelcomeCarouselScreen(),
       ),
-      GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
       GoRoute(
         path: '/auth/signup',
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Sign up', route: '/auth/signup'),
+        builder: (context, state) => const SignupScreen(),
       ),
+      GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
       GoRoute(
         path: '/post',
         builder: (context, state) =>
