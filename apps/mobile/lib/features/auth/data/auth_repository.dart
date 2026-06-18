@@ -46,6 +46,30 @@ class AuthRepository {
     return UserProfile.fromJson(res.data!);
   }
 
+  Future<TokenPair?> login({
+    required String email,
+    required String password,
+  }) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/auth/login',
+      data: {'email': email, 'password': password},
+      options: _idempotent(),
+    );
+    return _tokensOrNull(res.data);
+  }
+
+  /// Exchanges a refresh token for a fresh pair. Mobile passes [refreshToken];
+  /// web sends nothing (the API reads its HttpOnly `jb_refresh` cookie) and the
+  /// returned pair is null because new tokens come back as cookies.
+  Future<TokenPair?> refresh(String? refreshToken) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/auth/refresh',
+      data: {if (refreshToken != null) 'refreshToken': refreshToken},
+      options: _idempotent(),
+    );
+    return _tokensOrNull(res.data);
+  }
+
   Future<void> logout(String? refreshToken) async {
     await _dio.post<void>(
       '/auth/logout',

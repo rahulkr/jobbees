@@ -19,11 +19,13 @@ const testUser = UserProfile(
 /// An [AuthController] whose session state is fixed and whose [signUp] is
 /// recorded — no network, no keychain.
 class FakeAuthController extends AuthController {
-  FakeAuthController({this.initialUser, this.signUpError});
+  FakeAuthController({this.initialUser, this.signUpError, this.loginError});
 
   final UserProfile? initialUser;
   final Object? signUpError;
+  final Object? loginError;
   int signUpCount = 0;
+  int loginCount = 0;
 
   @override
   Future<UserProfile?> build() async => initialUser;
@@ -38,6 +40,13 @@ class FakeAuthController extends AuthController {
   }) async {
     signUpCount++;
     if (signUpError != null) throw signUpError!;
+    state = const AsyncData(testUser);
+  }
+
+  @override
+  Future<void> login({required String email, required String password}) async {
+    loginCount++;
+    if (loginError != null) throw loginError!;
     state = const AsyncData(testUser);
   }
 }
@@ -63,11 +72,19 @@ class InMemoryTokenStorage implements TokenStorage {
 
 /// A scriptable [AuthRepository] fake.
 class FakeAuthRepository implements AuthRepository {
-  FakeAuthRepository({this.signupTokens, this.meUser});
+  FakeAuthRepository({
+    this.signupTokens,
+    this.loginTokens,
+    this.refreshTokens,
+    this.meUser,
+  });
 
   final TokenPair? signupTokens;
+  final TokenPair? loginTokens;
+  final TokenPair? refreshTokens;
   final UserProfile? meUser;
   int logoutCount = 0;
+  int refreshCount = 0;
 
   @override
   String Function() get newIdempotencyKey =>
@@ -81,6 +98,18 @@ class FakeAuthRepository implements AuthRepository {
     required String lastName,
     UserRole? role,
   }) async => signupTokens;
+
+  @override
+  Future<TokenPair?> login({
+    required String email,
+    required String password,
+  }) async => loginTokens;
+
+  @override
+  Future<TokenPair?> refresh(String? refreshToken) async {
+    refreshCount++;
+    return refreshTokens;
+  }
 
   @override
   Future<UserProfile> fetchMe() async {

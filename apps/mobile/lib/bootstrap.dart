@@ -8,7 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'core/network/api_client.dart';
 import 'core/router/url_strategy.dart';
+import 'features/auth/providers/auth_controller.dart';
 import 'features/onboarding/providers/onboarding_providers.dart';
 
 Future<void> bootstrap() async {
@@ -26,7 +28,15 @@ Future<void> bootstrap() async {
 
   runApp(
     ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        // Let the network layer's 401-retry delegate to AuthController without
+        // `core` importing the auth feature (composition wired here).
+        sessionRefresherProvider.overrideWith(
+          (ref) =>
+              () => ref.read(authControllerProvider.notifier).refreshSession(),
+        ),
+      ],
       child: const JobbeesApp(),
     ),
   );

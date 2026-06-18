@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth/auth_token.dart';
+import 'auth_refresh_interceptor.dart';
 import 'surface_interceptor.dart';
 import 'web_credentials.dart';
 
@@ -19,6 +20,15 @@ import 'web_credentials.dart';
 const String kApiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
   defaultValue: 'http://localhost:3000',
+);
+
+/// Refreshes the session on a 401 and reports whether a fresh token is now in
+/// place. Defaults to "cannot refresh"; the auth layer overrides this in
+/// `bootstrap()` to delegate to AuthController, keeping `core` free of a
+/// feature dependency.
+final sessionRefresherProvider = Provider<Future<bool> Function()>(
+  (ref) =>
+      () async => false,
 );
 
 final dioProvider = Provider<Dio>((ref) {
@@ -34,6 +44,12 @@ final dioProvider = Provider<Dio>((ref) {
   enableWebCredentials(dio);
   dio.interceptors.add(
     SurfaceInterceptor(readAccessToken: () => ref.read(accessTokenProvider)),
+  );
+  dio.interceptors.add(
+    AuthRefreshInterceptor(
+      dio: dio,
+      refreshSession: () => ref.read(sessionRefresherProvider)(),
+    ),
   );
 
   return dio;
