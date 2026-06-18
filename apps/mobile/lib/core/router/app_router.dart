@@ -15,8 +15,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/models/auth_models.dart';
 import '../../features/auth/providers/auth_controller.dart';
 import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/screens/role_selection_screen.dart';
 import '../../features/auth/screens/signup_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/onboarding/providers/onboarding_providers.dart';
@@ -29,11 +31,19 @@ import '../../features/shell/screens/placeholder_screen.dart';
 /// the welcome carousel instead — see the redirect below.
 const String kSignInRoute = '/auth/login';
 
-/// First-run destination after the welcome carousel (brand-new users sign up).
-const String kSignUpRoute = '/auth/signup';
+/// First-run destination after the welcome carousel: brand-new users pick a
+/// role, which carries into signup.
+const String kSignUpRoute = '/auth/role';
 
 /// Routes reachable while signed out.
-const Set<String> _publicRoutes = {'/auth/login', '/auth/signup'};
+const Set<String> _publicRoutes = {'/auth/login', '/auth/role', '/auth/signup'};
+
+/// Maps the `?role=` signup query param to a [UserRole] (absent → decide later).
+UserRole? _roleFromQuery(String? value) => switch (value) {
+  'client' => UserRole.client,
+  'tasker' => UserRole.tasker,
+  _ => null,
+};
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Re-run redirects when onboarding or auth state changes WITHOUT rebuilding
@@ -97,8 +107,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
+        path: '/auth/role',
+        builder: (context, state) => const RoleSelectionScreen(),
+      ),
+      GoRoute(
         path: '/auth/signup',
-        builder: (context, state) => const SignupScreen(),
+        builder: (context, state) => SignupScreen(
+          role: _roleFromQuery(state.uri.queryParameters['role']),
+        ),
       ),
       GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
       GoRoute(

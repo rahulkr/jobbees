@@ -19,6 +19,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
+import '../models/auth_models.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_error_banner.dart';
 
@@ -26,7 +27,11 @@ import '../widgets/auth_error_banner.dart';
 const int _kMinPasswordLength = 10;
 
 class SignupScreen extends ConsumerStatefulWidget {
-  const SignupScreen({super.key});
+  const SignupScreen({this.role, super.key});
+
+  /// Chosen on the role-selection screen and carried through signup. Null means
+  /// "decide later" — the backend defaults to CLIENT.
+  final UserRole? role;
 
   @override
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
@@ -98,6 +103,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             password: _password.text,
             firstName: _firstName.text.trim(),
             lastName: _lastName.text.trim(),
+            role: widget.role,
           );
       // Success: the router redirect takes over. Nothing to navigate here.
     } on AppError catch (error) {
@@ -145,6 +151,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
+                if (widget.role != null) ...[
+                  const SizedBox(height: JSpacing.base),
+                  _RoleChip(role: widget.role!),
+                ],
                 const SizedBox(height: JSpacing.xl),
                 if (_formError != null) ...[
                   AuthErrorBanner(message: _formError!),
@@ -236,6 +246,57 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Shows which role the account is being created as, with a quick way back to
+/// the role picker to change it.
+class _RoleChip extends StatelessWidget {
+  const _RoleChip({required this.role});
+
+  final UserRole role;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isTasker = role == UserRole.tasker;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        JSpacing.md,
+        JSpacing.sm,
+        JSpacing.sm,
+        JSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: JRadius.chipAll,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isTasker ? Icons.handyman_outlined : Icons.assignment_outlined,
+            size: 16,
+            color: scheme.onPrimaryContainer,
+          ),
+          const SizedBox(width: JSpacing.sm),
+          Text(
+            isTasker ? 'Signing up as a tasker' : 'Signing up as a client',
+            style: textTheme.bodySmall?.copyWith(
+              color: scheme.onPrimaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: JSpacing.xs),
+          JButton.ghost(
+            label: 'Change',
+            onPressed: () => context.go('/auth/role'),
+            size: JButtonSize.sm,
+          ),
+        ],
       ),
     );
   }
