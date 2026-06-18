@@ -34,8 +34,8 @@ const List<_Slide> _slides = [
     icon: Icons.assignment_outlined,
     title: 'Post a job in minutes',
     body:
-        'Describe what you need done. Local taskers send you offers — you pick '
-        'who does it.',
+        'Describe what you need done. Local taskers send you offers, and you '
+        'pick who does it.',
   ),
   _Slide(
     icon: Icons.handyman_outlined,

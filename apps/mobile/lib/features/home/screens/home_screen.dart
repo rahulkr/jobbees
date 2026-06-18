@@ -63,7 +63,7 @@ class _HomeBody extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Foundation shell — mobile + web from one codebase',
+              'Foundation shell. Mobile and web from one codebase.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
