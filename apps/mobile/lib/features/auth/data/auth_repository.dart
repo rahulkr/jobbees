@@ -94,6 +94,20 @@ class AuthRepository {
     return _tokensOrNull(res.data);
   }
 
+  /// Verifies an email address with the token from the verification email.
+  Future<void> verifyEmail(String token) async {
+    await _dio.post<void>(
+      '/auth/email/verify',
+      data: {'token': token},
+      options: _idempotent(),
+    );
+  }
+
+  /// Resends the verification email to the signed-in user (Bearer required).
+  Future<void> resendVerificationEmail() async {
+    await _dio.post<void>('/auth/email/resend', options: _idempotent());
+  }
+
   /// Requests a password-reset email. The API always succeeds (it never reveals
   /// whether the email exists), so there's nothing to return.
   Future<void> forgotPassword(String email) async {
