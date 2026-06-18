@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
+import '../../auth/providers/auth_controller.dart';
 import '../models/abn_status.dart';
 import '../providers/verification_providers.dart';
 
@@ -22,14 +23,22 @@ class VerificationStatusScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final status = ref.watch(abnStatusProvider);
+    final phoneVerified =
+        ref.watch(authControllerProvider).valueOrNull?.phoneVerified ?? false;
     return Scaffold(
       appBar: AppBar(title: const Text('Verification')),
       body: SafeArea(
         child: ResponsiveLayout(
-          compact: (context) =>
-              _body(context, ref, status, maxWidth: double.infinity),
-          expanded: (context) =>
-              Center(child: _body(context, ref, status, maxWidth: 480)),
+          compact: (context) => _body(
+            context,
+            ref,
+            status,
+            phoneVerified,
+            maxWidth: double.infinity,
+          ),
+          expanded: (context) => Center(
+            child: _body(context, ref, status, phoneVerified, maxWidth: 480),
+          ),
         ),
       ),
     );
@@ -38,7 +47,8 @@ class VerificationStatusScreen extends ConsumerWidget {
   Widget _body(
     BuildContext context,
     WidgetRef ref,
-    AsyncValue<AbnStatus> status, {
+    AsyncValue<AbnStatus> status,
+    bool phoneVerified, {
     required double maxWidth,
   }) {
     return Align(
@@ -54,9 +64,69 @@ class VerificationStatusScreen extends ConsumerWidget {
               _ErrorState(onRetry: () => ref.invalidate(abnStatusProvider)),
           data: (abn) => ListView(
             padding: const EdgeInsets.all(JSpacing.lg),
-            children: [_AbnCard(status: abn)],
+            children: [
+              _AbnCard(status: abn),
+              const SizedBox(height: JSpacing.base),
+              _PhoneCard(verified: phoneVerified),
+            ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PhoneCard extends StatelessWidget {
+  const _PhoneCard({required this.verified});
+
+  final bool verified;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    final (IconData icon, Color tint, String label) = verified
+        ? (LucideIcons.badgeCheck, scheme.primary, 'Verified')
+        : (LucideIcons.smartphone, scheme.onSurfaceVariant, 'Not verified');
+
+    return JCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: tint),
+              const SizedBox(width: JSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Phone',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              _StatusChip(label: label, tint: tint),
+            ],
+          ),
+          const SizedBox(height: JSpacing.base),
+          Text(
+            verified
+                ? 'Your phone number is verified.'
+                : 'Verify your phone number to keep your account secure.',
+            style: textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          if (!verified) ...[
+            const SizedBox(height: JSpacing.base),
+            JButton.secondary(
+              label: 'Verify phone',
+              onPressed: () => context.go('/verify/phone'),
+              expanded: true,
+            ),
+          ],
+        ],
       ),
     );
   }

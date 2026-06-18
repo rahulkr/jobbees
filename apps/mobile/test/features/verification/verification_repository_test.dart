@@ -79,4 +79,28 @@ void main() {
     expect(status.isEmpty, isTrue);
     expect(status.isVerified, isFalse);
   });
+
+  test('sendPhoneOtp posts the phone with an Idempotency-Key', () async {
+    final adapter = _StubAdapter((_) => (status: 200, body: {'sent': true}));
+
+    await _repo(adapter).sendPhoneOtp('+61400000000');
+
+    expect(adapter.lastRequest!.path, '/auth/otp/send');
+    expect(adapter.lastRequest!.method, 'POST');
+    expect(adapter.lastRequest!.headers['Idempotency-Key'], 'idem-1');
+    expect((adapter.lastRequest!.data as Map)['phone'], '+61400000000');
+  });
+
+  test('verifyPhoneOtp posts the phone and code', () async {
+    final adapter = _StubAdapter(
+      (_) => (status: 200, body: {'phoneVerified': true}),
+    );
+
+    await _repo(adapter).verifyPhoneOtp(phone: '+61400000000', code: '000000');
+
+    expect(adapter.lastRequest!.path, '/auth/otp/verify');
+    expect(adapter.lastRequest!.headers['Idempotency-Key'], 'idem-1');
+    expect((adapter.lastRequest!.data as Map)['phone'], '+61400000000');
+    expect((adapter.lastRequest!.data as Map)['code'], '000000');
+  });
 }

@@ -29,6 +29,15 @@ class _FakeRepo implements VerificationRepository {
       verifiedAt: DateTime(2026),
     );
   }
+
+  @override
+  Future<void> sendPhoneOtp(String phone) async {}
+
+  @override
+  Future<void> verifyPhoneOtp({
+    required String phone,
+    required String code,
+  }) async {}
 }
 
 ProviderContainer _container(_FakeRepo repo) {

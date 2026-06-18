@@ -191,6 +191,14 @@ class AuthController extends AsyncNotifier<UserProfile?> {
     }
   }
 
+  /// Refetches the current profile and replaces [state]. Use after a server
+  /// change that flips a profile flag NOT carried in the token (e.g. phone
+  /// verification), where a token refresh isn't needed.
+  Future<void> reloadProfile() async {
+    final user = await ref.read(authRepositoryProvider).fetchMe();
+    state = AsyncData(user);
+  }
+
   Future<void> logout() async {
     final stored = await ref.read(tokenStorageProvider).read();
     try {
