@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jobbees_mobile/core/auth/auth_token.dart';
 import 'package:jobbees_mobile/features/auth/data/auth_repository.dart';
+import 'package:jobbees_mobile/features/auth/data/social_auth_service.dart';
 import 'package:jobbees_mobile/features/auth/models/auth_models.dart';
 import 'package:jobbees_mobile/features/auth/providers/auth_controller.dart';
 import 'package:jobbees_mobile/features/auth/providers/auth_providers.dart';
@@ -54,6 +55,15 @@ class _ScriptedRepo implements AuthRepository {
     required String password,
     required String firstName,
     required String lastName,
+    UserRole? role,
+  }) async => null;
+
+  @override
+  Future<TokenPair?> oauthLogin({
+    required String provider,
+    required String idToken,
+    String? firstName,
+    String? lastName,
     UserRole? role,
   }) async => null;
 
@@ -204,6 +214,62 @@ void main() {
       expect(repo.refreshCount, 1); // single-flight
     },
   );
+
+  test('signInWithGoogle exchanges the credential for a session', () async {
+    final storage = InMemoryTokenStorage();
+    final repo = FakeAuthRepository(
+      oauthTokens: const TokenPair(
+        accessToken: 'access-oauth',
+        refreshToken: 'refresh-oauth',
+      ),
+      meUser: testUser,
+    );
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repo),
+        tokenStorageProvider.overrideWithValue(storage),
+        socialAuthServiceProvider.overrideWithValue(
+          FakeSocialAuthService(
+            google: const SocialCredential(
+              provider: 'google',
+              idToken: 'google-id-token',
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    await container.read(authControllerProvider.future);
+
+    await container
+        .read(authControllerProvider.notifier)
+        .signInWithGoogle(role: UserRole.tasker);
+
+    expect(container.read(authControllerProvider).valueOrNull, testUser);
+    expect(repo.lastOAuthProvider, 'google');
+    expect(repo.lastOAuthRole, UserRole.tasker);
+    expect(container.read(accessTokenProvider), 'access-oauth');
+  });
+
+  test('a cancelled provider sheet leaves the user signed out', () async {
+    final repo = FakeAuthRepository(meUser: testUser);
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repo),
+        tokenStorageProvider.overrideWithValue(InMemoryTokenStorage()),
+        socialAuthServiceProvider.overrideWithValue(
+          FakeSocialAuthService(), // google == null → cancelled
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    await container.read(authControllerProvider.future);
+
+    await container.read(authControllerProvider.notifier).signInWithGoogle();
+
+    expect(container.read(authControllerProvider).valueOrNull, isNull);
+    expect(repo.lastOAuthProvider, isNull); // no API call made
+  });
 
   test('logout clears storage, bearer token, and session', () async {
     final storage = InMemoryTokenStorage()

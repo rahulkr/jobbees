@@ -9,8 +9,13 @@ import '../../../core/auth/token_storage.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/idempotency.dart';
 import '../data/auth_repository.dart';
+import '../data/social_auth_service.dart';
 
 final tokenStorageProvider = Provider<TokenStorage>((ref) => TokenStorage());
+
+final socialAuthServiceProvider = Provider<SocialAuthService>(
+  (ref) => RealSocialAuthService(),
+);
 
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepository(

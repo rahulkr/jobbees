@@ -3,6 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobbees_mobile/core/auth/token_storage.dart';
 import 'package:jobbees_mobile/features/auth/data/auth_repository.dart';
+import 'package:jobbees_mobile/features/auth/data/social_auth_service.dart';
 import 'package:jobbees_mobile/features/auth/models/auth_models.dart';
 import 'package:jobbees_mobile/features/auth/providers/auth_controller.dart';
 
@@ -19,16 +20,38 @@ const testUser = UserProfile(
 /// An [AuthController] whose session state is fixed and whose [signUp] is
 /// recorded — no network, no keychain.
 class FakeAuthController extends AuthController {
-  FakeAuthController({this.initialUser, this.signUpError, this.loginError});
+  FakeAuthController({
+    this.initialUser,
+    this.signUpError,
+    this.loginError,
+    this.socialError,
+  });
 
   final UserProfile? initialUser;
   final Object? signUpError;
   final Object? loginError;
+  final Object? socialError;
   int signUpCount = 0;
   int loginCount = 0;
+  int googleCount = 0;
+  int appleCount = 0;
 
   @override
   Future<UserProfile?> build() async => initialUser;
+
+  @override
+  Future<void> signInWithGoogle({UserRole? role}) async {
+    googleCount++;
+    if (socialError != null) throw socialError!;
+    state = const AsyncData(testUser);
+  }
+
+  @override
+  Future<void> signInWithApple({UserRole? role}) async {
+    appleCount++;
+    if (socialError != null) throw socialError!;
+    state = const AsyncData(testUser);
+  }
 
   @override
   Future<void> signUp({
@@ -76,15 +99,19 @@ class FakeAuthRepository implements AuthRepository {
     this.signupTokens,
     this.loginTokens,
     this.refreshTokens,
+    this.oauthTokens,
     this.meUser,
   });
 
   final TokenPair? signupTokens;
   final TokenPair? loginTokens;
   final TokenPair? refreshTokens;
+  final TokenPair? oauthTokens;
   final UserProfile? meUser;
   int logoutCount = 0;
   int refreshCount = 0;
+  String? lastOAuthProvider;
+  UserRole? lastOAuthRole;
 
   @override
   String Function() get newIdempotencyKey =>
@@ -119,7 +146,42 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<TokenPair?> oauthLogin({
+    required String provider,
+    required String idToken,
+    String? firstName,
+    String? lastName,
+    UserRole? role,
+  }) async {
+    lastOAuthProvider = provider;
+    lastOAuthRole = role;
+    return oauthTokens;
+  }
+
+  @override
   Future<void> logout(String? refreshToken) async => logoutCount++;
+}
+
+/// A scriptable [SocialAuthService] — no native SDK.
+class FakeSocialAuthService implements SocialAuthService {
+  FakeSocialAuthService({this.google, this.apple, this.error});
+
+  /// Credential to return; null models a cancelled provider sheet.
+  final SocialCredential? google;
+  final SocialCredential? apple;
+  final Object? error;
+
+  @override
+  Future<SocialCredential?> signInWithGoogle() async {
+    if (error != null) throw error!;
+    return google;
+  }
+
+  @override
+  Future<SocialCredential?> signInWithApple() async {
+    if (error != null) throw error!;
+    return apple;
+  }
 }
 
 /// Overrides for a signed-in app (home reachable, no network/keychain).

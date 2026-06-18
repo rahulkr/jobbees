@@ -23,6 +23,7 @@ import '../../../ui/ui.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_error_banner.dart';
 import '../widgets/auth_header.dart';
+import '../widgets/social_auth_buttons.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -160,6 +161,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   loading: _submitting,
                   expanded: true,
                   size: JButtonSize.lg,
+                ),
+                const SizedBox(height: JSpacing.lg),
+                SocialAuthButtons(
+                  onError: (message) => setState(
+                    () => _formError = message.isEmpty ? null : message,
+                  ),
                 ),
                 const SizedBox(height: JSpacing.base),
                 Row(

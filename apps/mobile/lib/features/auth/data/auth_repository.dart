@@ -58,6 +58,30 @@ class AuthRepository {
     return _tokensOrNull(res.data);
   }
 
+  /// Signs in with a verified provider ID token (provider = google | apple).
+  /// First-time tokens create the account; [firstName]/[lastName] seed the
+  /// profile (Apple only sends the name on first auth). Returns a [TokenPair]
+  /// on mobile; null on web (cookie session).
+  Future<TokenPair?> oauthLogin({
+    required String provider,
+    required String idToken,
+    String? firstName,
+    String? lastName,
+    UserRole? role,
+  }) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/auth/oauth/$provider',
+      data: {
+        'idToken': idToken,
+        if (firstName != null) 'firstName': firstName,
+        if (lastName != null) 'lastName': lastName,
+        if (role?.toJson() case final r?) 'role': r,
+      },
+      options: _idempotent(),
+    );
+    return _tokensOrNull(res.data);
+  }
+
   /// Exchanges a refresh token for a fresh pair. Mobile passes [refreshToken];
   /// web sends nothing (the API reads its HttpOnly `jb_refresh` cookie) and the
   /// returned pair is null because new tokens come back as cookies.
