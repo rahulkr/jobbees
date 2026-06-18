@@ -17,6 +17,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics.dart';
 import '../../../core/auth/auth_token.dart';
 import '../../../core/auth/token_storage.dart';
 import '../../../core/network/error_mapper.dart';
@@ -147,7 +148,10 @@ class AuthController extends AsyncNotifier<UserProfile?> {
     try {
       final tokens = await repo.login(email: email, password: password);
       await _persist(tokens);
-      state = AsyncData(await repo.fetchMe());
+      final user = await repo.fetchMe();
+      state = AsyncData(user);
+      await Analytics.identify(user.id);
+      await Analytics.track('logged_in');
     } catch (error) {
       throw ErrorMapper.map(error);
     }
@@ -170,7 +174,12 @@ class AuthController extends AsyncNotifier<UserProfile?> {
         role: role,
       );
       await _persist(tokens);
-      state = AsyncData(await repo.fetchMe());
+      final user = await repo.fetchMe();
+      state = AsyncData(user);
+      await Analytics.identify(user.id);
+      await Analytics.track('signup_completed', {
+        'role': (role ?? UserRole.client).name,
+      });
     } catch (error) {
       throw ErrorMapper.map(error);
     }
@@ -186,6 +195,7 @@ class AuthController extends AsyncNotifier<UserProfile?> {
       await repo.becomeTasker();
       await refreshSession();
       state = AsyncData(await repo.fetchMe());
+      await Analytics.track('role_switched_to_tasker');
     } catch (error) {
       throw ErrorMapper.map(error);
     }
@@ -208,6 +218,8 @@ class AuthController extends AsyncNotifier<UserProfile?> {
     }
     await _clearLocal();
     state = const AsyncData(null);
+    await Analytics.track('logged_out');
+    await Analytics.reset();
   }
 
   Future<void> _persist(TokenPair? tokens) async {
