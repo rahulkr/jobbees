@@ -159,6 +159,8 @@ model User {
 
   kycStatus       KycStatus  @default(NOT_STARTED)
   connectStatus   ConnectStatus @default(NOT_STARTED)
+  // Stripe Connect Express account id (acct_...). Null until onboarding starts.
+  stripeAccountId String?    @unique
 
   // Profile fields (client + tasker)
   avatarUrl       String?

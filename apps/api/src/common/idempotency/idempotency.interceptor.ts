@@ -6,10 +6,12 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { RedisService } from '../../redis/redis.service';
+import { SKIP_IDEMPOTENCY_KEY } from './skip-idempotency.decorator';
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const HEADER = 'idempotency-key';
@@ -36,13 +38,20 @@ interface CachedResult {
  */
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {
-  constructor(private readonly redis: RedisService) {}
+  constructor(
+    private readonly redis: RedisService,
+    private readonly reflector: Reflector,
+  ) {}
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
     const http = context.switchToHttp();
     const request = http.getRequest<Request>();
 
-    if (!MUTATING_METHODS.has(request.method)) {
+    const skip = this.reflector.getAllAndOverride<boolean>(SKIP_IDEMPOTENCY_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (skip || !MUTATING_METHODS.has(request.method)) {
       return next.handle();
     }
 

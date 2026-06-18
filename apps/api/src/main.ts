@@ -8,7 +8,12 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  // rawBody: keeps the unparsed body available (req.rawBody) for Stripe webhook
+  // signature verification, while JSON parsing still works for every other route.
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    rawBody: true,
+  });
 
   // Route Nest's logs through pino.
   app.useLogger(app.get(Logger));
