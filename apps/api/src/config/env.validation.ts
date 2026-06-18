@@ -87,6 +87,13 @@ export class EnvironmentVariables {
   @IsOptional()
   APPLE_CLIENT_IDS = '';
 
+  // ABR (Australian Business Register) lookup GUID. Free registration at
+  // abr.business.gov.au. Empty in dev → AbrService returns a stub (non-prod
+  // only) so the ABN flow is testable without the live register.
+  @IsString()
+  @IsOptional()
+  ABR_GUID = '';
+
   // Comma-separated allowed browser origins for CORS (credentialed). Empty in
   // dev → defaults to the admin dev server (http://localhost:3001).
   @IsString()

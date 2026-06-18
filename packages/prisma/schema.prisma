@@ -169,6 +169,8 @@ model User {
   hourlyRateCents Int?
   abn             String?    // 11-digit Australian Business Number
   abnVerifiedAt   DateTime?
+  abrBusinessName String?    // entity/business name from the ABR lookup
+  noAbnReason     String?    // set when a tasker declares they have no ABN (RCTI path)
 
   // Tasker embedding for matching — pgvector column added via raw migration
   // bio + skills + recent jobs → 1536-dim embedding via OpenAI text-embedding-3-small
