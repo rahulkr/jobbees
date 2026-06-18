@@ -22,6 +22,7 @@ import '../../../ui/ui.dart';
 import '../models/auth_models.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_error_banner.dart';
+import '../widgets/auth_header.dart';
 
 /// Mirrors the backend SignupDto password rule (`@MinLength(10)`).
 const int _kMinPasswordLength = 10;
@@ -138,18 +139,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: JSpacing.lg),
-                Text(
-                  'Create your account',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: JSpacing.sm),
-                Text(
-                  'Join JOBBees to post jobs or earn as a tasker.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                const AuthHeader(
+                  title: 'Create your account',
+                  subtitle: 'Join JOBBees to post jobs or earn as a tasker.',
                 ),
                 if (widget.role != null) ...[
                   const SizedBox(height: JSpacing.base),

@@ -11,6 +11,12 @@ Future<FakeAuthController> _pumpSignup(
   WidgetTester tester, {
   Object? signUpError,
 }) async {
+  // Tall surface so the scrollable form's submit button is on-screen for taps.
+  tester.view.physicalSize = const Size(800, 1600);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
   final controller = FakeAuthController(signUpError: signUpError);
   await tester.pumpWidget(
     ProviderScope(
