@@ -15,9 +15,11 @@ import '../../../core/responsive/responsive_layout.dart';
 /// Routes reachable from the foundation shell — kept in one place so the home
 /// screen and the router stay in sync.
 const List<({String label, String path})> kShellDestinations = [
-  (label: 'Sign up', path: '/auth/signup'),
   (label: 'Post a job', path: '/post'),
   (label: 'Browse a job', path: '/jobs/demo'),
+  // Temporary entry until the tasker onboarding flow lands; real entry is the
+  // client→tasker upgrade.
+  (label: 'Verify ABN (tasker)', path: '/verify'),
   (label: 'My profile', path: '/me'),
 ];
 

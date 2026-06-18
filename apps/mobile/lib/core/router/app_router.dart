@@ -28,6 +28,8 @@ import '../../features/onboarding/providers/onboarding_providers.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/welcome_carousel_screen.dart';
 import '../../features/shell/screens/placeholder_screen.dart';
+import '../../features/verification/screens/abn_entry_screen.dart';
+import '../../features/verification/screens/verification_status_screen.dart';
 
 /// Canonical entry for unauthenticated users (returning users log in; the
 /// screen links across to signup). First-run users land on signup straight off
@@ -141,6 +143,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             VerifyEmailScreen(token: state.uri.queryParameters['token']),
       ),
       GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+      GoRoute(
+        path: '/verify',
+        builder: (context, state) => const VerificationStatusScreen(),
+      ),
+      GoRoute(
+        path: '/verify/abn',
+        builder: (context, state) => const AbnEntryScreen(),
+      ),
       GoRoute(
         path: '/post',
         builder: (context, state) =>
