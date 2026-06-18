@@ -25,6 +25,7 @@ import '../../features/auth/screens/signup_screen.dart';
 import '../../features/auth/screens/verify_email_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/onboarding/providers/onboarding_providers.dart';
+import '../../features/profile/screens/public_tasker_profile_screen.dart';
 import '../../features/profile/screens/tasker_profile_screen.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/welcome_carousel_screen.dart';
@@ -171,6 +172,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile/tasker',
         builder: (context, state) => const TaskerProfileScreen(),
+      ),
+      GoRoute(
+        path: '/taskers/:id',
+        builder: (context, state) => PublicTaskerProfileScreen(
+          taskerId: state.pathParameters['id'] ?? '',
+        ),
       ),
       GoRoute(
         path: '/post',

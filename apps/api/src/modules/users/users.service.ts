@@ -5,9 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
-import { type User, UserRole } from '@jobbees/prisma';
+import { ConnectStatus, type User, UserRole } from '@jobbees/prisma';
 import { AuditLogService } from '../../common/audit/audit-log.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PublicTaskerProfileDto } from './dto/public-tasker-profile.dto';
 
 /** Request context for the audit trail (set by the controller). */
 export interface ActorContext {
@@ -173,6 +174,48 @@ export class UsersService {
     });
 
     return this.getTaskerProfile(userId);
+  }
+
+  /**
+   * A tasker's public profile (for clients). Narrow projection — no PII beyond
+   * first name + business name. Suspended/deleted/non-tasker → 404.
+   */
+  async getPublicTaskerProfile(taskerId: string): Promise<PublicTaskerProfileDto> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: taskerId,
+        role: UserRole.TASKER,
+        deletedAt: null,
+        suspendedAt: null,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        avatarUrl: true,
+        bio: true,
+        hourlyRateCents: true,
+        abrBusinessName: true,
+        emailVerified: true,
+        phoneVerified: true,
+        connectStatus: true,
+        skills: { select: { skill: true } },
+      },
+    });
+    if (!user) throw new NotFoundException('Tasker not found');
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      avatarUrl: user.avatarUrl,
+      bio: user.bio,
+      hourlyRateCents: user.hourlyRateCents,
+      businessName: user.abrBusinessName,
+      skills: user.skills.map((s) => s.skill),
+      verified: {
+        email: user.emailVerified,
+        phone: user.phoneVerified,
+        payments: user.connectStatus === ConnectStatus.COMPLETE,
+      },
+    };
   }
 
   /** Sets the phone + marks it verified. Phone is unique — reject if taken. */

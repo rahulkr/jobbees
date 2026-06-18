@@ -1,5 +1,5 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { UserRole } from '@jobbees/prisma';
+import { ConnectStatus, UserRole } from '@jobbees/prisma';
 import type { AuditLogService } from '../../common/audit/audit-log.service';
 import type { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from './users.service';
@@ -149,6 +149,57 @@ describe('UsersService tasker profile', () => {
     prisma.user.findFirst.mockResolvedValue(null);
 
     await expect(service.updateTaskerProfile('ghost', { bio: 'x' })).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+  });
+});
+
+describe('UsersService.getPublicTaskerProfile', () => {
+  function buildPublic(row: Record<string, unknown> | null) {
+    const prisma = { user: { findFirst: jest.fn().mockResolvedValue(row) } };
+    const audit = { record: jest.fn() };
+    const service = new UsersService(
+      prisma as unknown as PrismaService,
+      audit as unknown as AuditLogService,
+    );
+    return { service, prisma };
+  }
+
+  it('returns a narrow projection with verification badges', async () => {
+    const { service } = buildPublic({
+      id: 't1',
+      firstName: 'Sam',
+      avatarUrl: null,
+      bio: 'Reliable handyman',
+      hourlyRateCents: 8500,
+      abrBusinessName: 'Sam Pty Ltd',
+      emailVerified: true,
+      phoneVerified: false,
+      connectStatus: ConnectStatus.COMPLETE,
+      skills: [{ skill: 'plumbing' }],
+    });
+
+    const profile = await service.getPublicTaskerProfile('t1');
+
+    expect(profile).toEqual({
+      id: 't1',
+      firstName: 'Sam',
+      avatarUrl: null,
+      bio: 'Reliable handyman',
+      hourlyRateCents: 8500,
+      businessName: 'Sam Pty Ltd',
+      skills: ['plumbing'],
+      verified: { email: true, phone: false, payments: true },
+    });
+    // No PII fields leak through.
+    expect(profile).not.toHaveProperty('email');
+    expect(profile).not.toHaveProperty('phone');
+  });
+
+  it('404s for an unknown / non-tasker / suspended id', async () => {
+    const { service } = buildPublic(null);
+
+    await expect(service.getPublicTaskerProfile('missing')).rejects.toBeInstanceOf(
       NotFoundException,
     );
   });

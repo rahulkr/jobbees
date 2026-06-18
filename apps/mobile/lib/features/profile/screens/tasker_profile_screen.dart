@@ -9,11 +9,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
+import '../../auth/providers/auth_controller.dart';
 import '../../auth/widgets/auth_error_banner.dart';
 import '../models/tasker_profile.dart';
 import '../providers/profile_providers.dart';
@@ -117,8 +119,19 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(taskerProfileControllerProvider);
+    final myId = ref.watch(authControllerProvider).valueOrNull?.id;
     return Scaffold(
-      appBar: AppBar(title: const Text('Your tasker profile')),
+      appBar: AppBar(
+        title: const Text('Your tasker profile'),
+        actions: [
+          if (myId != null)
+            IconButton(
+              tooltip: 'Preview public profile',
+              icon: const Icon(LucideIcons.eye),
+              onPressed: () => context.push('/taskers/$myId'),
+            ),
+        ],
+      ),
       body: SafeArea(
         child: profile.when(
           loading: () => const Center(child: CircularProgressIndicator()),

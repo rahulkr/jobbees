@@ -7,6 +7,7 @@ library;
 
 import 'package:dio/dio.dart';
 
+import '../models/public_tasker_profile.dart';
 import '../models/tasker_profile.dart';
 
 class ProfileRepository {
@@ -35,5 +36,11 @@ class ProfileRepository {
       options: Options(headers: {'Idempotency-Key': newIdempotencyKey()}),
     );
     return TaskerProfile.fromJson(res.data ?? const {});
+  }
+
+  /// A tasker's public profile (visible to signed-in clients).
+  Future<PublicTaskerProfile> fetchPublic(String taskerId) async {
+    final res = await _dio.get<Map<String, dynamic>>('/taskers/$taskerId');
+    return PublicTaskerProfile.fromJson(res.data ?? const {});
   }
 }
