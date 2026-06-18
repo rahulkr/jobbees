@@ -83,6 +83,9 @@ class _ScriptedRepo implements AuthRepository {
   }) async {}
 
   @override
+  Future<void> becomeTasker() async {}
+
+  @override
   Future<void> logout(String? refreshToken) async {}
 }
 
@@ -168,6 +171,37 @@ void main() {
     expect(container.read(accessTokenProvider), 'access-2');
     expect((await storage.read())!.refreshToken, 'refresh-2');
   });
+
+  test(
+    'becomeTasker upgrades, refreshes the session, and refetches the profile',
+    () async {
+      const taskerUser = UserProfile(
+        id: 'user_test',
+        email: 'jordan@example.com',
+        firstName: 'Jordan',
+        lastName: 'Lee',
+        role: UserRole.tasker,
+        emailVerified: true,
+        phoneVerified: false,
+      );
+      final storage = InMemoryTokenStorage();
+      await storage.write(accessToken: 'a', refreshToken: 'r');
+      final repo = FakeAuthRepository(meUser: taskerUser);
+      final container = _container(repo: repo, storage: storage);
+      await container.read(authControllerProvider.future);
+
+      await container.read(authControllerProvider.notifier).becomeTasker();
+
+      // Upgrade call made, session re-minted (so the JWT carries TASKER), and
+      // the refetched profile is now a tasker.
+      expect(repo.becomeTaskerCount, 1);
+      expect(repo.refreshCount, greaterThanOrEqualTo(1));
+      expect(
+        container.read(authControllerProvider).valueOrNull?.role,
+        UserRole.tasker,
+      );
+    },
+  );
 
   test('build refreshes when the stored access token is rejected', () async {
     final storage = InMemoryTokenStorage()

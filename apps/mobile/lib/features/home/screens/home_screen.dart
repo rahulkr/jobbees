@@ -8,31 +8,47 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/responsive/responsive_layout.dart';
+import '../../auth/models/auth_models.dart';
+import '../../auth/providers/auth_controller.dart';
 
-/// Routes reachable from the foundation shell — kept in one place so the home
-/// screen and the router stay in sync.
+typedef _Destination = ({String label, String path});
+
+/// Shell entries shown to everyone (kept here so home + router stay in sync).
 const List<({String label, String path})> kShellDestinations = [
   (label: 'Post a job', path: '/post'),
   (label: 'Browse a job', path: '/jobs/demo'),
-  // Temporary entry until the tasker onboarding flow lands; real entry is the
-  // client→tasker upgrade.
-  (label: 'Verify ABN (tasker)', path: '/verify'),
-  (label: 'My profile', path: '/me'),
 ];
 
-class HomeScreen extends StatelessWidget {
+/// Role-specific entry. A client can switch on the tasker side of their account
+/// (they keep posting); a tasker manages their verification. Both reachable
+/// from one account, per the role model.
+_Destination _roleDestination(UserRole? role) => role == UserRole.tasker
+    ? (label: 'Verification', path: '/verify')
+    : (label: 'Work as a tasker', path: '/become-tasker');
+
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final role = ref.watch(authControllerProvider).valueOrNull?.role;
+    final destinations = <_Destination>[
+      ...kShellDestinations,
+      _roleDestination(role),
+      (label: 'My profile', path: '/me'),
+    ];
     return Scaffold(
       body: SafeArea(
         child: ResponsiveLayout(
-          compact: (context) => const _HomeBody(maxWidth: double.infinity),
-          expanded: (context) => const Center(child: _HomeBody(maxWidth: 480)),
+          compact: (context) =>
+              _HomeBody(maxWidth: double.infinity, destinations: destinations),
+          expanded: (context) => Center(
+            child: _HomeBody(maxWidth: 480, destinations: destinations),
+          ),
         ),
       ),
     );
@@ -40,9 +56,10 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _HomeBody extends StatelessWidget {
-  const _HomeBody({required this.maxWidth});
+  const _HomeBody({required this.maxWidth, required this.destinations});
 
   final double maxWidth;
+  final List<_Destination> destinations;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +89,7 @@ class _HomeBody extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            for (final destination in kShellDestinations) ...[
+            for (final destination in destinations) ...[
               OutlinedButton(
                 onPressed: () => context.go(destination.path),
                 child: Text(destination.label),

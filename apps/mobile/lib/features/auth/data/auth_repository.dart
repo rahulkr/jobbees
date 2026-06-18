@@ -130,6 +130,12 @@ class AuthRepository {
     );
   }
 
+  /// Upgrades the current client account to a tasker (one-way). The caller must
+  /// refresh the session afterwards so the new role lands in the access token.
+  Future<void> becomeTasker() async {
+    await _dio.post<void>('/me/become-tasker', options: _idempotent());
+  }
+
   Future<void> logout(String? refreshToken) async {
     await _dio.post<void>(
       '/auth/logout',
