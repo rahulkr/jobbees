@@ -116,17 +116,9 @@ class _JTextFieldState extends State<JTextField> {
                 ? scheme.surfaceContainerLow
                 : scheme.surfaceContainerHigh,
             borderRadius: JRadius.buttonMdAll,
+            // Single, clean border: hairline at rest, 2px primary on focus.
+            // No glow/shadow — it reads as a double outline.
             border: Border.all(color: borderColor, width: _focused ? 2 : 1),
-            // Soft accent glow on focus (no hard ring).
-            boxShadow: _focused
-                ? [
-                    BoxShadow(
-                      color: (hasError ? scheme.error : scheme.primary)
-                          .withValues(alpha: 0.12),
-                      blurRadius: 6,
-                    ),
-                  ]
-                : null,
           ),
           padding: const EdgeInsets.symmetric(horizontal: JSpacing.base),
           child: Row(
