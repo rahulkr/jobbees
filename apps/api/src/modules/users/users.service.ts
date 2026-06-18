@@ -31,6 +31,12 @@ export interface CreateOAuthUserInput {
   emailVerified: boolean;
 }
 
+export interface TaskerProfile {
+  bio: string | null;
+  hourlyRateCents: number | null;
+  skills: string[];
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -111,6 +117,62 @@ export class UsersService {
     });
 
     return updated;
+  }
+
+  /** The tasker profile (bio, hourly rate, free-text skill tags). */
+  async getTaskerProfile(userId: string): Promise<TaskerProfile> {
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
+      select: {
+        bio: true,
+        hourlyRateCents: true,
+        skills: { select: { skill: true } },
+      },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return {
+      bio: user.bio,
+      hourlyRateCents: user.hourlyRateCents,
+      skills: user.skills.map((s) => s.skill),
+    };
+  }
+
+  /**
+   * Partial update of the tasker profile. Only provided fields change; `skills`
+   * (when given) replaces the whole set. The user row + skill rows update in one
+   * transaction so a half-written profile is never observable.
+   */
+  async updateTaskerProfile(
+    userId: string,
+    input: { bio?: string; hourlyRateCents?: number; skills?: string[] },
+  ): Promise<TaskerProfile> {
+    const user = await this.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    await this.prisma.$transaction(async (tx) => {
+      if (input.bio !== undefined || input.hourlyRateCents !== undefined) {
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            ...(input.bio !== undefined ? { bio: input.bio } : {}),
+            ...(input.hourlyRateCents !== undefined
+              ? { hourlyRateCents: input.hourlyRateCents }
+              : {}),
+          },
+        });
+      }
+      if (input.skills !== undefined) {
+        const unique = [...new Set(input.skills.map((s) => s.trim()))].filter((s) => s.length > 0);
+        await tx.userSkill.deleteMany({ where: { userId } });
+        if (unique.length > 0) {
+          await tx.userSkill.createMany({
+            data: unique.map((skill) => ({ userId, skill })),
+          });
+        }
+      }
+    });
+
+    return this.getTaskerProfile(userId);
   }
 
   /** Sets the phone + marks it verified. Phone is unique — reject if taken. */

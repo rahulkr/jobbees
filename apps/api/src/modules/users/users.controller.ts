@@ -1,4 +1,4 @@
-import { Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { UserRole } from '@jobbees/prisma';
@@ -6,6 +6,7 @@ import { CurrentUser, type CurrentUserData } from '../../common/auth/current-use
 import { Roles } from '../../common/auth/roles.decorator';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
 import { BecomeTaskerResultDto } from './dto/become-tasker.dto';
+import { TaskerProfileDto, UpdateTaskerProfileDto } from './dto/profile.dto';
 import { UsersService } from './users.service';
 
 /**
@@ -36,5 +37,24 @@ export class UsersController {
       userAgent: req.header('user-agent') ?? null,
     });
     return { role: updated.role };
+  }
+
+  @Get('profile')
+  @Roles(UserRole.TASKER)
+  @ApiOperation({ summary: 'Get the current tasker profile' })
+  getProfile(@CurrentUser() user: CurrentUserData): Promise<TaskerProfileDto> {
+    return this.users.getTaskerProfile(user.id);
+  }
+
+  @Patch('profile')
+  @Roles(UserRole.TASKER)
+  @RateLimit({ points: 20, duration: 60 })
+  @ApiOperation({ summary: 'Update the current tasker profile' })
+  @ApiHeader({ name: 'Idempotency-Key', required: true })
+  updateProfile(
+    @CurrentUser() user: CurrentUserData,
+    @Body() dto: UpdateTaskerProfileDto,
+  ): Promise<TaskerProfileDto> {
+    return this.users.updateTaskerProfile(user.id, dto);
   }
 }

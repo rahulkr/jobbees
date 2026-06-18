@@ -37,6 +37,8 @@ class JTextField extends StatefulWidget {
     this.textInputAction,
     this.autofillHints,
     this.maxLength,
+    this.maxLines = 1,
+    this.minLines,
     this.onChanged,
     this.onSubmitted,
     this.enabled = true,
@@ -55,6 +57,8 @@ class JTextField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final Iterable<String>? autofillHints;
   final int? maxLength;
+  final int? maxLines;
+  final int? minLines;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final bool enabled;
@@ -141,6 +145,8 @@ class _JTextFieldState extends State<JTextField> {
                   textInputAction: widget.textInputAction,
                   autofillHints: widget.autofillHints,
                   maxLength: widget.maxLength,
+                  maxLines: widget.maxLines,
+                  minLines: widget.minLines,
                   onChanged: widget.onChanged,
                   onSubmitted: widget.onSubmitted,
                   style: TextStyle(fontSize: 16, color: scheme.onSurface),
