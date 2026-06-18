@@ -9,6 +9,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/error_mapper.dart';
 import '../../../core/network/idempotency.dart';
 import '../data/profile_repository.dart';
+import '../models/public_tasker_profile.dart';
 import '../models/tasker_profile.dart';
 
 final profileRepositoryProvider = Provider<ProfileRepository>(
@@ -23,6 +24,12 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 final taskerProfileControllerProvider =
     AsyncNotifierProvider<TaskerProfileController, TaskerProfile>(
       TaskerProfileController.new,
+    );
+
+/// A tasker's public profile by id (what clients see). Read-only.
+final publicTaskerProfileProvider =
+    FutureProvider.family<PublicTaskerProfile, String>(
+      (ref, id) => ref.read(profileRepositoryProvider).fetchPublic(id),
     );
 
 class TaskerProfileController extends AsyncNotifier<TaskerProfile> {

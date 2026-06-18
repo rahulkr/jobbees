@@ -86,4 +86,32 @@ void main() {
     expect(data['skills'], ['tiling']);
     expect(profile.hourlyRateCents, 9000);
   });
+
+  test('fetchPublic gets /taskers/:id and parses badges', () async {
+    final adapter = _StubAdapter(
+      (_) => (
+        status: 200,
+        body: {
+          'id': 't1',
+          'firstName': 'Sam',
+          'avatarUrl': null,
+          'bio': 'Reliable',
+          'hourlyRateCents': 8500,
+          'businessName': 'Sam Pty Ltd',
+          'skills': ['plumbing'],
+          'verified': {'email': true, 'phone': false, 'payments': true},
+        },
+      ),
+    );
+
+    final profile = await _repo(adapter).fetchPublic('t1');
+
+    expect(adapter.lastRequest!.path, '/taskers/t1');
+    expect(adapter.lastRequest!.method, 'GET');
+    expect(profile.firstName, 'Sam');
+    expect(profile.badges.email, isTrue);
+    expect(profile.badges.phone, isFalse);
+    expect(profile.badges.payments, isTrue);
+    expect(profile.skills, ['plumbing']);
+  });
 }
