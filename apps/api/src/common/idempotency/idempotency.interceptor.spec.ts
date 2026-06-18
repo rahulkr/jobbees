@@ -4,6 +4,7 @@ import {
   ConflictException,
   ExecutionContext,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { lastValueFrom, of } from 'rxjs';
 import { RedisService } from '../../redis/redis.service';
 import { IdempotencyInterceptor } from './idempotency.interceptor';
@@ -20,9 +21,15 @@ function mockContext(method: string, headers: Record<string, string>, path = '/a
       getRequest: () => request,
       getResponse: () => response,
     }),
+    getHandler: () => undefined,
+    getClass: () => undefined,
   } as unknown as ExecutionContext;
   return { ctx, response };
 }
+
+const noSkipReflector = {
+  getAllAndOverride: () => undefined,
+} as unknown as Reflector;
 
 const handlerReturning = (value: unknown): CallHandler => ({
   handle: () => of(value),
@@ -34,7 +41,7 @@ describe('IdempotencyInterceptor', () => {
 
   beforeEach(() => {
     redis = { client: { get: jest.fn(), set: jest.fn(), del: jest.fn() } };
-    interceptor = new IdempotencyInterceptor(redis as unknown as RedisService);
+    interceptor = new IdempotencyInterceptor(redis as unknown as RedisService, noSkipReflector);
   });
 
   it('passes non-mutating methods straight through', async () => {

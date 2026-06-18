@@ -99,6 +99,25 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   CORS_ORIGINS = '';
+
+  // Stripe (test mode in dev; live keys only via Key Vault). Optional so the
+  // app boots without payments configured; StripeConnectService throws a clear
+  // error if a Connect call is made while STRIPE_SECRET_KEY is empty.
+  @IsString()
+  @IsOptional()
+  STRIPE_SECRET_KEY = '';
+
+  // Verifies Stripe webhook signatures. From `stripe listen` in dev, or the
+  // dashboard endpoint secret. Empty → the webhook route rejects all events.
+  @IsString()
+  @IsOptional()
+  STRIPE_WEBHOOK_SECRET = '';
+
+  // Base URL Stripe Connect onboarding returns to (the API builds the account
+  // link return/refresh URLs from this). Dev default points at the API host.
+  @IsString()
+  @IsOptional()
+  STRIPE_CONNECT_RETURN_URL = 'http://localhost:3000/connect/return';
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {
