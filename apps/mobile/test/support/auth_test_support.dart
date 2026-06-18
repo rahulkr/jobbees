@@ -42,11 +42,16 @@ class FakeAuthController extends AuthController {
   @override
   Future<UserProfile?> build() async => initialUser;
 
+  int reloadProfileCount = 0;
+
   @override
   Future<void> becomeTasker() async {
     becomeTaskerCount++;
     if (becomeTaskerError != null) throw becomeTaskerError!;
   }
+
+  @override
+  Future<void> reloadProfile() async => reloadProfileCount++;
 
   @override
   Future<void> signInWithGoogle({UserRole? role}) async {
