@@ -68,6 +68,12 @@ class _ScriptedRepo implements AuthRepository {
   }) async => null;
 
   @override
+  Future<void> verifyEmail(String token) async {}
+
+  @override
+  Future<void> resendVerificationEmail() async {}
+
+  @override
   Future<void> forgotPassword(String email) async {}
 
   @override

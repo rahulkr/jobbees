@@ -213,4 +213,19 @@ void main() {
     expect(body['token'], 'reset-token');
     expect(body['newPassword'], 'a-strong-passphrase');
   });
+
+  test('verifyEmail posts the token to /auth/email/verify', () async {
+    final adapter = _StubAdapter(
+      (_) => (status: 200, body: {'verified': true}),
+    );
+
+    await _repo(adapter).verifyEmail('verify-token');
+
+    expect(adapter.lastRequest!.path, '/auth/email/verify');
+    expect(adapter.lastRequest!.headers['Idempotency-Key'], 'idem-123');
+    expect(
+      (adapter.lastRequest!.data as Map<String, dynamic>)['token'],
+      'verify-token',
+    );
+  });
 }

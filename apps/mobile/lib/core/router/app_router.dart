@@ -22,6 +22,7 @@ import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/role_selection_screen.dart';
 import '../../features/auth/screens/signup_screen.dart';
+import '../../features/auth/screens/verify_email_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/onboarding/providers/onboarding_providers.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
@@ -44,6 +45,7 @@ const Set<String> _publicRoutes = {
   '/auth/signup',
   '/auth/forgot',
   '/auth/reset',
+  '/auth/verify-email',
 };
 
 /// Maps the `?role=` signup query param to a [UserRole] (absent → decide later).
@@ -132,6 +134,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/auth/reset',
         builder: (context, state) =>
             ResetPasswordScreen(token: state.uri.queryParameters['token']),
+      ),
+      GoRoute(
+        path: '/auth/verify-email',
+        builder: (context, state) =>
+            VerifyEmailScreen(token: state.uri.queryParameters['token']),
       ),
       GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
       GoRoute(
