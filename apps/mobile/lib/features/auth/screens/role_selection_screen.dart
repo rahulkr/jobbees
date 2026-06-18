@@ -97,7 +97,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
             const AuthHeader(
               title: 'How will you start?',
               subtitle:
-                  'You can do both later — this just sets up your first '
+                  'You can do both later. This just sets up your first '
                   'experience.',
             ),
             const SizedBox(height: JSpacing.xl),
