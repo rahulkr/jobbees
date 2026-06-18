@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/error_mapper.dart';
 import '../../../core/network/idempotency.dart';
@@ -37,6 +38,7 @@ class AbnStatusController extends AsyncNotifier<AbnStatus> {
           .read(verificationRepositoryProvider)
           .submitAbn(abn);
       state = AsyncData(status);
+      await Analytics.track('abn_submitted', {'verified': status.isVerified});
     } catch (error) {
       throw ErrorMapper.map(error);
     }
@@ -69,6 +71,7 @@ class PhoneVerificationController {
       // phoneVerified isn't in the token, so refetch the profile (not a token
       // refresh) to flip it in the session the verification hub reads.
       await _ref.read(authControllerProvider.notifier).reloadProfile();
+      await Analytics.track('phone_verified');
     } catch (error) {
       throw ErrorMapper.map(error);
     }

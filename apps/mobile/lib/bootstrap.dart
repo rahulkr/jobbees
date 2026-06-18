@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'core/analytics/analytics.dart';
 import 'core/network/api_client.dart';
 import 'core/observability/error_reporting.dart';
 import 'core/router/url_strategy.dart';
@@ -26,6 +27,9 @@ Future<void> bootstrap() async {
   // welcome-carousel "seen" flag) is available to the router's first redirect
   // — no async splash flicker waiting on disk.
   final prefs = await SharedPreferences.getInstance();
+
+  // Product analytics (no-op until POSTHOG_KEY is set).
+  await Analytics.init();
 
   // Runs the app inside Sentry's error zone when a DSN is configured; a plain
   // runApp otherwise (no-op until SENTRY_DSN is set).
