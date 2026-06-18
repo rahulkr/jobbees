@@ -67,6 +67,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Logo on a white tile (the coral mark wouldn't show on the
+                // coral gradient).
+                Container(
+                  width: 112,
+                  height: 112,
+                  padding: const EdgeInsets.all(JSpacing.base),
+                  decoration: BoxDecoration(
+                    color: scheme.surface,
+                    borderRadius: JRadius.heroAll,
+                  ),
+                  child: Image.asset(
+                    'assets/icon.png',
+                    filterQuality: FilterQuality.medium,
+                  ),
+                ),
+                const SizedBox(height: JSpacing.xl),
                 Text(
                   'JOBBees',
                   style: textTheme.displayMedium?.copyWith(
