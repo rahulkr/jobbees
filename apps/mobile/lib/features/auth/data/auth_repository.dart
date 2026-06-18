@@ -94,6 +94,28 @@ class AuthRepository {
     return _tokensOrNull(res.data);
   }
 
+  /// Requests a password-reset email. The API always succeeds (it never reveals
+  /// whether the email exists), so there's nothing to return.
+  Future<void> forgotPassword(String email) async {
+    await _dio.post<void>(
+      '/auth/password/forgot',
+      data: {'email': email},
+      options: _idempotent(),
+    );
+  }
+
+  /// Sets a new password using the token from the reset email.
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    await _dio.post<void>(
+      '/auth/password/reset',
+      data: {'token': token, 'newPassword': newPassword},
+      options: _idempotent(),
+    );
+  }
+
   Future<void> logout(String? refreshToken) async {
     await _dio.post<void>(
       '/auth/logout',

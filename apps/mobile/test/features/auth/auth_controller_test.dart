@@ -68,6 +68,15 @@ class _ScriptedRepo implements AuthRepository {
   }) async => null;
 
   @override
+  Future<void> forgotPassword(String email) async {}
+
+  @override
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {}
+
+  @override
   Future<void> logout(String? refreshToken) async {}
 }
 

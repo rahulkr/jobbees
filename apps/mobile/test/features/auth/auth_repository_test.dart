@@ -187,4 +187,30 @@ void main() {
       expect(tokens!.accessToken, 'access-4');
     },
   );
+
+  test('forgotPassword posts the email to /auth/password/forgot', () async {
+    final adapter = _StubAdapter((_) => (status: 200, body: {'ok': true}));
+
+    await _repo(adapter).forgotPassword('jordan@example.com');
+
+    expect(adapter.lastRequest!.path, '/auth/password/forgot');
+    expect(adapter.lastRequest!.headers['Idempotency-Key'], 'idem-123');
+    expect(
+      (adapter.lastRequest!.data as Map<String, dynamic>)['email'],
+      'jordan@example.com',
+    );
+  });
+
+  test('resetPassword posts the token + new password', () async {
+    final adapter = _StubAdapter((_) => (status: 200, body: {'reset': true}));
+
+    await _repo(
+      adapter,
+    ).resetPassword(token: 'reset-token', newPassword: 'a-strong-passphrase');
+
+    expect(adapter.lastRequest!.path, '/auth/password/reset');
+    final body = adapter.lastRequest!.data as Map<String, dynamic>;
+    expect(body['token'], 'reset-token');
+    expect(body['newPassword'], 'a-strong-passphrase');
+  });
 }
