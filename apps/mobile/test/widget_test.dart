@@ -9,10 +9,12 @@ import 'package:jobbees_mobile/features/onboarding/data/onboarding_repository.da
 import 'package:jobbees_mobile/features/onboarding/providers/onboarding_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Boots the app as a returning user (onboarding already seen) and drives past
-/// the splash hold so we land on the home shell — the surface these foundation
-/// tests assert on. First-run onboarding (splash → welcome) is covered in
-/// test/features/onboarding/.
+import 'support/auth_test_support.dart';
+
+/// Boots the app as a returning, signed-in user (onboarding seen + a live
+/// session) and drives past the splash hold so we land on the home shell — the
+/// surface these foundation tests assert on. First-run onboarding and the auth
+/// gate are covered in test/features/.
 Future<void> _pumpHome(WidgetTester tester) async {
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
@@ -20,7 +22,10 @@ Future<void> _pumpHome(WidgetTester tester) async {
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        ...signedInOverrides(),
+      ],
       child: const JobbeesApp(),
     ),
   );
