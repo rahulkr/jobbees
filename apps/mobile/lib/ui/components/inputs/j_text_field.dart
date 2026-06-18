@@ -147,7 +147,19 @@ class _JTextFieldState extends State<JTextField> {
                   decoration: InputDecoration(
                     hintText: widget.hintText,
                     hintStyle: TextStyle(color: scheme.onSurfaceVariant),
+                    // Null EVERY border slot: the global inputDecorationTheme
+                    // defines focused/enabled/error borders, and leaving them
+                    // unset lets the theme draw a second ring on top of this
+                    // widget's own border. The field's border is the
+                    // AnimatedContainer above.
                     border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    isCollapsed: true,
+                    filled: false,
                     counterText: '',
                     contentPadding: EdgeInsets.zero,
                   ),
