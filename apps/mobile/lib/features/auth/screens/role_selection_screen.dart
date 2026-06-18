@@ -173,15 +173,15 @@ class _RoleCard extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: selected
-                      ? scheme.primary
-                      : scheme.surfaceContainerHighest,
+                  // Brand coral, not ash grey: light coral chip + coral glyph
+                  // at rest; solid coral + white glyph when selected.
+                  color: selected ? scheme.primary : scheme.primaryContainer,
                   borderRadius: JRadius.buttonLgAll,
                 ),
                 child: Icon(
                   option.icon,
                   size: 28,
-                  color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
+                  color: selected ? scheme.onPrimary : scheme.primary,
                 ),
               ),
               const SizedBox(width: JSpacing.base),
