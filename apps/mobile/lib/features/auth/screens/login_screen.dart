@@ -154,7 +154,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : 'Hide password',
                   ),
                 ),
-                const SizedBox(height: JSpacing.xl),
+                const SizedBox(height: JSpacing.sm),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: JButton.ghost(
+                    label: 'Forgot password?',
+                    onPressed: _submitting
+                        ? null
+                        : () => context.go('/auth/forgot'),
+                    size: JButtonSize.sm,
+                  ),
+                ),
+                const SizedBox(height: JSpacing.base),
                 JButton.primary(
                   label: 'Log in',
                   onPressed: _submitting ? null : _submit,

@@ -17,7 +17,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/models/auth_models.dart';
 import '../../features/auth/providers/auth_controller.dart';
+import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/role_selection_screen.dart';
 import '../../features/auth/screens/signup_screen.dart';
 import '../../features/home/screens/home_screen.dart';
@@ -36,7 +38,13 @@ const String kSignInRoute = '/auth/login';
 const String kSignUpRoute = '/auth/role';
 
 /// Routes reachable while signed out.
-const Set<String> _publicRoutes = {'/auth/login', '/auth/role', '/auth/signup'};
+const Set<String> _publicRoutes = {
+  '/auth/login',
+  '/auth/role',
+  '/auth/signup',
+  '/auth/forgot',
+  '/auth/reset',
+};
 
 /// Maps the `?role=` signup query param to a [UserRole] (absent → decide later).
 UserRole? _roleFromQuery(String? value) => switch (value) {
@@ -115,6 +123,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => SignupScreen(
           role: _roleFromQuery(state.uri.queryParameters['role']),
         ),
+      ),
+      GoRoute(
+        path: '/auth/forgot',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/auth/reset',
+        builder: (context, state) =>
+            ResetPasswordScreen(token: state.uri.queryParameters['token']),
       ),
       GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
       GoRoute(

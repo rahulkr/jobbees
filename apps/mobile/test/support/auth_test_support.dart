@@ -110,8 +110,10 @@ class FakeAuthRepository implements AuthRepository {
   final UserProfile? meUser;
   int logoutCount = 0;
   int refreshCount = 0;
+  int forgotCount = 0;
   String? lastOAuthProvider;
   UserRole? lastOAuthRole;
+  String? lastResetToken;
 
   @override
   String Function() get newIdempotencyKey =>
@@ -156,6 +158,17 @@ class FakeAuthRepository implements AuthRepository {
     lastOAuthProvider = provider;
     lastOAuthRole = role;
     return oauthTokens;
+  }
+
+  @override
+  Future<void> forgotPassword(String email) async => forgotCount++;
+
+  @override
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    lastResetToken = token;
   }
 
   @override
