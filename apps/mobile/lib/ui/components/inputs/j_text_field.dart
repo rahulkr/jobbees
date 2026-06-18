@@ -88,7 +88,7 @@ class _JTextFieldState extends State<JTextField> {
         ? scheme.error
         : _focused
         ? scheme.primary
-        : Colors.transparent;
+        : scheme.outlineVariant;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,19 +110,20 @@ class _JTextFieldState extends State<JTextField> {
           curve: JMotion.easeOut,
           height: 56,
           decoration: BoxDecoration(
+            // Light, calm input fill (dark-50) per docs/brand UI-PRINCIPLES
+            // § Forms; a hairline outline gives definition, primary on focus.
             color: widget.enabled
-                ? scheme.surfaceContainerHighest
-                : scheme.surfaceContainer,
+                ? scheme.surfaceContainerLow
+                : scheme.surfaceContainerHigh,
             borderRadius: JRadius.buttonMdAll,
-            border: Border.all(color: borderColor, width: 2),
-            // Soft focus halo in the accent (or error) colour.
+            border: Border.all(color: borderColor, width: _focused ? 2 : 1),
+            // Soft accent glow on focus (no hard ring).
             boxShadow: _focused
                 ? [
                     BoxShadow(
                       color: (hasError ? scheme.error : scheme.primary)
-                          .withValues(alpha: 0.16),
-                      blurRadius: 0,
-                      spreadRadius: 3,
+                          .withValues(alpha: 0.12),
+                      blurRadius: 6,
                     ),
                   ]
                 : null,
