@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'core/network/api_client.dart';
+import 'core/observability/error_reporting.dart';
 import 'core/router/url_strategy.dart';
 import 'features/auth/providers/auth_controller.dart';
 import 'features/onboarding/providers/onboarding_providers.dart';
@@ -26,18 +27,23 @@ Future<void> bootstrap() async {
   // — no async splash flicker waiting on disk.
   final prefs = await SharedPreferences.getInstance();
 
-  runApp(
-    ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(prefs),
-        // Let the network layer's 401-retry delegate to AuthController without
-        // `core` importing the auth feature (composition wired here).
-        sessionRefresherProvider.overrideWith(
-          (ref) =>
-              () => ref.read(authControllerProvider.notifier).refreshSession(),
-        ),
-      ],
-      child: const JobbeesApp(),
-    ),
-  );
+  // Runs the app inside Sentry's error zone when a DSN is configured; a plain
+  // runApp otherwise (no-op until SENTRY_DSN is set).
+  await initErrorReporting(() {
+    runApp(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          // Let the network layer's 401-retry delegate to AuthController without
+          // `core` importing the auth feature (composition wired here).
+          sessionRefresherProvider.overrideWith(
+            (ref) =>
+                () =>
+                    ref.read(authControllerProvider.notifier).refreshSession(),
+          ),
+        ],
+        child: const JobbeesApp(),
+      ),
+    );
+  });
 }
