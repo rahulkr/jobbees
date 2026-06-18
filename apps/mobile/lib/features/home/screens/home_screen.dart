@@ -23,12 +23,15 @@ const List<({String label, String path})> kShellDestinations = [
   (label: 'Browse a job', path: '/jobs/demo'),
 ];
 
-/// Role-specific entry. A client can switch on the tasker side of their account
-/// (they keep posting); a tasker manages their verification. Both reachable
-/// from one account, per the role model.
-_Destination _roleDestination(UserRole? role) => role == UserRole.tasker
-    ? (label: 'Verification', path: '/verify')
-    : (label: 'Work as a tasker', path: '/become-tasker');
+/// Role-specific entries. A client can switch on the tasker side of their
+/// account (they keep posting); a tasker manages verification + their profile.
+/// Both reachable from one account, per the role model.
+List<_Destination> _roleDestinations(UserRole? role) => role == UserRole.tasker
+    ? const [
+        (label: 'Verification', path: '/verify'),
+        (label: 'My tasker profile', path: '/profile/tasker'),
+      ]
+    : const [(label: 'Work as a tasker', path: '/become-tasker')];
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -38,7 +41,7 @@ class HomeScreen extends ConsumerWidget {
     final role = ref.watch(authControllerProvider).valueOrNull?.role;
     final destinations = <_Destination>[
       ...kShellDestinations,
-      _roleDestination(role),
+      ..._roleDestinations(role),
       (label: 'My profile', path: '/me'),
     ];
     return Scaffold(
