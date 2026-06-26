@@ -17,7 +17,7 @@ import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../providers/auth_providers.dart';
-import '../widgets/auth_error_banner.dart';
+import '../widgets/animated_auth_error.dart';
 import '../widgets/auth_header.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -30,6 +30,7 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _email = TextEditingController();
+  final _emailFocus = FocusNode();
 
   String? _emailError;
   String? _formError;
@@ -39,6 +40,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   void dispose() {
     _email.dispose();
+    _emailFocus.dispose();
     super.dispose();
   }
 
@@ -54,7 +56,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Future<void> _submit() async {
     if (_submitting) return;
     FocusScope.of(context).unfocus();
-    if (!_validate()) return;
+    if (!_validate()) {
+      JHaptics.error();
+      _emailFocus.requestFocus();
+      return;
+    }
 
     setState(() {
       _submitting = true;
@@ -65,7 +71,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       await ref.read(authRepositoryProvider).forgotPassword(_email.text.trim());
       if (mounted) setState(() => _sent = true);
     } catch (error) {
-      if (mounted) setState(() => _formError = ErrorMapper.map(error).message);
+      if (mounted) {
+        JHaptics.error();
+        setState(() => _formError = ErrorMapper.map(error).message);
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -107,13 +116,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             subtitle: "Enter your email and we'll send you a reset link.",
           ),
           const SizedBox(height: JSpacing.xl),
-          if (_formError != null) ...[
-            AuthErrorBanner(message: _formError!),
-            const SizedBox(height: JSpacing.base),
-          ],
+          AnimatedAuthError(message: _formError),
           JTextField(
             label: 'Email',
             controller: _email,
+            focusNode: _emailFocus,
             enabled: !_submitting,
             errorText: _emailError,
             hintText: 'you@example.com',

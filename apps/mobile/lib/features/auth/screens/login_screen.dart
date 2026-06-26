@@ -22,7 +22,7 @@ import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../providers/auth_controller.dart';
-import '../widgets/auth_error_banner.dart';
+import '../widgets/animated_auth_error.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/social_auth_buttons.dart';
 
@@ -37,6 +37,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
 
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+
   String? _emailError;
   String? _passwordError;
   String? _formError;
@@ -48,6 +51,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -63,10 +68,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return _emailError == null && _passwordError == null;
   }
 
+  void _focusFirstError() {
+    final target = _emailError != null
+        ? _emailFocus
+        : _passwordError != null
+        ? _passwordFocus
+        : null;
+    target?.requestFocus();
+  }
+
   Future<void> _submit() async {
     if (_submitting) return;
     FocusScope.of(context).unfocus();
-    if (!_validate()) return;
+    if (!_validate()) {
+      JHaptics.error();
+      _focusFirstError();
+      return;
+    }
 
     setState(() {
       _submitting = true;
@@ -79,7 +97,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .login(email: _email.text.trim(), password: _password.text);
       // Success: the router redirect takes over.
     } on AppError catch (error) {
-      if (mounted) setState(() => _formError = error.message);
+      if (mounted) {
+        JHaptics.error();
+        setState(() => _formError = error.message);
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -115,13 +136,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   subtitle: 'Log in to continue.',
                 ),
                 const SizedBox(height: JSpacing.xl),
-                if (_formError != null) ...[
-                  AuthErrorBanner(message: _formError!),
-                  const SizedBox(height: JSpacing.base),
-                ],
+                AnimatedAuthError(message: _formError),
                 JTextField(
                   label: 'Email',
                   controller: _email,
+                  focusNode: _emailFocus,
                   enabled: !_submitting,
                   errorText: _emailError,
                   hintText: 'you@example.com',
@@ -133,6 +152,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 JTextField(
                   label: 'Password',
                   controller: _password,
+                  focusNode: _passwordFocus,
                   enabled: !_submitting,
                   errorText: _passwordError,
                   obscureText: _obscurePassword,

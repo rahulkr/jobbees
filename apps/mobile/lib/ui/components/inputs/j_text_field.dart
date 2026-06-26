@@ -27,6 +27,7 @@ class JTextField extends StatefulWidget {
   const JTextField({
     required this.label,
     required this.controller,
+    this.focusNode,
     this.hintText,
     this.helperText,
     this.errorText,
@@ -47,6 +48,11 @@ class JTextField extends StatefulWidget {
 
   final String label;
   final TextEditingController controller;
+
+  /// Optional external focus node. Supply one when the parent needs to drive
+  /// focus (e.g. jumping to the first invalid field on a failed submit); the
+  /// parent owns its lifecycle. When null the field manages its own internally.
+  final FocusNode? focusNode;
   final String? hintText;
   final String? helperText;
   final String? errorText;
@@ -68,18 +74,39 @@ class JTextField extends StatefulWidget {
 }
 
 class _JTextFieldState extends State<JTextField> {
-  final _focus = FocusNode();
+  // Only created (and disposed) when the parent does not supply one.
+  FocusNode? _internalFocus;
   bool _focused = false;
+
+  FocusNode get _focusNode =>
+      widget.focusNode ?? (_internalFocus ??= FocusNode());
 
   @override
   void initState() {
     super.initState();
-    _focus.addListener(() => setState(() => _focused = _focus.hasFocus));
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(JTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      (oldWidget.focusNode ?? _internalFocus)?.removeListener(
+        _handleFocusChange,
+      );
+      _focusNode.addListener(_handleFocusChange);
+      _focused = _focusNode.hasFocus;
+    }
+  }
+
+  void _handleFocusChange() {
+    if (mounted) setState(() => _focused = _focusNode.hasFocus);
   }
 
   @override
   void dispose() {
-    _focus.dispose();
+    (widget.focusNode ?? _internalFocus)?.removeListener(_handleFocusChange);
+    _internalFocus?.dispose();
     super.dispose();
   }
 
@@ -138,7 +165,7 @@ class _JTextFieldState extends State<JTextField> {
               Expanded(
                 child: TextField(
                   controller: widget.controller,
-                  focusNode: _focus,
+                  focusNode: _focusNode,
                   enabled: widget.enabled,
                   obscureText: widget.obscureText,
                   keyboardType: widget.keyboardType,
