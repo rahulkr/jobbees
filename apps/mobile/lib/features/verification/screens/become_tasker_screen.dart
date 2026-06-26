@@ -20,7 +20,6 @@ import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../../auth/providers/auth_controller.dart';
-import '../../auth/widgets/animated_auth_error.dart';
 
 class BecomeTaskerScreen extends ConsumerStatefulWidget {
   const BecomeTaskerScreen({super.key});
@@ -31,21 +30,21 @@ class BecomeTaskerScreen extends ConsumerStatefulWidget {
 
 class _BecomeTaskerScreenState extends ConsumerState<BecomeTaskerScreen> {
   bool _submitting = false;
-  String? _formError;
 
   Future<void> _start() async {
     if (_submitting) return;
-    setState(() {
-      _submitting = true;
-      _formError = null;
-    });
+    setState(() => _submitting = true);
     try {
       await ref.read(authControllerProvider.notifier).becomeTasker();
       if (mounted) context.go('/verify');
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
-        setState(() => _formError = error.message);
+        JSnackbar.showError(
+          context,
+          error.message,
+          onRetry: error.retryable ? _start : null,
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -150,7 +149,6 @@ class _BecomeTaskerScreenState extends ConsumerState<BecomeTaskerScreen> {
                 ],
               ),
               const SizedBox(height: JSpacing.xl),
-              AnimatedAuthError(message: _formError),
               JButton.primary(
                 label: 'Get started',
                 onPressed: _submitting ? null : _start,

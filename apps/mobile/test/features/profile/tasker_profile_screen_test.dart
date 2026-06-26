@@ -104,7 +104,7 @@ void main() {
     expect(rate.focusNode?.hasFocus, isTrue);
   });
 
-  testWidgets('shows the error banner when saving fails', (tester) async {
+  testWidgets('shows an error snackbar when saving fails', (tester) async {
     final repo = _FakeRepo(
       const TaskerProfile(skills: []),
       updateError: const AppError('Could not save'),

@@ -22,7 +22,6 @@ import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../models/auth_models.dart';
 import '../providers/auth_controller.dart';
-import '../widgets/animated_auth_error.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/social_auth_buttons.dart';
 
@@ -55,7 +54,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   String? _lastNameError;
   String? _emailError;
   String? _passwordError;
-  String? _formError;
 
   bool _submitting = false;
   bool _obscurePassword = true;
@@ -121,10 +119,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       return;
     }
 
-    setState(() {
-      _submitting = true;
-      _formError = null;
-    });
+    setState(() => _submitting = true);
 
     try {
       await ref
@@ -143,7 +138,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
-        setState(() => _formError = error.message);
+        JSnackbar.showError(
+          context,
+          error.message,
+          onRetry: error.retryable ? _submit : null,
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -184,7 +183,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   _RoleChip(role: widget.role!),
                 ],
                 const SizedBox(height: JSpacing.xl),
-                AnimatedAuthError(message: _formError),
                 JTextField(
                   label: 'First name',
                   controller: _firstName,
@@ -255,9 +253,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 const SizedBox(height: JSpacing.lg),
                 SocialAuthButtons(
                   role: widget.role,
-                  onError: (message) => setState(
-                    () => _formError = message.isEmpty ? null : message,
-                  ),
+                  onError: (message) {
+                    if (message.isNotEmpty && mounted) {
+                      JSnackbar.showError(context, message);
+                    }
+                  },
                 ),
                 const SizedBox(height: JSpacing.base),
                 Row(

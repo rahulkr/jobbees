@@ -17,7 +17,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
-import '../../auth/widgets/animated_auth_error.dart';
 import '../providers/verification_providers.dart';
 
 class PhoneVerificationScreen extends ConsumerStatefulWidget {
@@ -39,7 +38,6 @@ class _PhoneVerificationScreenState
   bool _busy = false;
   String? _phoneError;
   String? _codeError;
-  String? _formError;
 
   @override
   void dispose() {
@@ -72,10 +70,7 @@ class _PhoneVerificationScreenState
       _phoneFocus.requestFocus();
       return;
     }
-    setState(() {
-      _busy = true;
-      _formError = null;
-    });
+    setState(() => _busy = true);
     try {
       await ref
           .read(phoneVerificationControllerProvider)
@@ -84,7 +79,11 @@ class _PhoneVerificationScreenState
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
-        setState(() => _formError = error.message);
+        JSnackbar.showError(
+          context,
+          error.message,
+          onRetry: error.retryable ? _sendCode : null,
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -99,10 +98,7 @@ class _PhoneVerificationScreenState
       _codeFocus.requestFocus();
       return;
     }
-    setState(() {
-      _busy = true;
-      _formError = null;
-    });
+    setState(() => _busy = true);
     try {
       await ref
           .read(phoneVerificationControllerProvider)
@@ -111,7 +107,11 @@ class _PhoneVerificationScreenState
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
-        setState(() => _formError = error.message);
+        JSnackbar.showError(
+          context,
+          error.message,
+          onRetry: error.retryable ? _verify : null,
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -123,7 +123,6 @@ class _PhoneVerificationScreenState
       _codeSent = false;
       _code.clear();
       _codeError = null;
-      _formError = null;
     });
   }
 
@@ -163,7 +162,6 @@ class _PhoneVerificationScreenState
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              AnimatedAuthError(message: _formError),
               if (!_codeSent) ..._phoneStep() else ..._codeStep(),
             ],
           ),

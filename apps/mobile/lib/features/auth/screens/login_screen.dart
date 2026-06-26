@@ -22,7 +22,6 @@ import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../providers/auth_controller.dart';
-import '../widgets/animated_auth_error.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/social_auth_buttons.dart';
 
@@ -42,7 +41,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   String? _emailError;
   String? _passwordError;
-  String? _formError;
 
   bool _submitting = false;
   bool _obscurePassword = true;
@@ -86,10 +84,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    setState(() {
-      _submitting = true;
-      _formError = null;
-    });
+    setState(() => _submitting = true);
 
     try {
       await ref
@@ -99,7 +94,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
-        setState(() => _formError = error.message);
+        JSnackbar.showError(
+          context,
+          error.message,
+          onRetry: error.retryable ? _submit : null,
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -136,7 +135,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   subtitle: 'Log in to continue.',
                 ),
                 const SizedBox(height: JSpacing.xl),
-                AnimatedAuthError(message: _formError),
                 JTextField(
                   label: 'Email',
                   controller: _email,
@@ -194,9 +192,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: JSpacing.lg),
                 SocialAuthButtons(
-                  onError: (message) => setState(
-                    () => _formError = message.isEmpty ? null : message,
-                  ),
+                  onError: (message) {
+                    if (message.isNotEmpty && mounted) {
+                      JSnackbar.showError(context, message);
+                    }
+                  },
                 ),
                 const SizedBox(height: JSpacing.base),
                 Row(

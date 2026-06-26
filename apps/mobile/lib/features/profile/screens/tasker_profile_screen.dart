@@ -16,7 +16,6 @@ import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../../auth/providers/auth_controller.dart';
-import '../../auth/widgets/animated_auth_error.dart';
 import '../models/tasker_profile.dart';
 import '../providers/profile_providers.dart';
 
@@ -40,7 +39,6 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
   bool _initialised = false;
   bool _saving = false;
   String? _rateError;
-  String? _formError;
 
   @override
   void dispose() {
@@ -98,7 +96,6 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
     setState(() {
       _saving = true;
       _rateError = null;
-      _formError = null;
     });
     try {
       await ref
@@ -116,7 +113,11 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
-        setState(() => _formError = error.message);
+        JSnackbar.showError(
+          context,
+          error.message,
+          onRetry: error.retryable ? _save : null,
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -183,7 +184,6 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              AnimatedAuthError(message: _formError),
               JTextField(
                 label: 'About you',
                 controller: _bio,

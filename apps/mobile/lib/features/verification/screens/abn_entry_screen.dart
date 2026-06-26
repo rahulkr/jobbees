@@ -14,7 +14,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
-import '../../auth/widgets/animated_auth_error.dart';
 import '../providers/verification_providers.dart';
 
 class AbnEntryScreen extends ConsumerStatefulWidget {
@@ -29,7 +28,6 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
   final _abnFocus = FocusNode();
 
   String? _abnError;
-  String? _formError;
   bool _submitting = false;
 
   @override
@@ -56,10 +54,7 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
       return;
     }
 
-    setState(() {
-      _submitting = true;
-      _formError = null;
-    });
+    setState(() => _submitting = true);
 
     try {
       await ref
@@ -69,7 +64,11 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
-        setState(() => _formError = error.message);
+        JSnackbar.showError(
+          context,
+          error.message,
+          onRetry: error.retryable ? _submit : null,
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -115,7 +114,6 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              AnimatedAuthError(message: _formError),
               JTextField(
                 label: 'ABN',
                 controller: _abn,

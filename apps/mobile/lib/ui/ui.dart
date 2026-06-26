@@ -27,3 +27,4 @@ export 'components/containers/j_bottom_sheet.dart';
 // Components — feedback
 export 'components/feedback/j_empty_state.dart';
 export 'components/feedback/j_loading_skeleton.dart';
+export 'components/feedback/j_snackbar.dart';

@@ -51,7 +51,9 @@ void main() {
     expect(controller.loginCount, 1);
   });
 
-  testWidgets('shows a server error in the banner', (tester) async {
+  testWidgets('shows a server error in a snackbar (no Retry on 4xx)', (
+    tester,
+  ) async {
     await _pumpLogin(
       tester,
       loginError: const AppError('Incorrect email or password.'),
@@ -63,5 +65,32 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Incorrect email or password.'), findsOneWidget);
+    // A wrong-credentials error is not retryable, so no Retry action.
+    expect(find.text('Retry'), findsNothing);
+  });
+
+  testWidgets('offers Retry on a transient error and re-runs the submit', (
+    tester,
+  ) async {
+    final controller = await _pumpLogin(
+      tester,
+      loginError: const AppError(
+        "Can't reach JOBBees right now.",
+        retryable: true,
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField).at(0), 'jordan@example.com');
+    await tester.enterText(find.byType(TextField).at(1), 'a-strong-passphrase');
+    await tester.tap(find.text('Log in'));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Can't reach JOBBees right now."), findsOneWidget);
+    expect(controller.loginCount, 1);
+
+    // Tapping Retry re-runs the login without re-entering anything.
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+    expect(controller.loginCount, 2);
   });
 }
