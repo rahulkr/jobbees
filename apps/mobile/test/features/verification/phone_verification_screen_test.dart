@@ -88,6 +88,9 @@ void main() {
 
     expect(find.text('Enter a valid phone number'), findsOneWidget);
     expect(repo.sendCount, 0);
+
+    final phone = tester.widget<TextField>(find.byType(TextField));
+    expect(phone.focusNode?.hasFocus, isTrue);
   });
 
   testWidgets('sends the code, verifies, reloads the profile, and returns', (

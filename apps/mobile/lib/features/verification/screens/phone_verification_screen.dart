@@ -17,7 +17,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
-import '../../auth/widgets/auth_error_banner.dart';
+import '../../auth/widgets/animated_auth_error.dart';
 import '../providers/verification_providers.dart';
 
 class PhoneVerificationScreen extends ConsumerStatefulWidget {
@@ -32,6 +32,8 @@ class _PhoneVerificationScreenState
     extends ConsumerState<PhoneVerificationScreen> {
   final _phone = TextEditingController();
   final _code = TextEditingController();
+  final _phoneFocus = FocusNode();
+  final _codeFocus = FocusNode();
 
   bool _codeSent = false;
   bool _busy = false;
@@ -43,6 +45,8 @@ class _PhoneVerificationScreenState
   void dispose() {
     _phone.dispose();
     _code.dispose();
+    _phoneFocus.dispose();
+    _codeFocus.dispose();
     super.dispose();
   }
 
@@ -63,7 +67,11 @@ class _PhoneVerificationScreenState
   Future<void> _sendCode() async {
     if (_busy) return;
     FocusScope.of(context).unfocus();
-    if (!_validatePhone()) return;
+    if (!_validatePhone()) {
+      JHaptics.error();
+      _phoneFocus.requestFocus();
+      return;
+    }
     setState(() {
       _busy = true;
       _formError = null;
@@ -74,7 +82,10 @@ class _PhoneVerificationScreenState
           .sendCode(_normalisedPhone);
       if (mounted) setState(() => _codeSent = true);
     } on AppError catch (error) {
-      if (mounted) setState(() => _formError = error.message);
+      if (mounted) {
+        JHaptics.error();
+        setState(() => _formError = error.message);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -83,7 +94,11 @@ class _PhoneVerificationScreenState
   Future<void> _verify() async {
     if (_busy) return;
     FocusScope.of(context).unfocus();
-    if (!_validateCode()) return;
+    if (!_validateCode()) {
+      JHaptics.error();
+      _codeFocus.requestFocus();
+      return;
+    }
     setState(() {
       _busy = true;
       _formError = null;
@@ -94,7 +109,10 @@ class _PhoneVerificationScreenState
           .verifyCode(phone: _normalisedPhone, code: _code.text.trim());
       if (mounted) context.pop();
     } on AppError catch (error) {
-      if (mounted) setState(() => _formError = error.message);
+      if (mounted) {
+        JHaptics.error();
+        setState(() => _formError = error.message);
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -145,10 +163,7 @@ class _PhoneVerificationScreenState
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              if (_formError != null) ...[
-                AuthErrorBanner(message: _formError!),
-                const SizedBox(height: JSpacing.base),
-              ],
+              AnimatedAuthError(message: _formError),
               if (!_codeSent) ..._phoneStep() else ..._codeStep(),
             ],
           ),
@@ -161,6 +176,7 @@ class _PhoneVerificationScreenState
     JTextField(
       label: 'Phone number',
       controller: _phone,
+      focusNode: _phoneFocus,
       enabled: !_busy,
       errorText: _phoneError,
       hintText: '+61400000000',
@@ -183,6 +199,7 @@ class _PhoneVerificationScreenState
     JTextField(
       label: 'Verification code',
       controller: _code,
+      focusNode: _codeFocus,
       enabled: !_busy,
       errorText: _codeError,
       hintText: '6-digit code',
