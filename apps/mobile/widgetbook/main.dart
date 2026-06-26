@@ -21,6 +21,7 @@ import 'components/inputs/j_text_field_page.dart';
 import 'components/containers/j_card_page.dart';
 import 'components/containers/j_bottom_sheet_page.dart';
 import 'components/feedback/j_empty_state_page.dart';
+import 'components/feedback/j_loading_skeleton_page.dart';
 import 'components/showcase/home_feed_page.dart';
 
 void main() {
@@ -75,7 +76,10 @@ class _WidgetbookApp extends StatelessWidget {
               name: 'Containers',
               children: [jCardPage(), jBottomSheetPage()],
             ),
-            WidgetbookFolder(name: 'Feedback', children: [jEmptyStatePage()]),
+            WidgetbookFolder(
+              name: 'Feedback',
+              children: [jEmptyStatePage(), jLoadingSkeletonPage()],
+            ),
           ],
         ),
       ],
