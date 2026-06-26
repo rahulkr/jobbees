@@ -87,6 +87,23 @@ void main() {
     expect(find.text('Profile saved'), findsOneWidget); // snackbar
   });
 
+  testWidgets('flags an invalid rate and focuses the rate field', (
+    tester,
+  ) async {
+    final repo = _FakeRepo(const TaskerProfile(skills: []));
+    await _pump(tester, repo);
+
+    await tester.enterText(find.byType(TextField).at(1), 'abc'); // bad rate
+    await tester.ensureVisible(find.text('Save profile'));
+    await tester.tap(find.text('Save profile'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enter a valid amount'), findsOneWidget);
+    expect(repo.lastUpdate, isNull); // never reached the server
+    final rate = tester.widget<TextField>(find.byType(TextField).at(1));
+    expect(rate.focusNode?.hasFocus, isTrue);
+  });
+
   testWidgets('shows the error banner when saving fails', (tester) async {
     final repo = _FakeRepo(
       const TaskerProfile(skills: []),

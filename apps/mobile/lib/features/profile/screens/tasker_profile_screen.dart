@@ -16,7 +16,7 @@ import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../../auth/providers/auth_controller.dart';
-import '../../auth/widgets/auth_error_banner.dart';
+import '../../auth/widgets/animated_auth_error.dart';
 import '../models/tasker_profile.dart';
 import '../providers/profile_providers.dart';
 
@@ -34,6 +34,7 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
   final _bio = TextEditingController();
   final _rate = TextEditingController();
   final _skillInput = TextEditingController();
+  final _rateFocus = FocusNode();
   final List<String> _skills = [];
 
   bool _initialised = false;
@@ -46,6 +47,7 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
     _bio.dispose();
     _rate.dispose();
     _skillInput.dispose();
+    _rateFocus.dispose();
     super.dispose();
   }
 
@@ -88,7 +90,9 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
     if (_saving) return;
     FocusScope.of(context).unfocus();
     if (_rate.text.trim().isNotEmpty && _rateCents() == null) {
+      JHaptics.error();
       setState(() => _rateError = 'Enter a valid amount');
+      _rateFocus.requestFocus();
       return;
     }
     setState(() {
@@ -110,7 +114,10 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
         ).showSnackBar(const SnackBar(content: Text('Profile saved')));
       }
     } on AppError catch (error) {
-      if (mounted) setState(() => _formError = error.message);
+      if (mounted) {
+        JHaptics.error();
+        setState(() => _formError = error.message);
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -176,10 +183,7 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              if (_formError != null) ...[
-                AuthErrorBanner(message: _formError!),
-                const SizedBox(height: JSpacing.base),
-              ],
+              AnimatedAuthError(message: _formError),
               JTextField(
                 label: 'About you',
                 controller: _bio,
@@ -193,6 +197,7 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
               JTextField(
                 label: 'Hourly rate (AUD)',
                 controller: _rate,
+                focusNode: _rateFocus,
                 enabled: !_saving,
                 errorText: _rateError,
                 hintText: 'e.g. 85',

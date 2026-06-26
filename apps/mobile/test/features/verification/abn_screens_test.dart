@@ -65,6 +65,19 @@ void main() {
       expect(find.text('Enter your 11-digit ABN'), findsOneWidget);
     });
 
+    testWidgets('moves focus to the ABN field on a failed submit', (
+      tester,
+    ) async {
+      await _pump(tester, const AbnEntryScreen());
+
+      await tester.enterText(find.byType(TextField), '123');
+      await tester.tap(find.text('Verify ABN'));
+      await tester.pumpAndSettle();
+
+      final abn = tester.widget<TextField>(find.byType(TextField));
+      expect(abn.focusNode?.hasFocus, isTrue);
+    });
+
     testWidgets('submits a well-formed ABN and surfaces a server error', (
       tester,
     ) async {

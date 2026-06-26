@@ -14,7 +14,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
-import '../../auth/widgets/auth_error_banner.dart';
+import '../../auth/widgets/animated_auth_error.dart';
 import '../providers/verification_providers.dart';
 
 class AbnEntryScreen extends ConsumerStatefulWidget {
@@ -26,6 +26,7 @@ class AbnEntryScreen extends ConsumerStatefulWidget {
 
 class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
   final _abn = TextEditingController();
+  final _abnFocus = FocusNode();
 
   String? _abnError;
   String? _formError;
@@ -34,6 +35,7 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
   @override
   void dispose() {
     _abn.dispose();
+    _abnFocus.dispose();
     super.dispose();
   }
 
@@ -48,7 +50,11 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
   Future<void> _submit() async {
     if (_submitting) return;
     FocusScope.of(context).unfocus();
-    if (!_validate()) return;
+    if (!_validate()) {
+      JHaptics.error();
+      _abnFocus.requestFocus();
+      return;
+    }
 
     setState(() {
       _submitting = true;
@@ -61,7 +67,10 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
           .submit(_abn.text.replaceAll(RegExp(r'\s+'), ''));
       if (mounted) context.pop();
     } on AppError catch (error) {
-      if (mounted) setState(() => _formError = error.message);
+      if (mounted) {
+        JHaptics.error();
+        setState(() => _formError = error.message);
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -106,13 +115,11 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              if (_formError != null) ...[
-                AuthErrorBanner(message: _formError!),
-                const SizedBox(height: JSpacing.base),
-              ],
+              AnimatedAuthError(message: _formError),
               JTextField(
                 label: 'ABN',
                 controller: _abn,
+                focusNode: _abnFocus,
                 enabled: !_submitting,
                 errorText: _abnError,
                 hintText: '11 digits',
