@@ -134,7 +134,13 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
       ),
       body: SafeArea(
         child: profile.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: const _FormSkeleton(),
+            ),
+          ),
           error: (_, _) => _ErrorState(
             onRetry: () => ref.invalidate(taskerProfileControllerProvider),
           ),
@@ -220,6 +226,52 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Loading placeholder shaped like the profile form: intro, bio area, rate
+/// field, skills field + chips, save button. Skeleton, not a spinner.
+class _FormSkeleton extends StatelessWidget {
+  const _FormSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      padding: EdgeInsets.all(JSpacing.lg),
+      child: JShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: JSpacing.sm),
+            JSkeleton.line(width: 260),
+            SizedBox(height: JSpacing.xl),
+            JSkeleton.line(width: 88),
+            SizedBox(height: JSpacing.sm),
+            JSkeleton.box(height: 120),
+            SizedBox(height: JSpacing.lg),
+            JSkeleton.line(width: 128),
+            SizedBox(height: JSpacing.sm),
+            JSkeleton.box(height: 56),
+            SizedBox(height: JSpacing.lg),
+            JSkeleton.line(width: 60),
+            SizedBox(height: JSpacing.sm),
+            JSkeleton.box(height: 56),
+            SizedBox(height: JSpacing.base),
+            Row(
+              children: [
+                JSkeleton.box(width: 96, height: 32, radius: JRadius.chipAll),
+                SizedBox(width: JSpacing.sm),
+                JSkeleton.box(width: 72, height: 32, radius: JRadius.chipAll),
+                SizedBox(width: JSpacing.sm),
+                JSkeleton.box(width: 108, height: 32, radius: JRadius.chipAll),
+              ],
+            ),
+            SizedBox(height: JSpacing.xl),
+            JSkeleton.box(height: 56),
+          ],
         ),
       ),
     );

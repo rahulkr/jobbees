@@ -56,10 +56,7 @@ class VerificationStatusScreen extends ConsumerWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: status.when(
-          loading: () => const Padding(
-            padding: EdgeInsets.only(top: JSpacing.xxxl),
-            child: Center(child: CircularProgressIndicator()),
-          ),
+          loading: () => const _VerificationSkeleton(),
           error: (_, _) =>
               _ErrorState(onRetry: () => ref.invalidate(abnStatusProvider)),
           data: (abn) => ListView(
@@ -220,6 +217,65 @@ class _AbnCard extends StatelessWidget {
     if (abn.length != 11) return abn;
     return '${abn.substring(0, 2)} ${abn.substring(2, 5)} '
         '${abn.substring(5, 8)} ${abn.substring(8, 11)}';
+  }
+}
+
+/// Loading placeholder mirroring the two verification cards (ABN + phone).
+/// A skeleton in the content's shape, not a spinner (UI-PRINCIPLES § Loading).
+class _VerificationSkeleton extends StatelessWidget {
+  const _VerificationSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(JSpacing.lg),
+      children: const [
+        _GhostCard(),
+        SizedBox(height: JSpacing.base),
+        _GhostCard(),
+      ],
+    );
+  }
+}
+
+/// A single ghost card: real card chrome (kept crisp, outside the shimmer) with
+/// shimmering placeholder shapes inside, matching an [_AbnCard] / [_PhoneCard].
+class _GhostCard extends StatelessWidget {
+  const _GhostCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: JRadius.cardAll,
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      padding: const EdgeInsets.all(JSpacing.base),
+      child: const JShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                JSkeleton.circle(size: 24),
+                SizedBox(width: JSpacing.sm),
+                JSkeleton.line(width: 64),
+                Spacer(),
+                JSkeleton.box(width: 72, height: 24, radius: JRadius.chipAll),
+              ],
+            ),
+            SizedBox(height: JSpacing.base),
+            JSkeleton.line(),
+            SizedBox(height: JSpacing.sm),
+            JSkeleton.line(width: 200),
+            SizedBox(height: JSpacing.base),
+            JSkeleton.box(height: 52),
+          ],
+        ),
+      ),
+    );
   }
 }
 

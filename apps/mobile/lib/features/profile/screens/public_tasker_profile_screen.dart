@@ -27,7 +27,13 @@ class PublicTaskerProfileScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Tasker profile')),
       body: SafeArea(
         child: profile.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: const _ProfileSkeleton(),
+            ),
+          ),
           error: (_, _) => _ErrorState(
             onRetry: () =>
                 ref.invalidate(publicTaskerProfileProvider(taskerId)),
@@ -122,6 +128,58 @@ class PublicTaskerProfileScreen extends ConsumerWidget {
                 color: scheme.onSurfaceVariant,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Loading placeholder shaped like the public profile: avatar + name, trust
+/// badges, rate, and an About block. Skeleton, not a spinner.
+class _ProfileSkeleton extends StatelessWidget {
+  const _ProfileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      padding: EdgeInsets.all(JSpacing.lg),
+      child: JShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                JSkeleton.circle(size: 64),
+                SizedBox(width: JSpacing.base),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    JSkeleton.line(width: 140, height: 20),
+                    SizedBox(height: JSpacing.sm),
+                    JSkeleton.line(width: 100),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: JSpacing.lg),
+            Row(
+              children: [
+                JSkeleton.box(width: 120, height: 26, radius: JRadius.chipAll),
+                SizedBox(width: JSpacing.sm),
+                JSkeleton.box(width: 120, height: 26, radius: JRadius.chipAll),
+              ],
+            ),
+            SizedBox(height: JSpacing.lg),
+            JSkeleton.line(width: 80, height: 20),
+            SizedBox(height: JSpacing.lg),
+            JSkeleton.line(width: 80),
+            SizedBox(height: JSpacing.sm),
+            JSkeleton.line(),
+            SizedBox(height: JSpacing.sm),
+            JSkeleton.line(),
+            SizedBox(height: JSpacing.sm),
+            JSkeleton.line(width: 220),
           ],
         ),
       ),
