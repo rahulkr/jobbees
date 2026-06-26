@@ -17,29 +17,35 @@ class AuthErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(JSpacing.base),
-      decoration: BoxDecoration(
-        color: scheme.errorContainer,
-        borderRadius: JRadius.buttonMdAll,
-      ),
-      child: Row(
-        children: [
-          Icon(
-            LucideIcons.circleAlert,
-            size: 20,
-            color: scheme.onErrorContainer,
-          ),
-          const SizedBox(width: JSpacing.md),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: scheme.onErrorContainer),
+    // liveRegion makes VoiceOver/TalkBack announce the message the moment it
+    // appears, so a non-sighted user is not left submitting into silence.
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: Container(
+        padding: const EdgeInsets.all(JSpacing.base),
+        decoration: BoxDecoration(
+          color: scheme.errorContainer,
+          borderRadius: JRadius.buttonMdAll,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              LucideIcons.circleAlert,
+              size: 20,
+              color: scheme.onErrorContainer,
             ),
-          ),
-        ],
+            const SizedBox(width: JSpacing.md),
+            Expanded(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onErrorContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

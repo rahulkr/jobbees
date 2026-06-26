@@ -17,7 +17,7 @@ import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../providers/auth_providers.dart';
-import '../widgets/auth_error_banner.dart';
+import '../widgets/animated_auth_error.dart';
 import '../widgets/auth_header.dart';
 
 /// Matches the backend ResetPasswordDto (`@MinLength(10)`).
@@ -38,6 +38,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _password = TextEditingController();
   final _confirm = TextEditingController();
 
+  final _passwordFocus = FocusNode();
+  final _confirmFocus = FocusNode();
+
   String? _passwordError;
   String? _confirmError;
   String? _formError;
@@ -51,6 +54,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   void dispose() {
     _password.dispose();
     _confirm.dispose();
+    _passwordFocus.dispose();
+    _confirmFocus.dispose();
     super.dispose();
   }
 
@@ -66,10 +71,23 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     return _passwordError == null && _confirmError == null;
   }
 
+  void _focusFirstError() {
+    final target = _passwordError != null
+        ? _passwordFocus
+        : _confirmError != null
+        ? _confirmFocus
+        : null;
+    target?.requestFocus();
+  }
+
   Future<void> _submit() async {
     if (_submitting) return;
     FocusScope.of(context).unfocus();
-    if (!_validate()) return;
+    if (!_validate()) {
+      JHaptics.error();
+      _focusFirstError();
+      return;
+    }
 
     setState(() {
       _submitting = true;
@@ -82,7 +100,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           .resetPassword(token: widget.token!, newPassword: _password.text);
       if (mounted) setState(() => _done = true);
     } catch (error) {
-      if (mounted) setState(() => _formError = ErrorMapper.map(error).message);
+      if (mounted) {
+        JHaptics.error();
+        setState(() => _formError = ErrorMapper.map(error).message);
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -131,13 +152,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           subtitle: 'Pick a password you have not used before.',
         ),
         const SizedBox(height: JSpacing.xl),
-        if (_formError != null) ...[
-          AuthErrorBanner(message: _formError!),
-          const SizedBox(height: JSpacing.base),
-        ],
+        AnimatedAuthError(message: _formError),
         JTextField(
           label: 'New password',
           controller: _password,
+          focusNode: _passwordFocus,
           enabled: !_submitting,
           errorText: _passwordError,
           helperText: 'At least $_kMinPasswordLength characters',
@@ -156,8 +175,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         JTextField(
           label: 'Confirm password',
           controller: _confirm,
+          focusNode: _confirmFocus,
           enabled: !_submitting,
           errorText: _confirmError,
+          helperText: 'Type it again',
           obscureText: _obscure,
           textInputAction: TextInputAction.done,
           autofillHints: const [AutofillHints.newPassword],

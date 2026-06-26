@@ -85,4 +85,24 @@ void main() {
 
     expect(find.text('That account already exists.'), findsOneWidget);
   });
+
+  testWidgets('offers example hints on the name fields', (tester) async {
+    await _pumpSignup(tester);
+
+    // Hints render as placeholder text while the fields are empty.
+    expect(find.text('Jordan'), findsOneWidget);
+    expect(find.text('Lee'), findsOneWidget);
+  });
+
+  testWidgets('moves focus to the first invalid field on a failed submit', (
+    tester,
+  ) async {
+    await _pumpSignup(tester);
+
+    await tester.tap(find.text('Create account'));
+    await tester.pumpAndSettle();
+
+    final firstName = tester.widget<TextField>(find.byType(TextField).at(0));
+    expect(firstName.focusNode?.hasFocus, isTrue);
+  });
 }

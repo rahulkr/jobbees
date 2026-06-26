@@ -22,7 +22,7 @@ import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../models/auth_models.dart';
 import '../providers/auth_controller.dart';
-import '../widgets/auth_error_banner.dart';
+import '../widgets/animated_auth_error.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/social_auth_buttons.dart';
 
@@ -46,6 +46,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
 
+  final _firstNameFocus = FocusNode();
+  final _lastNameFocus = FocusNode();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+
   String? _firstNameError;
   String? _lastNameError;
   String? _emailError;
@@ -61,6 +66,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     _lastName.dispose();
     _email.dispose();
     _password.dispose();
+    _firstNameFocus.dispose();
+    _lastNameFocus.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -88,10 +97,29 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         _passwordError == null;
   }
 
+  /// Lands the cursor on the first field with an error so a failed submit
+  /// points the user straight at the problem instead of leaving focus dropped.
+  void _focusFirstError() {
+    final target = _firstNameError != null
+        ? _firstNameFocus
+        : _lastNameError != null
+        ? _lastNameFocus
+        : _emailError != null
+        ? _emailFocus
+        : _passwordError != null
+        ? _passwordFocus
+        : null;
+    target?.requestFocus();
+  }
+
   Future<void> _submit() async {
     if (_submitting) return;
     FocusScope.of(context).unfocus();
-    if (!_validate()) return;
+    if (!_validate()) {
+      JHaptics.error();
+      _focusFirstError();
+      return;
+    }
 
     setState(() {
       _submitting = true;
@@ -113,7 +141,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       if (mounted && widget.role == UserRole.tasker) context.go('/verify');
       // Otherwise the router redirect takes over. Nothing to navigate here.
     } on AppError catch (error) {
-      if (mounted) setState(() => _formError = error.message);
+      if (mounted) {
+        JHaptics.error();
+        setState(() => _formError = error.message);
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -153,15 +184,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   _RoleChip(role: widget.role!),
                 ],
                 const SizedBox(height: JSpacing.xl),
-                if (_formError != null) ...[
-                  AuthErrorBanner(message: _formError!),
-                  const SizedBox(height: JSpacing.base),
-                ],
+                AnimatedAuthError(message: _formError),
                 JTextField(
                   label: 'First name',
                   controller: _firstName,
+                  focusNode: _firstNameFocus,
                   enabled: !_submitting,
                   errorText: _firstNameError,
+                  hintText: 'Jordan',
                   textInputAction: TextInputAction.next,
                   autofillHints: const [AutofillHints.givenName],
                 ),
@@ -169,8 +199,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 JTextField(
                   label: 'Last name',
                   controller: _lastName,
+                  focusNode: _lastNameFocus,
                   enabled: !_submitting,
                   errorText: _lastNameError,
+                  hintText: 'Lee',
                   textInputAction: TextInputAction.next,
                   autofillHints: const [AutofillHints.familyName],
                 ),
@@ -178,6 +210,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 JTextField(
                   label: 'Email',
                   controller: _email,
+                  focusNode: _emailFocus,
                   enabled: !_submitting,
                   errorText: _emailError,
                   hintText: 'you@example.com',
@@ -189,6 +222,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 JTextField(
                   label: 'Password',
                   controller: _password,
+                  focusNode: _passwordFocus,
                   enabled: !_submitting,
                   errorText: _passwordError,
                   helperText: 'At least $_kMinPasswordLength characters',
