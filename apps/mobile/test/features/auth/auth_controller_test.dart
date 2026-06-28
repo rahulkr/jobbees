@@ -86,6 +86,9 @@ class _ScriptedRepo implements AuthRepository {
   Future<void> becomeTasker() async {}
 
   @override
+  Future<void> switchToClient() async {}
+
+  @override
   Future<void> logout(String? refreshToken) async {}
 }
 
@@ -199,6 +202,29 @@ void main() {
       expect(
         container.read(authControllerProvider).valueOrNull?.role,
         UserRole.tasker,
+      );
+    },
+  );
+
+  test(
+    'switchToClient downgrades, refreshes the session, and refetches the profile',
+    () async {
+      // testUser is a CLIENT — the profile after the switch.
+      final storage = InMemoryTokenStorage();
+      await storage.write(accessToken: 'a', refreshToken: 'r');
+      final repo = FakeAuthRepository(meUser: testUser);
+      final container = _container(repo: repo, storage: storage);
+      await container.read(authControllerProvider.future);
+
+      await container.read(authControllerProvider.notifier).switchToClient();
+
+      // Switch call made, session re-minted (so the JWT carries CLIENT), and
+      // the refetched profile is now a client.
+      expect(repo.switchToClientCount, 1);
+      expect(repo.refreshCount, greaterThanOrEqualTo(1));
+      expect(
+        container.read(authControllerProvider).valueOrNull?.role,
+        UserRole.client,
       );
     },
   );

@@ -18,16 +18,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/error_mapper.dart';
 import '../../../core/platform/platform_info.dart';
 import '../../../ui/ui.dart';
-import '../models/auth_models.dart';
 import '../providers/auth_controller.dart';
 
 enum _Provider { google, apple }
 
 class SocialAuthButtons extends ConsumerStatefulWidget {
-  const SocialAuthButtons({this.role, this.onError, super.key});
-
-  /// Applied only on first-time signup (carried from role selection).
-  final UserRole? role;
+  const SocialAuthButtons({this.onError, super.key});
 
   /// Surfaces a provider failure message to the host screen's error banner.
   final ValueChanged<String>? onError;
@@ -48,9 +44,9 @@ class _SocialAuthButtonsState extends ConsumerState<SocialAuthButtons> {
     try {
       final controller = ref.read(authControllerProvider.notifier);
       if (provider == _Provider.google) {
-        await controller.signInWithGoogle(role: widget.role);
+        await controller.signInWithGoogle();
       } else {
-        await controller.signInWithApple(role: widget.role);
+        await controller.signInWithApple();
       }
       // Success: the router redirect takes over. Cancellation is a silent no-op.
     } on AppError catch (error) {

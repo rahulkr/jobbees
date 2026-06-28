@@ -15,16 +15,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/models/auth_models.dart';
 import '../../features/auth/providers/auth_controller.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
-import '../../features/auth/screens/role_selection_screen.dart';
 import '../../features/auth/screens/signup_screen.dart';
 import '../../features/auth/screens/verify_email_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/onboarding/providers/onboarding_providers.dart';
+import '../../features/profile/screens/my_profile_screen.dart';
 import '../../features/profile/screens/public_tasker_profile_screen.dart';
 import '../../features/profile/screens/tasker_profile_screen.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
@@ -40,25 +39,18 @@ import '../../features/verification/screens/verification_status_screen.dart';
 /// the welcome carousel instead — see the redirect below.
 const String kSignInRoute = '/auth/login';
 
-/// First-run destination after the welcome carousel: brand-new users pick a
-/// role, which carries into signup.
-const String kSignUpRoute = '/auth/role';
+/// First-run destination after the welcome carousel: brand-new users go
+/// straight to signup. Everyone starts as a client; becoming a tasker is a
+/// later in-app upgrade from the profile screen (client note #4).
+const String kSignUpRoute = '/auth/signup';
 
 /// Routes reachable while signed out.
 const Set<String> _publicRoutes = {
   '/auth/login',
-  '/auth/role',
   '/auth/signup',
   '/auth/forgot',
   '/auth/reset',
   '/auth/verify-email',
-};
-
-/// Maps the `?role=` signup query param to a [UserRole] (absent → decide later).
-UserRole? _roleFromQuery(String? value) => switch (value) {
-  'client' => UserRole.client,
-  'tasker' => UserRole.tasker,
-  _ => null,
 };
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -129,14 +121,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: '/auth/role',
-        builder: (context, state) => const RoleSelectionScreen(),
-      ),
-      GoRoute(
         path: '/auth/signup',
-        builder: (context, state) => SignupScreen(
-          role: _roleFromQuery(state.uri.queryParameters['role']),
-        ),
+        builder: (context, state) => const SignupScreen(),
       ),
       GoRoute(
         path: '/auth/forgot',
@@ -186,8 +172,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/me',
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'My profile', route: '/me'),
+        builder: (context, state) => const MyProfileScreen(),
       ),
       GoRoute(
         path: '/jobs/:id',
