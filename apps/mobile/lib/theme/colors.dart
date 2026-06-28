@@ -15,17 +15,20 @@ import 'package:flutter/material.dart';
 class JobbeesColors {
   JobbeesColors._();
 
-  // ---- Primary palette (coral orange) ----
-  static const primary50 = Color(0xFFFFF4ED);
-  static const primary100 = Color(0xFFFFE6D5);
-  static const primary200 = Color(0xFFFECCAB);
-  static const primary300 = Color(0xFFFDAB76);
-  static const primary400 = Color(0xFFFB8A3E);
-  static const primary500 = Color(0xFFFF6B2C); // main brand
-  static const primary600 = Color(0xFFE8530F);
-  static const primary700 = Color(0xFFC1400D);
-  static const primary800 = Color(0xFF9A3412);
-  static const primary900 = Color(0xFF7C2D12);
+  // ---- Primary palette (honey orange — logo-true) ----
+  // Re-based on the logo's actual orange (#ED713E), a warmer/softer honey tone
+  // than the old hot coral (#FF6B2C) which read as a "warning". Reads as warm +
+  // premium, and is on-brand for the honeycomb mark (bees → honey).
+  static const primary50 = Color(0xFFFDF3EC);
+  static const primary100 = Color(0xFFFBE3D2);
+  static const primary200 = Color(0xFFF6C5A0);
+  static const primary300 = Color(0xFFF0A572);
+  static const primary400 = Color(0xFFEE8B53);
+  static const primary500 = Color(0xFFED713E); // main brand (logo orange)
+  static const primary600 = Color(0xFFDB5E2C);
+  static const primary700 = Color(0xFFB84A24);
+  static const primary800 = Color(0xFF92391E);
+  static const primary900 = Color(0xFF76301B);
 
   /// Default = primary-500
   static const primary = primary500;
@@ -110,7 +113,9 @@ final lightColorScheme = ColorScheme(
 
 final darkColorScheme = ColorScheme(
   brightness: Brightness.dark,
-  primary: const Color(0xFFFF8F5E), // lighter for AA contrast on dark surface
+  primary: const Color(
+    0xFFF4A06A,
+  ), // lighter honey for AA contrast on dark surface
   onPrimary: JobbeesColors.dark900,
   primaryContainer: JobbeesColors.primary800,
   onPrimaryContainer: JobbeesColors.primary100,
@@ -145,10 +150,33 @@ final darkColorScheme = ColorScheme(
 // Gradients (use sparingly — hero moments only)
 // ============================================================================
 
+// Honey blend: logo orange → warm amber. Elegant + on-brand, not "warning".
+// Hero moments only (icon containers, celebration) — it lightens, so it's NOT
+// for surfaces with overlaid white text. Buttons use [gradientPrimaryButton].
 const gradientPrimary = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
-  colors: [JobbeesColors.primary, Color(0xFFFF8F5E)],
+  colors: [JobbeesColors.primary, Color(0xFFF4A24B)],
+);
+
+// Primary CTA fill — a "lit from above" treatment: a rich honey-gold → deep
+// terracotta base (vertical) sitting under a faint white top sheen
+// ([gradientButtonSheen]), for a glassy, tactile pill. The deep lower half keeps
+// the centred white label legible. Buttons intentionally use a vertical fill (a
+// top highlight reads as light from above), not the 135° hero diagonal.
+const gradientPrimaryButton = LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: [Color(0xFFF2A65A), Color(0xFFD8602A)],
+);
+
+// A restrained top highlight layered over [gradientPrimaryButton] on primary CTAs
+// (~12% white fading to transparent). Just enough lit-from-above hint to keep the
+// pill tactile, without the glossy "2010s glass button" sheen a stronger value reads as.
+const gradientButtonSheen = LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: [Color(0x1FFFFFFF), Color(0x00FFFFFF)],
 );
 
 const gradientSuccess = LinearGradient(

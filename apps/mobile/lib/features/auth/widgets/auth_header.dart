@@ -25,8 +25,8 @@ class AuthHeader extends StatelessWidget {
       children: [
         Image.asset(
           'assets/icon.png',
-          width: 56,
-          height: 56,
+          width: 68,
+          height: 68,
           filterQuality: FilterQuality.medium,
         ),
         const SizedBox(height: JSpacing.lg),
