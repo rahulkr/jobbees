@@ -8,8 +8,10 @@
 /// clears the busy state; a real failure is reported up via [onError] so the
 /// host screen renders it in its banner.
 ///
-/// NOTE (brand): production should use the official Google/Apple button assets
-/// for store review. These branded JButtons are the MVP stand-in.
+/// Branding: both providers use their official mark — the multi-colour Google
+/// "G" (assets/social/google.png) and the black Apple logo
+/// (assets/social/apple.png) — on the neutral outline [JButton.secondary] so
+/// the primary CTA stays dominant.
 library;
 
 import 'package:flutter/material.dart';
@@ -81,7 +83,12 @@ class _SocialAuthButtonsState extends ConsumerState<SocialAuthButtons> {
     final buttons = <Widget>[
       JButton.secondary(
         label: 'Continue with Google',
-        icon: Icons.g_mobiledata,
+        leading: Image.asset(
+          'assets/social/google.png',
+          width: 20,
+          height: 20,
+          filterQuality: FilterQuality.medium,
+        ),
         onPressed: anyBusy ? null : () => _run(_Provider.google),
         loading: _busy == _Provider.google,
         expanded: true,
@@ -91,7 +98,12 @@ class _SocialAuthButtonsState extends ConsumerState<SocialAuthButtons> {
         const SizedBox(height: JSpacing.md),
         JButton.secondary(
           label: 'Continue with Apple',
-          icon: Icons.apple,
+          leading: Image.asset(
+            'assets/social/apple.png',
+            width: 20,
+            height: 20,
+            filterQuality: FilterQuality.medium,
+          ),
           onPressed: anyBusy ? null : () => _run(_Provider.apple),
           loading: _busy == _Provider.apple,
           expanded: true,

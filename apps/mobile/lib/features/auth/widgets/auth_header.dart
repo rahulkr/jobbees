@@ -23,10 +23,13 @@ class AuthHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Brand lockup (honeycomb + JOBBEES wordmark) — the auth funnel opens
+        // with both the recognisable mark and the brand name. It's a wide
+        // asset, so pin the height and let the width follow its aspect.
         Image.asset(
-          'assets/icon.png',
-          width: 68,
-          height: 68,
+          'assets/branding/wordmark.png',
+          height: 40,
+          fit: BoxFit.contain,
           filterQuality: FilterQuality.medium,
         ),
         const SizedBox(height: JSpacing.lg),
