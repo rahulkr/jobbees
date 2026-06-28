@@ -17,7 +17,6 @@ import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../providers/auth_providers.dart';
-import '../widgets/animated_auth_error.dart';
 import '../widgets/auth_header.dart';
 
 /// Matches the backend ResetPasswordDto (`@MinLength(10)`).
@@ -43,7 +42,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   String? _passwordError;
   String? _confirmError;
-  String? _formError;
   bool _submitting = false;
   bool _obscure = true;
   bool _done = false;
@@ -89,10 +87,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       return;
     }
 
-    setState(() {
-      _submitting = true;
-      _formError = null;
-    });
+    setState(() => _submitting = true);
 
     try {
       await ref
@@ -101,8 +96,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       if (mounted) setState(() => _done = true);
     } catch (error) {
       if (mounted) {
+        final mapped = ErrorMapper.map(error);
         JHaptics.error();
-        setState(() => _formError = ErrorMapper.map(error).message);
+        JSnackbar.showError(
+          context,
+          mapped.message,
+          onRetry: mapped.retryable ? _submit : null,
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -152,7 +152,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
           subtitle: 'Pick a password you have not used before.',
         ),
         const SizedBox(height: JSpacing.xl),
-        AnimatedAuthError(message: _formError),
         JTextField(
           label: 'New password',
           controller: _password,

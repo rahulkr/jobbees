@@ -13,9 +13,15 @@ import 'package:dio/dio.dart';
 
 /// A user-presentable error. Screens show `.message` in their error state.
 class AppError implements Exception {
-  const AppError(this.message);
+  const AppError(this.message, {this.retryable = false});
 
   final String message;
+
+  /// Whether re-running the same request might succeed without the user
+  /// changing anything: a transient failure (no connection, timeout, or a 5xx).
+  /// Validation / auth errors (4xx) are NOT retryable — retrying just fails
+  /// again — so a "Retry" affordance should only show when this is true.
+  final bool retryable;
 
   @override
   String toString() => message;
@@ -33,8 +39,12 @@ class ErrorMapper {
   static AppError _fromDio(DioException error) {
     final response = error.response;
     if (response != null) {
+      final status = response.statusCode;
       return AppError(
-        _serverMessage(response.data) ?? _statusFallback(response.statusCode),
+        _serverMessage(response.data) ?? _statusFallback(status),
+        // Server-side faults (5xx) are worth retrying; 4xx are the caller's
+        // problem and won't fix themselves on a retry.
+        retryable: status != null && status >= 500,
       );
     }
 
@@ -43,11 +53,16 @@ class ErrorMapper {
       DioExceptionType.sendTimeout ||
       DioExceptionType.receiveTimeout => const AppError(
         'The connection timed out. Check your network and try again.',
+        retryable: true,
       ),
       DioExceptionType.connectionError => const AppError(
         "Can't reach JOBBees right now. Check your connection and try again.",
+        retryable: true,
       ),
-      _ => const AppError('Something went wrong. Please try again.'),
+      _ => const AppError(
+        'Something went wrong. Please try again.',
+        retryable: true,
+      ),
     };
   }
 

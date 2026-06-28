@@ -73,7 +73,7 @@ void main() {
     expect(controller.signUpCount, 1);
   });
 
-  testWidgets('renders a server error in the banner', (tester) async {
+  testWidgets('renders a server error in a snackbar', (tester) async {
     await _pumpSignup(
       tester,
       signUpError: const AppError('That account already exists.'),

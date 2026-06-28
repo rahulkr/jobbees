@@ -57,7 +57,7 @@ void main() {
     expect(find.text('verify-stub'), findsOneWidget);
   });
 
-  testWidgets('a failure shows the error banner and stays on the screen', (
+  testWidgets('a failure shows an error snackbar and stays on the screen', (
     tester,
   ) async {
     await _pump(
