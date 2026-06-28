@@ -55,6 +55,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _submitting = false;
   bool _obscurePassword = true;
 
+  /// Progressive disclosure: the email form stays collapsed behind a "Sign up
+  /// with email" action until the user opts in — keeps the first paint clean
+  /// and stops the primary "Create account" CTA being pushed below the fold.
+  bool _showEmailForm = false;
+
   @override
   void dispose() {
     _firstName.dispose();
@@ -173,12 +178,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   subtitle: 'Join JOBBees to post jobs or earn as a tasker.',
                 ),
                 const SizedBox(height: JSpacing.xl),
-                // Social-first: most users sign up with Google/Apple (client
-                // note #5), so the provider buttons lead and sit above the fold;
-                // the email form follows under an "or sign up with email" divider.
+                // Progressive disclosure — best practice for a social-dominant
+                // signup (client note #5): Google/Apple lead; the email form stays
+                // collapsed behind a "Sign up with email" action so the first paint
+                // is clean and the primary "Create account" CTA is never pushed
+                // below the fold (it appears, with its button, only when chosen).
                 SocialAuthButtons(
                   dividerAtBottom: true,
-                  dividerLabel: 'or sign up with email',
+                  dividerLabel: _showEmailForm ? 'or sign up with email' : 'or',
                   onError: (message) {
                     if (message.isNotEmpty && mounted) {
                       JSnackbar.showError(context, message);
@@ -186,85 +193,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: JSpacing.lg),
-                // First + last name share a row to claw back vertical space so
-                // the social buttons clear the fold without scrolling.
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: JTextField(
-                        label: 'First name',
-                        controller: _firstName,
-                        focusNode: _firstNameFocus,
-                        enabled: !_submitting,
-                        errorText: _firstNameError,
-                        hintText: 'Jordan',
-                        textInputAction: TextInputAction.next,
-                        autofillHints: const [AutofillHints.givenName],
-                      ),
-                    ),
-                    const SizedBox(width: JSpacing.base),
-                    Expanded(
-                      child: JTextField(
-                        label: 'Last name',
-                        controller: _lastName,
-                        focusNode: _lastNameFocus,
-                        enabled: !_submitting,
-                        errorText: _lastNameError,
-                        hintText: 'Lee',
-                        textInputAction: TextInputAction.next,
-                        autofillHints: const [AutofillHints.familyName],
-                      ),
-                    ),
-                  ],
+                // Collapsed shows a "Sign up with email" button; expanded swaps
+                // in the full form (ending in its own CTA). The size change
+                // animates so the reveal reads as intentional, not a jump.
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
+                  child: _showEmailForm ? _emailForm() : _emailTrigger(),
                 ),
-                const SizedBox(height: JSpacing.base),
-                JTextField(
-                  label: 'Email',
-                  controller: _email,
-                  focusNode: _emailFocus,
-                  enabled: !_submitting,
-                  errorText: _emailError,
-                  hintText: 'you@example.com',
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.email],
-                ),
-                const SizedBox(height: JSpacing.base),
-                JTextField(
-                  label: 'Password',
-                  controller: _password,
-                  focusNode: _passwordFocus,
-                  enabled: !_submitting,
-                  errorText: _passwordError,
-                  helperText: 'At least $_kMinPasswordLength characters',
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.done,
-                  autofillHints: const [AutofillHints.newPassword],
-                  onSubmitted: (_) => _submit(),
-                  suffixIcon: IconButton(
-                    onPressed: _submitting
-                        ? null
-                        : () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                    icon: Icon(
-                      _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
-                    ),
-                    tooltip: _obscurePassword
-                        ? 'Show password'
-                        : 'Hide password',
-                  ),
-                ),
-                const SizedBox(height: JSpacing.xl),
-                JButton.primary(
-                  label: 'Create account',
-                  onPressed: _submitting ? null : _submit,
-                  loading: _submitting,
-                  expanded: true,
-                  size: JButtonSize.lg,
-                ),
-                const SizedBox(height: JSpacing.base),
+                const SizedBox(height: JSpacing.lg),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -288,6 +226,106 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Reveals the email form and lands focus on the first field once it mounts.
+  void _revealEmailForm() {
+    setState(() => _showEmailForm = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _firstNameFocus.requestFocus();
+    });
+  }
+
+  /// Collapsed state: a single action that opts the user into email signup.
+  Widget _emailTrigger() {
+    return JButton.secondary(
+      label: 'Sign up with email',
+      icon: LucideIcons.mail,
+      onPressed: _submitting ? null : _revealEmailForm,
+      expanded: true,
+      size: JButtonSize.lg,
+    );
+  }
+
+  /// Expanded state: the full email form, ending in its own "Create account" CTA
+  /// so the primary action is always in view once the form is shown.
+  Widget _emailForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // First + last name share a row to keep the form compact.
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: JTextField(
+                label: 'First name',
+                controller: _firstName,
+                focusNode: _firstNameFocus,
+                enabled: !_submitting,
+                errorText: _firstNameError,
+                hintText: 'Jordan',
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.givenName],
+              ),
+            ),
+            const SizedBox(width: JSpacing.base),
+            Expanded(
+              child: JTextField(
+                label: 'Last name',
+                controller: _lastName,
+                focusNode: _lastNameFocus,
+                enabled: !_submitting,
+                errorText: _lastNameError,
+                hintText: 'Lee',
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.familyName],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: JSpacing.base),
+        JTextField(
+          label: 'Email',
+          controller: _email,
+          focusNode: _emailFocus,
+          enabled: !_submitting,
+          errorText: _emailError,
+          hintText: 'you@example.com',
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.email],
+        ),
+        const SizedBox(height: JSpacing.base),
+        JTextField(
+          label: 'Password',
+          controller: _password,
+          focusNode: _passwordFocus,
+          enabled: !_submitting,
+          errorText: _passwordError,
+          helperText: 'At least $_kMinPasswordLength characters',
+          obscureText: _obscurePassword,
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.newPassword],
+          onSubmitted: (_) => _submit(),
+          suffixIcon: IconButton(
+            onPressed: _submitting
+                ? null
+                : () => setState(() => _obscurePassword = !_obscurePassword),
+            icon: Icon(_obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff),
+            tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+          ),
+        ),
+        const SizedBox(height: JSpacing.xl),
+        JButton.primary(
+          label: 'Create account',
+          onPressed: _submitting ? null : _submit,
+          loading: _submitting,
+          expanded: true,
+          size: JButtonSize.lg,
+        ),
+      ],
     );
   }
 }
