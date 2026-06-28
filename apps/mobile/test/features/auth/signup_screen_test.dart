@@ -10,6 +10,7 @@ import '../../support/auth_test_support.dart';
 Future<FakeAuthController> _pumpSignup(
   WidgetTester tester, {
   Object? signUpError,
+  bool revealEmailForm = true,
 }) async {
   // Tall surface so the scrollable form's submit button is on-screen for taps.
   tester.view.physicalSize = const Size(800, 1600);
@@ -25,6 +26,12 @@ Future<FakeAuthController> _pumpSignup(
     ),
   );
   await tester.pumpAndSettle();
+  if (revealEmailForm) {
+    // The email form sits behind a "Sign up with email" action (progressive
+    // disclosure); reveal it so the form-level tests can reach the fields.
+    await tester.tap(find.text('Sign up with email'));
+    await tester.pumpAndSettle();
+  }
   return controller;
 }
 
@@ -36,6 +43,21 @@ Future<void> _fillValidForm(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('keeps the email form collapsed until requested', (tester) async {
+    await _pumpSignup(tester, revealEmailForm: false);
+
+    // Socials lead; the email form and its CTA are hidden until opted into.
+    expect(find.text('Sign up with email'), findsOneWidget);
+    expect(find.byType(TextField), findsNothing);
+    expect(find.text('Create account'), findsNothing);
+
+    await tester.tap(find.text('Sign up with email'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsNWidgets(4));
+    expect(find.text('Create account'), findsOneWidget);
+  });
+
   testWidgets('blocks submit and shows validation when fields are empty', (
     tester,
   ) async {
