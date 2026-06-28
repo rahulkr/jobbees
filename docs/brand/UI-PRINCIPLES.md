@@ -146,7 +146,7 @@ We ship **light only** at MVP per inventory row 188 ("Theme — light only at MV
 | Body text         | `#33334A` | `#E8E8ED`                                   |
 | Headline text     | `#1A1A2E` | `#FFFFFF`                                   |
 | Border            | `#E8E8ED` | `#33334A`                                   |
-| Primary           | `#FF6B2C` | `#FF8F5E` (slightly lighter for AA on dark) |
+| Primary           | `#ED713E` | `#F4A06A` (slightly lighter for AA on dark) |
 | Success           | `#22C55E` | `#4ADE80` (slightly lighter)                |
 
 To enable dark mode later: flip `themeMode: ThemeMode.system` (or user preference) in `app_theme.dart`. No widget rewrites needed.

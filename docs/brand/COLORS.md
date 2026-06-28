@@ -2,20 +2,22 @@
 
 Locked from the React Native prototype. **Do not introduce new brand colors without updating this file + the Flutter / Tailwind implementations.**
 
-## Primary palette — coral orange (the brand color)
+## Primary palette — honey orange (the brand color)
+
+Re-based on the logo's actual orange (`#ED713E`) — a warmer, softer **honey** tone than the old hot coral (`#FF6B2C`, which read as a "warning"). On-brand for the honeycomb mark (bees → honey). Changed per client note #1.
 
 | Token                         | Hex           | Use                                                            |
 | ----------------------------- | ------------- | -------------------------------------------------------------- |
-| `primary-50`                  | `#FFF4ED`     | Lightest backgrounds, hover surfaces, info banner background   |
-| `primary-100`                 | `#FFE6D5`     | Subtle accents                                                 |
-| `primary-200`                 | `#FECCAB`     | Light borders                                                  |
-| `primary-300`                 | `#FDAB76`     | Light highlights                                               |
-| `primary-400`                 | `#FB8A3E`     | Lighter button hover                                           |
-| **`primary` / `primary-500`** | **`#FF6B2C`** | **Main brand color — primary CTAs, focus states, links, logo** |
-| `primary-600`                 | `#E8530F`     | Pressed/active state                                           |
-| `primary-700`                 | `#C1400D`     | Deep accents — primary-on-light text                           |
-| `primary-800`                 | `#9A3412`     | Very dark                                                      |
-| `primary-900`                 | `#7C2D12`     | Deepest                                                        |
+| `primary-50`                  | `#FDF3EC`     | Lightest backgrounds, hover surfaces, info banner background   |
+| `primary-100`                 | `#FBE3D2`     | Subtle accents                                                 |
+| `primary-200`                 | `#F6C5A0`     | Light borders                                                  |
+| `primary-300`                 | `#F0A572`     | Light highlights                                               |
+| `primary-400`                 | `#EE8B53`     | Lighter button hover                                           |
+| **`primary` / `primary-500`** | **`#ED713E`** | **Main brand color — primary CTAs, focus states, links, logo** |
+| `primary-600`                 | `#DB5E2C`     | Pressed/active state                                           |
+| `primary-700`                 | `#B84A24`     | Deep accents — primary-on-light text                           |
+| `primary-800`                 | `#92391E`     | Very dark                                                      |
+| `primary-900`                 | `#76301B`     | Deepest                                                        |
 
 ## Dark palette — deep navy-charcoal (the contrast color)
 
@@ -57,15 +59,15 @@ Locked from the React Native prototype. **Do not introduce new brand colors with
 
 For hero elements, icon containers, and celebration moments. **Always use a 135deg diagonal (top-left → bottom-right).**
 
-| Token              | Definition                                          | Use                                                                                       |
-| ------------------ | --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `gradient-primary` | `linear-gradient(135deg, #FF6B2C 0%, #FF8F5E 100%)` | Hero icon containers, splash screen, primary CTA on hero screens, "first job" celebration |
-| `gradient-success` | `linear-gradient(135deg, #22C55E 0%, #16A34A 100%)` | Verified badge backgrounds, completion-confirmed moment                                   |
-| `gradient-dark`    | `linear-gradient(135deg, #1A1A2E 0%, #33334A 100%)` | Dark-mode hero backgrounds, premium-feel cards                                            |
+| Token              | Definition                                          | Use                                                                                      |
+| ------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `gradient-primary` | `linear-gradient(135deg, #ED713E 0%, #F4A24B 100%)` | Hero icon containers, primary CTA on hero screens, "first job" celebration (honey blend) |
+| `gradient-success` | `linear-gradient(135deg, #22C55E 0%, #16A34A 100%)` | Verified badge backgrounds, completion-confirmed moment                                  |
+| `gradient-dark`    | `linear-gradient(135deg, #1A1A2E 0%, #33334A 100%)` | Dark-mode hero backgrounds, premium-feel cards                                           |
 
 ## Usage rules
 
-### Primary color (#FF6B2C)
+### Primary color (#ED713E)
 
 - ✅ Primary CTAs (Publish, Send Code, Accept Offer)
 - ✅ Focused input borders
@@ -93,18 +95,18 @@ For hero elements, icon containers, and celebration moments. **Always use a 135d
 
 | Combination            | Ratio  | WCAG AA pass?   |
 | ---------------------- | ------ | --------------- |
-| `primary` on white     | 3.4:1  | Large text only |
-| `primary-700` on white | 5.8:1  | ✅ All text     |
+| `primary` on white     | 3.0:1  | Large text only |
+| `primary-700` on white | 5.1:1  | ✅ All text     |
 | `dark-800` on white    | 14.3:1 | ✅ All text     |
 | `dark-400` on white    | 4.6:1  | ✅ All text     |
-| White on `primary`     | 3.4:1  | Large text only |
+| White on `primary`     | 3.0:1  | Large text only |
 | White on `dark-800`    | 14.3:1 | ✅ All text     |
 
 **Rule:** for any body or label text on the primary color, use white (large text) OR switch to `primary-700` on white for small text.
 
 ## Logo
 
-The JOBBees logo is a stylised "BB" letterform in `primary` (#FF6B2C) with two short antennae on top (the bees). White outline / subtle shadow for depth.
+The JOBBees logo is a honeycomb mark (a cluster of orange hexagons) in `primary` (#ED713E), paired with the "JOBBEES" wordmark (the second "B" carries two short antennae — the bee). White outline / subtle shadow for depth.
 
 - Use the orange logo on white / `primary-50` backgrounds
 - Use the **white logo** on `primary` / `gradient-primary` backgrounds
