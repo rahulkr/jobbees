@@ -74,9 +74,13 @@ dev_dependencies:
   widgetbook_generator: ^3.21.0
   build_runner: ^2.15.0
   flutter_launcher_icons: ^0.14.1 # generates iOS/Android launcher icons
+  flutter_native_splash: ^2.4.0 # generates the native launch screen
 
 # Launcher icon generation: `dart run flutter_launcher_icons`. iOS icons can't
-# have alpha, so the transparent logo is flattened onto white.
+# have alpha, so the transparent logo is flattened onto white. The Android
+# adaptive foreground uses a more-inset copy (`icon_foreground.png`) so the
+# honeycomb stays inside the adaptive safe zone and isn't clipped by the system
+# mask. Web favicon + PWA icons are generated separately (see scripts in the PR).
 flutter_launcher_icons:
   image_path: "assets/icon.png"
   android: true
@@ -84,7 +88,18 @@ flutter_launcher_icons:
   remove_alpha_ios: true
   background_color_ios: "#FFFFFF"
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/icon.png"
+  adaptive_icon_foreground: "assets/icon_foreground.png"
+
+# Native launch screen (the frame before Flutter boots): `dart run
+# flutter_native_splash:create`. Same brand lockup as the in-app SplashScreen on
+# a white background, so cold launch shows no blank/white flash. Android 12+ uses
+# the centred mark (its splash slot is icon-shaped, not a wide lockup).
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/branding/splash_logo.png
+  android_12:
+    color: "#FFFFFF"
+    image: assets/icon_foreground.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -99,6 +114,7 @@ flutter:
 
   assets:
     - assets/icon.png
+    - assets/branding/splash_logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

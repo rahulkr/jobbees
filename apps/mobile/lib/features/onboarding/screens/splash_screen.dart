@@ -7,8 +7,9 @@
 /// [splashCompleteProvider]; the router redirect reacts to that, so this widget
 /// never pushes a route itself (CLAUDE.md rule 5).
 ///
-/// App-icon / launch-image assets are client-supplied (see apps/mobile
-/// CLAUDE.md "What's NOT here"), so the brand wordmark stands in for now.
+/// Shows the client's brand lockup on a clean light background. The native
+/// launch screen (flutter_native_splash) uses the same asset, so there's no
+/// white flash before this frame.
 library;
 
 import 'dart:async';
@@ -16,7 +17,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../theme/colors.dart';
 import '../../../ui/ui.dart';
 import '../providers/onboarding_providers.dart';
 
@@ -57,48 +57,27 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
     return Scaffold(
-      body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: gradientPrimary),
-        child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Logo on a white tile (the coral mark wouldn't show on the
-                // coral gradient).
-                Container(
-                  width: 112,
-                  height: 112,
-                  padding: const EdgeInsets.all(JSpacing.base),
-                  decoration: BoxDecoration(
-                    color: scheme.surface,
-                    borderRadius: JRadius.heroAll,
-                  ),
-                  child: Image.asset(
-                    'assets/icon.png',
-                    filterQuality: FilterQuality.medium,
-                  ),
+      backgroundColor: theme.colorScheme.surface,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/branding/splash_logo.png',
+                width: 280,
+                filterQuality: FilterQuality.medium,
+              ),
+              const SizedBox(height: JSpacing.lg),
+              Text(
+                'Local jobs, done right',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: JSpacing.xl),
-                Text(
-                  'JOBBees',
-                  style: textTheme.displayMedium?.copyWith(
-                    color: scheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: JSpacing.md),
-                Text(
-                  'Local jobs, done right',
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: scheme.onPrimary.withValues(alpha: 0.9),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
