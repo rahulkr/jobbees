@@ -23,10 +23,24 @@ import '../providers/auth_controller.dart';
 enum _Provider { google, apple }
 
 class SocialAuthButtons extends ConsumerStatefulWidget {
-  const SocialAuthButtons({this.onError, super.key});
+  const SocialAuthButtons({
+    this.onError,
+    this.dividerLabel = 'or',
+    this.dividerAtBottom = false,
+    super.key,
+  });
 
   /// Surfaces a provider failure message to the host screen's error banner.
   final ValueChanged<String>? onError;
+
+  /// Text in the "or" divider. Login uses the default; the social-first signup
+  /// layout passes 'or sign up with email' to frame email as the alt path.
+  final String dividerLabel;
+
+  /// When true, the divider renders *below* the provider buttons (social-first
+  /// layouts where socials lead and the email form follows). Default false =
+  /// divider on top (form-first screens, e.g. login).
+  final bool dividerAtBottom;
 
   @override
   ConsumerState<SocialAuthButtons> createState() => _SocialAuthButtonsState();
@@ -59,36 +73,47 @@ class _SocialAuthButtonsState extends ConsumerState<SocialAuthButtons> {
   @override
   Widget build(BuildContext context) {
     final anyBusy = _busy != null;
-    return Column(
-      children: [
-        const _OrDivider(),
-        const SizedBox(height: JSpacing.lg),
+
+    final divider = <Widget>[
+      _OrDivider(label: widget.dividerLabel),
+      const SizedBox(height: JSpacing.lg),
+    ];
+    final buttons = <Widget>[
+      JButton.secondary(
+        label: 'Continue with Google',
+        icon: Icons.g_mobiledata,
+        onPressed: anyBusy ? null : () => _run(_Provider.google),
+        loading: _busy == _Provider.google,
+        expanded: true,
+        size: JButtonSize.lg,
+      ),
+      if (_showApple) ...[
+        const SizedBox(height: JSpacing.md),
         JButton.secondary(
-          label: 'Continue with Google',
-          icon: Icons.g_mobiledata,
-          onPressed: anyBusy ? null : () => _run(_Provider.google),
-          loading: _busy == _Provider.google,
+          label: 'Continue with Apple',
+          icon: Icons.apple,
+          onPressed: anyBusy ? null : () => _run(_Provider.apple),
+          loading: _busy == _Provider.apple,
           expanded: true,
           size: JButtonSize.lg,
         ),
-        if (_showApple) ...[
-          const SizedBox(height: JSpacing.md),
-          JButton.secondary(
-            label: 'Continue with Apple',
-            icon: Icons.apple,
-            onPressed: anyBusy ? null : () => _run(_Provider.apple),
-            loading: _busy == _Provider.apple,
-            expanded: true,
-            size: JButtonSize.lg,
-          ),
-        ],
       ],
+    ];
+
+    return Column(
+      children: widget.dividerAtBottom
+          // Social-first: buttons lead, divider separates them from the form below.
+          ? [...buttons, const SizedBox(height: JSpacing.lg), divider.first]
+          // Form-first: divider on top, then buttons.
+          : [...divider, ...buttons],
     );
   }
 }
 
 class _OrDivider extends StatelessWidget {
-  const _OrDivider();
+  const _OrDivider({this.label = 'or'});
+
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +125,7 @@ class _OrDivider extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: JSpacing.base),
           child: Text(
-            'or',
+            label,
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
