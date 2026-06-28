@@ -52,6 +52,7 @@ class JButton extends StatelessWidget {
     required this.variant,
     this.size = JButtonSize.md,
     this.icon,
+    this.leading,
     this.loading = false,
     this.expanded = false,
     this.gradient = false,
@@ -86,6 +87,7 @@ class JButton extends StatelessWidget {
     required VoidCallback? onPressed,
     JButtonSize size = JButtonSize.md,
     IconData? icon,
+    Widget? leading,
     bool loading = false,
     bool expanded = false,
     Key? key,
@@ -95,6 +97,7 @@ class JButton extends StatelessWidget {
     variant: JButtonVariant.secondary,
     size: size,
     icon: icon,
+    leading: leading,
     loading: loading,
     expanded: expanded,
     key: key,
@@ -146,6 +149,10 @@ class JButton extends StatelessWidget {
   final JButtonVariant variant;
   final JButtonSize size;
   final IconData? icon;
+
+  /// Custom leading widget (e.g. a brand logo image) shown before the label, in
+  /// place of [icon]. Takes precedence over [icon] when both are provided.
+  final Widget? leading;
   final bool loading;
 
   /// If true, the button expands to fill its parent's width.
@@ -218,6 +225,9 @@ class JButton extends StatelessWidget {
                 color: isDisabled ? fg.withValues(alpha: 0.6) : fg,
               ),
             ),
+            const SizedBox(width: JSpacing.sm),
+          ] else if (leading != null) ...[
+            leading!,
             const SizedBox(width: JSpacing.sm),
           ] else if (icon != null) ...[
             Icon(

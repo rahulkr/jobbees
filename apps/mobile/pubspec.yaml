@@ -115,6 +115,8 @@ flutter:
   assets:
     - assets/icon.png
     - assets/branding/splash_logo.png
+    - assets/branding/wordmark.png
+    - assets/social/google.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
