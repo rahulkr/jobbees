@@ -151,10 +151,21 @@ final darkColorScheme = ColorScheme(
 // ============================================================================
 
 // Honey blend: logo orange → warm amber. Elegant + on-brand, not "warning".
+// Hero moments only (icon containers, celebration) — it lightens, so it's NOT
+// for surfaces with overlaid white text. Buttons use [gradientPrimaryButton].
 const gradientPrimary = LinearGradient(
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
   colors: [JobbeesColors.primary, Color(0xFFF4A24B)],
+);
+
+// Primary CTA fill: a subtle honey "depth" gradient (lighter top-left → deeper
+// bottom-right). Unlike the lighter hero blend, the deeper end keeps white
+// button text legible (AA) across the whole surface.
+const gradientPrimaryButton = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [Color(0xFFF2925F), Color(0xFFDB5E2C)],
 );
 
 const gradientSuccess = LinearGradient(

@@ -48,7 +48,7 @@ class JButton extends StatelessWidget {
     IconData? icon,
     bool loading = false,
     bool expanded = false,
-    bool gradient = false,
+    bool gradient = true,
     Key? key,
   }) => JButton._(
     label: label,
@@ -133,8 +133,9 @@ class JButton extends StatelessWidget {
   /// If true, the button expands to fill its parent's width.
   final bool expanded;
 
-  /// If true (primary only), fills with the brand coral gradient.
-  /// Reserved for hero moments per docs/brand/UI-PRINCIPLES.md § Elevation.
+  /// If true (primary only), fills with the honey "depth" gradient instead of a
+  /// flat colour. On by default for primary CTAs; pass `gradient: false` for a
+  /// flat button. See docs/brand/COLORS.md § Gradients.
   final bool gradient;
 
   @override
@@ -231,7 +232,9 @@ class JButton extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: useGradient
             ? DecoratedBox(
-                decoration: const BoxDecoration(gradient: gradientPrimary),
+                decoration: const BoxDecoration(
+                  gradient: gradientPrimaryButton,
+                ),
                 child: content,
               )
             : content,

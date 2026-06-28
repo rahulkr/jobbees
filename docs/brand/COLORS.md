@@ -59,11 +59,12 @@ Re-based on the logo's actual orange (`#ED713E`) — a warmer, softer **honey** 
 
 For hero elements, icon containers, and celebration moments. **Always use a 135deg diagonal (top-left → bottom-right).**
 
-| Token              | Definition                                          | Use                                                                                      |
-| ------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `gradient-primary` | `linear-gradient(135deg, #ED713E 0%, #F4A24B 100%)` | Hero icon containers, primary CTA on hero screens, "first job" celebration (honey blend) |
-| `gradient-success` | `linear-gradient(135deg, #22C55E 0%, #16A34A 100%)` | Verified badge backgrounds, completion-confirmed moment                                  |
-| `gradient-dark`    | `linear-gradient(135deg, #1A1A2E 0%, #33334A 100%)` | Dark-mode hero backgrounds, premium-feel cards                                           |
+| Token                     | Definition                                          | Use                                                                                                      |
+| ------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `gradient-primary`        | `linear-gradient(135deg, #ED713E 0%, #F4A24B 100%)` | Hero icon containers, "first job" celebration (honey blend). It _lightens_ — never under white text.     |
+| `gradient-primary-button` | `linear-gradient(135deg, #F2925F 0%, #DB5E2C 100%)` | **Primary CTA button fill — on by default.** Subtle depth; the deeper end keeps white text legible (AA). |
+| `gradient-success`        | `linear-gradient(135deg, #22C55E 0%, #16A34A 100%)` | Verified badge backgrounds, completion-confirmed moment                                                  |
+| `gradient-dark`           | `linear-gradient(135deg, #1A1A2E 0%, #33334A 100%)` | Dark-mode hero backgrounds, premium-feel cards                                                           |
 
 ## Usage rules
 
