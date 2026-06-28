@@ -77,6 +77,8 @@ Material 3 uses 6 elevation levels (0-5). For JOBBees we use only 3:
 
 Avoid heavy shadows. Use `dark-100` 1px borders on cards in light mode instead of elevation when possible — looks cleaner.
 
+**One intentional exception — the primary CTA.** `JButton.primary` carries a soft, _brand-tinted_ warm lift (not a grey drop shadow) so the main action floats off the page. Kept deliberately tight — ≈18px blur, −8 spread, ~20% terracotta (`0x33D4541F`) plus a faint neutral ambient — so it reads as a _lift_, not a glowing halo (a wider/stronger blur reads as a neon halo). Source of truth: `_kCtaShadow` in `apps/mobile/lib/ui/components/buttons/j_button.dart`.
+
 ## Motion
 
 Three principles:
@@ -84,7 +86,7 @@ Three principles:
 ### 1. Quick + subtle
 
 - Page transitions: 250ms ease-out
-- Button press feedback: 100ms ease-out
+- Button press feedback: 100ms spring — scale to 0.97 then settle (`JMotion.spring`, `Cubic(0.16, 1, 0.3, 1)`), via the shared `JPressable`; not a linear/ease-out fade
 - Bottom sheet appear: 300ms cubic-bezier(0.16, 1, 0.3, 1) (smooth, slightly bouncy)
 - Snackbar: 200ms
 
@@ -146,7 +148,7 @@ We ship **light only** at MVP per inventory row 188 ("Theme — light only at MV
 | Body text         | `#33334A` | `#E8E8ED`                                   |
 | Headline text     | `#1A1A2E` | `#FFFFFF`                                   |
 | Border            | `#E8E8ED` | `#33334A`                                   |
-| Primary           | `#FF6B2C` | `#FF8F5E` (slightly lighter for AA on dark) |
+| Primary           | `#ED713E` | `#F4A06A` (slightly lighter for AA on dark) |
 | Success           | `#22C55E` | `#4ADE80` (slightly lighter)                |
 
 To enable dark mode later: flip `themeMode: ThemeMode.system` (or user preference) in `app_theme.dart`. No widget rewrites needed.

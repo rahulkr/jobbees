@@ -86,7 +86,7 @@ apps/mobile/lib/
 
 **Source of truth (do not invent new tokens):**
 
-- Primary: `#FF6B2C` (coral orange) with 9 shades
+- Primary: `#ED713E` (honey orange, logo-true) with 9 shades
 - Dark: `#1A1A2E` (deep navy-charcoal) with 9 shades
 - Semantic: `success #22C55E`, `warning #F59E0B`, `error #EF4444`, `info #3B82F6`
 - Font: Inter (Regular/Medium/SemiBold/Bold via `google_fonts`)

@@ -44,10 +44,10 @@ WidgetbookComponent jCardPage() {
                   width: 48,
                   height: 48,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFFFE5D6),
+                    color: Color(0xFFFBE3D2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.build, color: Color(0xFFFF6B2C)),
+                  child: const Icon(Icons.build, color: Color(0xFFED713E)),
                 ),
                 const SizedBox(width: JSpacing.base),
                 Expanded(

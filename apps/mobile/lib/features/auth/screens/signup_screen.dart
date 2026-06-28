@@ -173,26 +173,50 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   subtitle: 'Join JOBBees to post jobs or earn as a tasker.',
                 ),
                 const SizedBox(height: JSpacing.xl),
-                JTextField(
-                  label: 'First name',
-                  controller: _firstName,
-                  focusNode: _firstNameFocus,
-                  enabled: !_submitting,
-                  errorText: _firstNameError,
-                  hintText: 'Jordan',
-                  textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.givenName],
+                // Social-first: most users sign up with Google/Apple (client
+                // note #5), so the provider buttons lead and sit above the fold;
+                // the email form follows under an "or sign up with email" divider.
+                SocialAuthButtons(
+                  dividerAtBottom: true,
+                  dividerLabel: 'or sign up with email',
+                  onError: (message) {
+                    if (message.isNotEmpty && mounted) {
+                      JSnackbar.showError(context, message);
+                    }
+                  },
                 ),
-                const SizedBox(height: JSpacing.base),
-                JTextField(
-                  label: 'Last name',
-                  controller: _lastName,
-                  focusNode: _lastNameFocus,
-                  enabled: !_submitting,
-                  errorText: _lastNameError,
-                  hintText: 'Lee',
-                  textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.familyName],
+                const SizedBox(height: JSpacing.lg),
+                // First + last name share a row to claw back vertical space so
+                // the social buttons clear the fold without scrolling.
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: JTextField(
+                        label: 'First name',
+                        controller: _firstName,
+                        focusNode: _firstNameFocus,
+                        enabled: !_submitting,
+                        errorText: _firstNameError,
+                        hintText: 'Jordan',
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.givenName],
+                      ),
+                    ),
+                    const SizedBox(width: JSpacing.base),
+                    Expanded(
+                      child: JTextField(
+                        label: 'Last name',
+                        controller: _lastName,
+                        focusNode: _lastNameFocus,
+                        enabled: !_submitting,
+                        errorText: _lastNameError,
+                        hintText: 'Lee',
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.familyName],
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: JSpacing.base),
                 JTextField(
@@ -239,14 +263,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   loading: _submitting,
                   expanded: true,
                   size: JButtonSize.lg,
-                ),
-                const SizedBox(height: JSpacing.lg),
-                SocialAuthButtons(
-                  onError: (message) {
-                    if (message.isNotEmpty && mounted) {
-                      JSnackbar.showError(context, message);
-                    }
-                  },
                 ),
                 const SizedBox(height: JSpacing.base),
                 Row(
