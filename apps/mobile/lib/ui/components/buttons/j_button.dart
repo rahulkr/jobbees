@@ -232,10 +232,17 @@ class JButton extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: useGradient
             ? DecoratedBox(
+                // Honey-gold base + a faint white top sheen layered over it —
+                // a "lit from above", glassy pill. Label sits on top of both.
                 decoration: const BoxDecoration(
                   gradient: gradientPrimaryButton,
                 ),
-                child: content,
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    gradient: gradientButtonSheen,
+                  ),
+                  child: content,
+                ),
               )
             : content,
       ),

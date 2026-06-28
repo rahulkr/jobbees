@@ -159,13 +159,23 @@ const gradientPrimary = LinearGradient(
   colors: [JobbeesColors.primary, Color(0xFFF4A24B)],
 );
 
-// Primary CTA fill: a subtle honey "depth" gradient (lighter top-left → deeper
-// bottom-right). Unlike the lighter hero blend, the deeper end keeps white
-// button text legible (AA) across the whole surface.
+// Primary CTA fill — a "lit from above" treatment: a rich honey-gold → deep
+// terracotta base (vertical) sitting under a faint white top sheen
+// ([gradientButtonSheen]), for a glassy, tactile pill. The deep lower half keeps
+// the centred white label legible. Buttons intentionally use a vertical fill (a
+// top highlight reads as light from above), not the 135° hero diagonal.
 const gradientPrimaryButton = LinearGradient(
-  begin: Alignment.topLeft,
-  end: Alignment.bottomRight,
-  colors: [Color(0xFFF2925F), Color(0xFFDB5E2C)],
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: [Color(0xFFF6A24A), Color(0xFFD4541F)],
+);
+
+// The glassy top highlight layered over [gradientPrimaryButton] on primary CTAs
+// (~30% white fading to transparent). Gives the button its lit-from-above sheen.
+const gradientButtonSheen = LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: [Color(0x4DFFFFFF), Color(0x00FFFFFF)],
 );
 
 const gradientSuccess = LinearGradient(

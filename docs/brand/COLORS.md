@@ -59,12 +59,13 @@ Re-based on the logo's actual orange (`#ED713E`) — a warmer, softer **honey** 
 
 For hero elements, icon containers, and celebration moments. **Always use a 135deg diagonal (top-left → bottom-right).**
 
-| Token                     | Definition                                          | Use                                                                                                      |
-| ------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `gradient-primary`        | `linear-gradient(135deg, #ED713E 0%, #F4A24B 100%)` | Hero icon containers, "first job" celebration (honey blend). It _lightens_ — never under white text.     |
-| `gradient-primary-button` | `linear-gradient(135deg, #F2925F 0%, #DB5E2C 100%)` | **Primary CTA button fill — on by default.** Subtle depth; the deeper end keeps white text legible (AA). |
-| `gradient-success`        | `linear-gradient(135deg, #22C55E 0%, #16A34A 100%)` | Verified badge backgrounds, completion-confirmed moment                                                  |
-| `gradient-dark`           | `linear-gradient(135deg, #1A1A2E 0%, #33334A 100%)` | Dark-mode hero backgrounds, premium-feel cards                                                           |
+| Token                     | Definition                                                    | Use                                                                                                                                                   |
+| ------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gradient-primary`        | `linear-gradient(135deg, #ED713E 0%, #F4A24B 100%)`           | Hero icon containers, "first job" celebration (honey blend). It _lightens_ — never under white text.                                                  |
+| `gradient-primary-button` | `linear-gradient(180deg, #F6A24A 0%, #D4541F 100%)`           | **Primary CTA base fill — on by default.** Vertical "lit from above" (not the 135° hero diagonal); the deep lower half keeps white text legible (AA). |
+| `gradient-button-sheen`   | `linear-gradient(180deg, rgba(255,255,255,.30), transparent)` | Faint glassy top highlight layered _over_ `gradient-primary-button` on primary CTAs — the 2026 "liquid glass" depth.                                  |
+| `gradient-success`        | `linear-gradient(135deg, #22C55E 0%, #16A34A 100%)`           | Verified badge backgrounds, completion-confirmed moment                                                                                               |
+| `gradient-dark`           | `linear-gradient(135deg, #1A1A2E 0%, #33334A 100%)`           | Dark-mode hero backgrounds, premium-feel cards                                                                                                        |
 
 ## Usage rules
 
