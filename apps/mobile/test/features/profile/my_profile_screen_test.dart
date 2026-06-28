@@ -50,14 +50,45 @@ void main() {
     expect(find.text('Verification'), findsNothing);
   });
 
-  testWidgets('a tasker sees verification + profile entries, no upgrade', (
+  testWidgets('a tasker sees verification + profile + switch-to-client', (
     tester,
   ) async {
     await _pump(tester, user: _taskerUser);
 
     expect(find.text('Verification'), findsOneWidget);
     expect(find.text('My tasker profile'), findsOneWidget);
+    expect(find.text('Switch to client'), findsOneWidget);
     expect(find.text('Become a tasker'), findsNothing);
+  });
+
+  testWidgets('confirming switch-to-client calls the controller', (
+    tester,
+  ) async {
+    final controller = await _pump(tester, user: _taskerUser);
+
+    await tester.tap(find.text('Switch to client')); // the tile
+    await tester.pumpAndSettle();
+
+    // Confirm dialog is open; nothing has happened yet.
+    expect(find.text('Switch to client?'), findsOneWidget);
+    expect(controller.switchToClientCount, 0);
+
+    // Tap the dialog's confirm button (a TextButton, unlike the tile).
+    await tester.tap(find.widgetWithText(TextButton, 'Switch to client'));
+    await tester.pumpAndSettle();
+
+    expect(controller.switchToClientCount, 1);
+  });
+
+  testWidgets('cancelling switch-to-client does nothing', (tester) async {
+    final controller = await _pump(tester, user: _taskerUser);
+
+    await tester.tap(find.text('Switch to client'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(controller.switchToClientCount, 0);
   });
 
   testWidgets('tapping log out calls the controller', (tester) async {

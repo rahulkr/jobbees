@@ -26,6 +26,7 @@ class FakeAuthController extends AuthController {
     this.loginError,
     this.socialError,
     this.becomeTaskerError,
+    this.switchToClientError,
   });
 
   final UserProfile? initialUser;
@@ -33,11 +34,13 @@ class FakeAuthController extends AuthController {
   final Object? loginError;
   final Object? socialError;
   final Object? becomeTaskerError;
+  final Object? switchToClientError;
   int signUpCount = 0;
   int loginCount = 0;
   int googleCount = 0;
   int appleCount = 0;
   int becomeTaskerCount = 0;
+  int switchToClientCount = 0;
   int logoutCount = 0;
 
   @override
@@ -47,6 +50,13 @@ class FakeAuthController extends AuthController {
   Future<void> logout() async {
     logoutCount++;
     state = const AsyncData(null);
+  }
+
+  @override
+  Future<void> switchToClient() async {
+    switchToClientCount++;
+    if (switchToClientError != null) throw switchToClientError!;
+    state = const AsyncData(testUser); // back to a client
   }
 
   int reloadProfileCount = 0;
@@ -131,6 +141,7 @@ class FakeAuthRepository implements AuthRepository {
   final UserProfile? meUser;
   int logoutCount = 0;
   int becomeTaskerCount = 0;
+  int switchToClientCount = 0;
   int refreshCount = 0;
   int forgotCount = 0;
   int resendCount = 0;
@@ -203,6 +214,9 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> becomeTasker() async => becomeTaskerCount++;
+
+  @override
+  Future<void> switchToClient() async => switchToClientCount++;
 
   @override
   Future<void> logout(String? refreshToken) async => logoutCount++;

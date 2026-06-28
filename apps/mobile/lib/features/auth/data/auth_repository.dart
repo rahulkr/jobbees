@@ -130,10 +130,18 @@ class AuthRepository {
     );
   }
 
-  /// Upgrades the current client account to a tasker (one-way). The caller must
-  /// refresh the session afterwards so the new role lands in the access token.
+  /// Upgrades the current client account to a tasker. The caller must refresh
+  /// the session afterwards so the new role lands in the access token.
   Future<void> becomeTasker() async {
     await _dio.post<void>('/me/become-tasker', options: _idempotent());
+  }
+
+  /// Switches the current tasker account back to a client (reverse of
+  /// [becomeTasker]). Tasker verification is kept server-side, so re-upgrading
+  /// is instant. The caller must refresh the session afterwards so the CLIENT
+  /// role lands in the access token.
+  Future<void> switchToClient() async {
+    await _dio.post<void>('/me/switch-to-client', options: _idempotent());
   }
 
   Future<void> logout(String? refreshToken) async {

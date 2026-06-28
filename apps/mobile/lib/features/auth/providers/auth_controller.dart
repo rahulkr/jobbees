@@ -185,10 +185,10 @@ class AuthController extends AsyncNotifier<UserProfile?> {
     }
   }
 
-  /// Upgrades the current client account to a tasker (one-way). Refreshes the
-  /// session so the new role lands in the access token (TASKER-only endpoints
-  /// reject a stale CLIENT token), then refetches the profile so `state` carries
-  /// the tasker role and the router/UI react.
+  /// Upgrades the current client account to a tasker. Refreshes the session so
+  /// the new role lands in the access token (TASKER-only endpoints reject a
+  /// stale CLIENT token), then refetches the profile so `state` carries the
+  /// tasker role and the router/UI react.
   Future<void> becomeTasker() async {
     final repo = ref.read(authRepositoryProvider);
     try {
@@ -196,6 +196,22 @@ class AuthController extends AsyncNotifier<UserProfile?> {
       await refreshSession();
       state = AsyncData(await repo.fetchMe());
       await Analytics.track('role_switched_to_tasker');
+    } catch (error) {
+      throw ErrorMapper.map(error);
+    }
+  }
+
+  /// Switches the current tasker back to a client (reverse of [becomeTasker]).
+  /// Tasker verification stays intact server-side, so re-upgrading is instant.
+  /// Refreshes the session so the CLIENT role lands in the access token, then
+  /// refetches the profile so `state` carries the client role and the UI reacts.
+  Future<void> switchToClient() async {
+    final repo = ref.read(authRepositoryProvider);
+    try {
+      await repo.switchToClient();
+      await refreshSession();
+      state = AsyncData(await repo.fetchMe());
+      await Analytics.track('role_switched_to_client');
     } catch (error) {
       throw ErrorMapper.map(error);
     }

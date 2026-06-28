@@ -18,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../../auth/models/auth_models.dart';
@@ -105,7 +106,129 @@ class _Body extends ConsumerWidget {
       subtitle: 'Bio, hourly rate and skills.',
       onTap: () => context.go('/profile/tasker'),
     ),
+    const SizedBox(height: JSpacing.base),
+    const _SwitchToClientTile(),
   ];
+}
+
+/// Lets a tasker switch back to a client (the reverse of "Become a tasker").
+/// Reversible and non-destructive — tasker verification is kept — so a light
+/// confirm is enough. On success the session flips to CLIENT and this screen
+/// re-renders as the client view; failures surface in a snackbar.
+class _SwitchToClientTile extends ConsumerStatefulWidget {
+  const _SwitchToClientTile();
+
+  @override
+  ConsumerState<_SwitchToClientTile> createState() =>
+      _SwitchToClientTileState();
+}
+
+class _SwitchToClientTileState extends ConsumerState<_SwitchToClientTile> {
+  bool _submitting = false;
+
+  Future<void> _confirmAndSwitch() async {
+    if (_submitting) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Switch to client?'),
+        content: const Text(
+          'You will go back to hiring only. We keep your tasker details - '
+          'ABN, payments and profile - so you can switch back anytime.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Switch to client'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _submitting = true);
+    try {
+      await ref.read(authControllerProvider.notifier).switchToClient();
+      // Auth state flips to CLIENT; the profile re-renders as the client view.
+    } on AppError catch (error) {
+      if (mounted) {
+        JHaptics.error();
+        JSnackbar.showError(
+          context,
+          error.message,
+          onRetry: error.retryable ? _confirmAndSwitch : null,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return JCard.tappable(
+      onTap: _confirmAndSwitch,
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest,
+              borderRadius: JRadius.buttonMdAll,
+            ),
+            child: Icon(
+              LucideIcons.arrowLeftRight,
+              size: 22,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: JSpacing.base),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Switch to client',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: JSpacing.xs),
+                Text(
+                  'Go back to hiring only. Your tasker details are saved.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: JSpacing.sm),
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: _submitting
+                ? const Padding(
+                    padding: EdgeInsets.all(2),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(
+                    LucideIcons.chevronRight,
+                    color: scheme.onSurfaceVariant,
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Header extends StatelessWidget {

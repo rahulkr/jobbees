@@ -52,7 +52,7 @@ Most categories (cleaning, gardening, moving, handyman, IT, tutoring, Ikea assem
 | 29  | Profile edit                                                          | IN   | 2   |                                                                                                                                                                                                                     |
 | 33  | Public profile view (limited fields visible to taskers)               | IN   | 2   |                                                                                                                                                                                                                     |
 | 34  | Verification badges (email, phone, Stripe Connect)                    | THIN | 1   | Just rendering; license badges come in Sprint 4                                                                                                                                                                     |
-| 15  | Client → Tasker upgrade flow (one-way only)                           | IN   | 4   | Triggers Stripe Connect + ABN entry                                                                                                                                                                                 |
+| 15  | Client ↔ Tasker role switch (reversible)                              | IN   | 4   | Triggers Stripe Connect + ABN entry. Reversible (client note #4, PR#50): a tasker can switch back to client from the profile screen; verification is kept so re-upgrading is instant.                               |
 | 24  | ABN entry + ABR lookup UI                                             | IN   | 3   | Tasker-only; checksum + business name match via ABR API                                                                                                                                                             |
 | 25  | Verification status screen (Connect / ABN)                            | IN   | 2   | Replaces old "KYC status screen"; license tab comes in S4                                                                                                                                                           |
 | 26  | KYC manual review prompt (per Estimation v1.2 audit)                  | IN   | 1   | Shown when admin manual review is pending — sets expectations, prevents repeated submission attempts.                                                                                                               |
@@ -82,14 +82,14 @@ REMOVED from earlier draft (deferred to Sprint 4 with offering):
 
 ### Backend (apps/api) — tasker upgrade + Stripe Connect + ABN
 
-| ID  | Item                                    | Call | Hrs | Notes                                                                                                 |
-| --- | --------------------------------------- | ---- | --- | ----------------------------------------------------------------------------------------------------- |
-| 241 | ABN + ABR lookup integration            | IN   | 3   | https://abr.business.gov.au/ ; 24h local cache                                                        |
-| 244 | Client→Tasker upgrade backend (one-way) | IN   | 3   | State change, triggers Connect onboarding init                                                        |
-| 292 | Stripe Connect Express integration      | IN   | 12  | Stripe handles identity KYC end-to-end                                                                |
-| 293 | Connect webhook handlers                | IN   | 6   | `account.updated`, `account.application.authorized`, etc. — HMAC signature verified before processing |
-| 294 | Connect onboarding status tracking      | IN   | 4   | Pending → restricted → complete state transitions; mirrors to User.kycStatus                          |
-| 295 | Held-funds calculation per tasker       | IN   | 3   | Sum of captured-but-not-released amounts                                                              |
+| ID  | Item                                           | Call | Hrs | Notes                                                                                                                                            |
+| --- | ---------------------------------------------- | ---- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 241 | ABN + ABR lookup integration                   | IN   | 3   | https://abr.business.gov.au/ ; 24h local cache                                                                                                   |
+| 244 | Client↔Tasker role switch backend (reversible) | IN   | 3   | State change, triggers Connect onboarding init. `POST /me/switch-to-client` added (client note #4, PR#50): tasker→client, token re-mint + audit. |
+| 292 | Stripe Connect Express integration             | IN   | 12  | Stripe handles identity KYC end-to-end                                                                                                           |
+| 293 | Connect webhook handlers                       | IN   | 6   | `account.updated`, `account.application.authorized`, etc. — HMAC signature verified before processing                                            |
+| 294 | Connect onboarding status tracking             | IN   | 4   | Pending → restricted → complete state transitions; mirrors to User.kycStatus                                                                     |
+| 295 | Held-funds calculation per tasker              | IN   | 3   | Sum of captured-but-not-released amounts                                                                                                         |
 
 **Backend total: ~31h**
 
@@ -199,8 +199,8 @@ Same as Sprint 1, plus:
 01:45 — Hard close app. Reopen. Biometric prompt fires. Touch ID
         (simulated). Logged back in.
 
-02:10 — Profile → "Become a tasker." One-way confirmation dialog.
-        Continue.
+02:10 — Profile → "Become a tasker." Confirmation dialog. Continue.
+        (A tasker can later switch back to client from the same Profile.)
 
 02:30 — Stripe Connect webview launches. Show the Stripe-hosted onboarding
         form (Stripe handles ALL identity KYC — name, DOB, address,

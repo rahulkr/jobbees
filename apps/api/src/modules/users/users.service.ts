@@ -84,11 +84,11 @@ export class UsersService {
   }
 
   /**
-   * Upgrades a client to a tasker. One-way (CLAUDE.md role model): a tasker can
-   * also act as a client, but a client only becomes a tasker through this gated
-   * step. Idempotent — an existing tasker is returned unchanged so retries (and
-   * stale CLIENT access tokens that haven't refreshed yet) are safe. Admins are
-   * never re-roled here.
+   * Upgrades a client to a tasker. Reversible via {@link switchToClient} — a
+   * tasker keeps their verification and can switch back to a client. A client
+   * only becomes a tasker through this gated step. Idempotent — an existing
+   * tasker is returned unchanged so retries (and stale CLIENT access tokens that
+   * haven't refreshed yet) are safe. Admins are never re-roled here.
    *
    * The caller must refresh the access token afterwards: the role is baked into
    * the JWT, so TASKER-only endpoints (e.g. ABN) keep rejecting until rotation
@@ -113,6 +113,44 @@ export class UsersService {
       resourceType: 'User',
       resourceId: userId,
       diff: { from: UserRole.CLIENT, to: UserRole.TASKER },
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+    });
+
+    return updated;
+  }
+
+  /**
+   * Switches a tasker back to a client — the reverse of {@link becomeTasker}.
+   * Self-service and reversible: tasker verification (ABN, Connect, phone, bio,
+   * skills) is left intact, so flipping back to a tasker later is instant and
+   * needs no re-verification. Idempotent like becomeTasker — an existing client
+   * is returned unchanged so retries (and stale TASKER tokens that haven't
+   * refreshed yet) are safe. Admins are never re-roled here.
+   *
+   * The caller must refresh the access token afterwards so the JWT carries the
+   * CLIENT role — a stale TASKER token keeps passing TASKER guards until the
+   * 15-minute access token rotates.
+   */
+  async switchToClient(userId: string, ctx: ActorContext = {}): Promise<User> {
+    const user = await this.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    if (user.role === UserRole.CLIENT) return user; // idempotent no-op
+    if (user.role !== UserRole.TASKER) {
+      throw new ForbiddenException('Only taskers can switch back to a client');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { role: UserRole.CLIENT },
+    });
+
+    await this.audit.record({
+      actorId: userId,
+      action: 'user.switched_to_client',
+      resourceType: 'User',
+      resourceId: userId,
+      diff: { from: UserRole.TASKER, to: UserRole.CLIENT },
       ipAddress: ctx.ipAddress,
       userAgent: ctx.userAgent,
     });
