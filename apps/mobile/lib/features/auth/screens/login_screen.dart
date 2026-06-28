@@ -212,7 +212,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       label: 'Sign up',
                       onPressed: _submitting
                           ? null
-                          : () => context.go('/auth/role'),
+                          : () => context.go('/auth/signup'),
                       size: JButtonSize.sm,
                     ),
                   ],

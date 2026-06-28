@@ -38,9 +38,16 @@ class FakeAuthController extends AuthController {
   int googleCount = 0;
   int appleCount = 0;
   int becomeTaskerCount = 0;
+  int logoutCount = 0;
 
   @override
   Future<UserProfile?> build() async => initialUser;
+
+  @override
+  Future<void> logout() async {
+    logoutCount++;
+    state = const AsyncData(null);
+  }
 
   int reloadProfileCount = 0;
 

@@ -2,10 +2,12 @@
 
 /// Email/password signup (inventory row 2).
 ///
-/// Creates a CLIENT/TASKER account against the Sprint 1 `/auth/signup` backend.
-/// On success the [AuthController] flips the session to authenticated and the
-/// router redirects home — this screen never navigates itself (CLAUDE.md rule
-/// 5). Phone OTP, role selection, and Google/Apple sign-in are separate rows.
+/// Creates a CLIENT account against the Sprint 1 `/auth/signup` backend —
+/// everyone signs up as a client and upgrades to a tasker later from the
+/// profile screen (client note #4). On success the [AuthController] flips the
+/// session to authenticated and the router redirects home — this screen never
+/// navigates itself (CLAUDE.md rule 5). Phone OTP and Google/Apple sign-in are
+/// separate rows.
 ///
 /// Four states (CLAUDE.md rule 3): content is the form; loading is the in-flight
 /// submit (button spinner, inputs disabled); error renders inline (field-level
@@ -20,7 +22,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
-import '../models/auth_models.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/social_auth_buttons.dart';
@@ -29,11 +30,7 @@ import '../widgets/social_auth_buttons.dart';
 const int _kMinPasswordLength = 10;
 
 class SignupScreen extends ConsumerStatefulWidget {
-  const SignupScreen({this.role, super.key});
-
-  /// Chosen on the role-selection screen and carried through signup. Null means
-  /// "decide later" — the backend defaults to CLIENT.
-  final UserRole? role;
+  const SignupScreen({super.key});
 
   @override
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
@@ -129,12 +126,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             password: _password.text,
             firstName: _firstName.text.trim(),
             lastName: _lastName.text.trim(),
-            role: widget.role,
           );
-      // Tasker-intent signups go straight to verification (the work side needs
-      // it); clients fall through to the router redirect → home.
-      if (mounted && widget.role == UserRole.tasker) context.go('/verify');
-      // Otherwise the router redirect takes over. Nothing to navigate here.
+      // The router redirect takes over once the session flips. Nothing to
+      // navigate here.
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
@@ -178,10 +172,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   title: 'Create your account',
                   subtitle: 'Join JOBBees to post jobs or earn as a tasker.',
                 ),
-                if (widget.role != null) ...[
-                  const SizedBox(height: JSpacing.base),
-                  _RoleChip(role: widget.role!),
-                ],
                 const SizedBox(height: JSpacing.xl),
                 JTextField(
                   label: 'First name',
@@ -252,7 +242,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 const SizedBox(height: JSpacing.lg),
                 SocialAuthButtons(
-                  role: widget.role,
                   onError: (message) {
                     if (message.isNotEmpty && mounted) {
                       JSnackbar.showError(context, message);
@@ -282,57 +271,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Shows which role the account is being created as, with a quick way back to
-/// the role picker to change it.
-class _RoleChip extends StatelessWidget {
-  const _RoleChip({required this.role});
-
-  final UserRole role;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isTasker = role == UserRole.tasker;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        JSpacing.md,
-        JSpacing.sm,
-        JSpacing.sm,
-        JSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: scheme.primaryContainer,
-        borderRadius: JRadius.chipAll,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isTasker ? LucideIcons.hammer : LucideIcons.clipboardList,
-            size: 16,
-            color: scheme.onPrimaryContainer,
-          ),
-          const SizedBox(width: JSpacing.sm),
-          Text(
-            isTasker ? 'Signing up as a tasker' : 'Signing up as a client',
-            style: textTheme.bodySmall?.copyWith(
-              color: scheme.onPrimaryContainer,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: JSpacing.xs),
-          JButton.ghost(
-            label: 'Change',
-            onPressed: () => context.go('/auth/role'),
-            size: JButtonSize.sm,
-          ),
-        ],
       ),
     );
   }

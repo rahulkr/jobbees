@@ -8,40 +8,27 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/responsive/responsive_layout.dart';
-import '../../auth/models/auth_models.dart';
-import '../../auth/providers/auth_controller.dart';
 
 typedef _Destination = ({String label, String path});
 
 /// Shell entries shown to everyone (kept here so home + router stay in sync).
+/// Role-specific actions (becoming a tasker, verification, tasker profile) live
+/// on the profile screen now (`/me`), not on home.
 const List<({String label, String path})> kShellDestinations = [
   (label: 'Post a job', path: '/post'),
   (label: 'Browse a job', path: '/jobs/demo'),
 ];
 
-/// Role-specific entries. A client can switch on the tasker side of their
-/// account (they keep posting); a tasker manages verification + their profile.
-/// Both reachable from one account, per the role model.
-List<_Destination> _roleDestinations(UserRole? role) => role == UserRole.tasker
-    ? const [
-        (label: 'Verification', path: '/verify'),
-        (label: 'My tasker profile', path: '/profile/tasker'),
-      ]
-    : const [(label: 'Work as a tasker', path: '/become-tasker')];
-
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(authControllerProvider).valueOrNull?.role;
-    final destinations = <_Destination>[
+  Widget build(BuildContext context) {
+    const destinations = <_Destination>[
       ...kShellDestinations,
-      ..._roleDestinations(role),
       (label: 'My profile', path: '/me'),
     ];
     return Scaffold(
