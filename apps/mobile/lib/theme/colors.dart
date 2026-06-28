@@ -167,15 +167,16 @@ const gradientPrimary = LinearGradient(
 const gradientPrimaryButton = LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
-  colors: [Color(0xFFF6A24A), Color(0xFFD4541F)],
+  colors: [Color(0xFFF2A65A), Color(0xFFD8602A)],
 );
 
-// The glassy top highlight layered over [gradientPrimaryButton] on primary CTAs
-// (~30% white fading to transparent). Gives the button its lit-from-above sheen.
+// A restrained top highlight layered over [gradientPrimaryButton] on primary CTAs
+// (~12% white fading to transparent). Just enough lit-from-above hint to keep the
+// pill tactile, without the glossy "2010s glass button" sheen a stronger value reads as.
 const gradientButtonSheen = LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
-  colors: [Color(0x4DFFFFFF), Color(0x00FFFFFF)],
+  colors: [Color(0x1FFFFFFF), Color(0x00FFFFFF)],
 );
 
 const gradientSuccess = LinearGradient(

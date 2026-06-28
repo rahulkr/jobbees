@@ -27,6 +27,24 @@ enum JButtonVariant { primary, secondary, danger, ghost }
 
 enum JButtonSize { sm, md, lg }
 
+/// Soft, warm elevation under the primary CTA — a brand-tinted lift (not a grey
+/// drop shadow) plus a faint ambient layer, so the button reads as a raised,
+/// premium surface that floats above the screen.
+const List<BoxShadow> _kCtaShadow = [
+  BoxShadow(
+    color: Color(0x33D4541F), // ~20% of the deep terracotta — a tight warm lift
+    blurRadius: 18,
+    offset: Offset(0, 10),
+    spreadRadius:
+        -8, // pulled in so it reads as a lift under the pill, not a halo
+  ),
+  BoxShadow(
+    color: Color(0x14000000), // faint neutral ambient for grounding
+    blurRadius: 6,
+    offset: Offset(0, 2),
+  ),
+];
+
 class JButton extends StatelessWidget {
   const JButton._({
     required this.label,
@@ -150,9 +168,11 @@ class JButton extends StatelessWidget {
         Colors.transparent,
       ),
       JButtonVariant.secondary => (
-        scheme.surfaceContainerHighest,
+        // Clean outline (white fill + subtle border) so secondary actions —
+        // e.g. social sign-in — recede and let the primary CTA dominate.
+        scheme.surface,
         scheme.onSurface,
-        Colors.transparent,
+        scheme.outline,
       ),
       JButtonVariant.danger => (
         scheme.error,
@@ -222,30 +242,38 @@ class JButton extends StatelessWidget {
     final useGradient =
         gradient && variant == JButtonVariant.primary && !isDisabled;
 
+    final material = Material(
+      color: useGradient
+          ? Colors.transparent
+          : (isDisabled ? bg.withValues(alpha: 0.4) : bg),
+      borderRadius: radius,
+      clipBehavior: Clip.antiAlias,
+      child: useGradient
+          ? DecoratedBox(
+              // Honey-gold base + a faint white top sheen layered over it —
+              // a "lit from above", glassy pill. Label sits on top of both.
+              decoration: const BoxDecoration(gradient: gradientPrimaryButton),
+              child: DecoratedBox(
+                decoration: const BoxDecoration(gradient: gradientButtonSheen),
+                child: content,
+              ),
+            )
+          : content,
+    );
+
+    // The warm lift goes on an outer box (outside the Material's clip) so the
+    // shadow isn't clipped. Only the raised primary CTA gets it.
     final button = JPressable(
       onTap: isDisabled ? null : onPressed,
-      child: Material(
-        color: useGradient
-            ? Colors.transparent
-            : (isDisabled ? bg.withValues(alpha: 0.4) : bg),
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: useGradient
-            ? DecoratedBox(
-                // Honey-gold base + a faint white top sheen layered over it —
-                // a "lit from above", glassy pill. Label sits on top of both.
-                decoration: const BoxDecoration(
-                  gradient: gradientPrimaryButton,
-                ),
-                child: DecoratedBox(
-                  decoration: const BoxDecoration(
-                    gradient: gradientButtonSheen,
-                  ),
-                  child: content,
-                ),
-              )
-            : content,
-      ),
+      child: useGradient
+          ? DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: radius,
+                boxShadow: _kCtaShadow,
+              ),
+              child: material,
+            )
+          : material,
     );
 
     if (expanded) {
