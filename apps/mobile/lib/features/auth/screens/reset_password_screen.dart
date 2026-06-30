@@ -112,10 +112,12 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: ResponsiveLayout(
-          compact: (context) => _body(context, maxWidth: double.infinity),
-          expanded: (context) => Center(child: _body(context, maxWidth: 480)),
+      body: DismissKeyboard(
+        child: SafeArea(
+          child: ResponsiveLayout(
+            compact: (context) => _body(context, maxWidth: double.infinity),
+            expanded: (context) => Center(child: _body(context, maxWidth: 480)),
+          ),
         ),
       ),
     );
@@ -136,6 +138,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(JSpacing.lg),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: content,
         ),
       ),

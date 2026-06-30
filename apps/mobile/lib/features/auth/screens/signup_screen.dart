@@ -151,10 +151,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: ResponsiveLayout(
-          compact: (context) => _form(context, maxWidth: double.infinity),
-          expanded: (context) => Center(child: _form(context, maxWidth: 480)),
+      body: DismissKeyboard(
+        child: SafeArea(
+          child: ResponsiveLayout(
+            compact: (context) => _form(context, maxWidth: double.infinity),
+            expanded: (context) => Center(child: _form(context, maxWidth: 480)),
+          ),
         ),
       ),
     );
@@ -168,6 +170,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(JSpacing.lg),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: AutofillGroup(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
