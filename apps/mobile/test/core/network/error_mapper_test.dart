@@ -65,4 +65,30 @@ void main() {
     expect(mapped.message, 'Bad ABN');
     expect(mapped.retryable, isFalse);
   });
+
+  test('surfaces the machine-readable code when the body carries one', () {
+    final mapped = ErrorMapper.map(
+      _dio(
+        DioExceptionType.badResponse,
+        response: _resp(
+          403,
+          data: {
+            'message': 'Account is suspended',
+            'code': 'ACCOUNT_SUSPENDED',
+          },
+        ),
+      ),
+    );
+    expect(mapped.code, 'ACCOUNT_SUSPENDED');
+  });
+
+  test('code is null when the error body has none', () {
+    final mapped = ErrorMapper.map(
+      _dio(
+        DioExceptionType.badResponse,
+        response: _resp(400, data: {'message': 'Bad ABN'}),
+      ),
+    );
+    expect(mapped.code, isNull);
+  });
 }

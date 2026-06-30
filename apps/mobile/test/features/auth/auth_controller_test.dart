@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jobbees_mobile/core/auth/auth_token.dart';
@@ -174,6 +175,39 @@ void main() {
     expect(container.read(accessTokenProvider), 'access-2');
     expect((await storage.read())!.refreshToken, 'refresh-2');
   });
+
+  test(
+    'login on a suspended account flips state to suspended (no throw)',
+    () async {
+      final container = _container(
+        repo: FakeAuthRepository(
+          loginError: DioException(
+            requestOptions: RequestOptions(path: '/auth/login'),
+            type: DioExceptionType.badResponse,
+            response: Response<dynamic>(
+              requestOptions: RequestOptions(path: '/auth/login'),
+              statusCode: 403,
+              data: const {
+                'message': 'Account is suspended',
+                'code': 'ACCOUNT_SUSPENDED',
+              },
+            ),
+          ),
+        ),
+        storage: InMemoryTokenStorage(),
+      );
+      await container.read(authControllerProvider.future);
+
+      // Suspension is routed via session state, not rethrown to the screen.
+      await container
+          .read(authControllerProvider.notifier)
+          .login(email: 'blocked@example.com', password: 'whatever');
+
+      final user = container.read(authControllerProvider).valueOrNull;
+      expect(user, isNotNull);
+      expect(user!.isSuspended, isTrue);
+    },
+  );
 
   test(
     'becomeTasker upgrades, refreshes the session, and refetches the profile',

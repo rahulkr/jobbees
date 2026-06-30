@@ -60,6 +60,7 @@ dependencies:
   lucide_icons_flutter: ^3.1.14+2
   sentry_flutter: ^9.22.0
   posthog_flutter: ^5.27.0
+  local_auth: ^3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -117,7 +118,6 @@ flutter:
     - assets/branding/splash_logo.png
     - assets/branding/wordmark.png
     - assets/social/google.png
-    - assets/social/apple.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -139,7 +139,9 @@ class AuthController extends AsyncNotifier<UserProfile?> {
       await _persist(tokens);
       state = AsyncData(await repo.fetchMe());
     } catch (error) {
-      throw ErrorMapper.map(error);
+      final mapped = ErrorMapper.map(error);
+      if (_routeIfSuspended(mapped)) return;
+      throw mapped;
     }
   }
 
@@ -153,7 +155,9 @@ class AuthController extends AsyncNotifier<UserProfile?> {
       await Analytics.identify(user.id);
       await Analytics.track('logged_in');
     } catch (error) {
-      throw ErrorMapper.map(error);
+      final mapped = ErrorMapper.map(error);
+      if (_routeIfSuspended(mapped, email: email)) return;
+      throw mapped;
     }
   }
 
@@ -181,7 +185,9 @@ class AuthController extends AsyncNotifier<UserProfile?> {
         'role': (role ?? UserRole.client).name,
       });
     } catch (error) {
-      throw ErrorMapper.map(error);
+      final mapped = ErrorMapper.map(error);
+      if (_routeIfSuspended(mapped, email: email)) return;
+      throw mapped;
     }
   }
 
@@ -260,5 +266,18 @@ class AuthController extends AsyncNotifier<UserProfile?> {
     } catch (_) {
       return null;
     }
+  }
+
+  /// API discriminator (see backend `AllExceptionsFilter`) for a blocked,
+  /// suspended account.
+  static const String _suspendedCode = 'ACCOUNT_SUSPENDED';
+
+  /// If [mapped] is a suspended-account error, flip the session to a suspended
+  /// sentinel so the router routes to the account-suspended screen (rule 5) and
+  /// report it handled. Otherwise return false so the caller rethrows [mapped].
+  bool _routeIfSuspended(AppError mapped, {String email = ''}) {
+    if (mapped.code != _suspendedCode) return false;
+    state = AsyncData(UserProfile.suspended(email: email));
+    return true;
   }
 }
