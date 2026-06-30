@@ -162,9 +162,15 @@ describe('AuthService', () => {
         suspendedAt: new Date(),
       });
       passwords.verify.mockResolvedValue(true);
-      await expect(
-        service.login({ email: 'u1@example.com', password: 'right' }, CTX),
-      ).rejects.toBeInstanceOf(ForbiddenException);
+      const error = await service
+        .login({ email: 'u1@example.com', password: 'right' }, CTX)
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(ForbiddenException);
+      // Carries the machine-readable code the mobile app routes the
+      // account-suspended screen on (not just the human message).
+      expect((error as ForbiddenException).getResponse()).toMatchObject({
+        code: 'ACCOUNT_SUSPENDED',
+      });
     });
   });
 

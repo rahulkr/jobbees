@@ -12,6 +12,8 @@ interface ErrorResponseBody {
   statusCode: number;
   error: string;
   message: string | string[];
+  /** Optional machine-readable discriminator (e.g. ACCOUNT_SUSPENDED, REAUTH_REQUIRED). */
+  code?: string;
   path: string;
   timestamp: string;
 }
@@ -37,6 +39,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let error = 'InternalServerError';
     let message: string | string[] = 'Internal server error';
+    let code: string | undefined;
 
     if (exception instanceof HttpException) {
       const res = exception.getResponse();
@@ -47,6 +50,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const body = res as Record<string, unknown>;
         message = (body.message as string | string[]) ?? exception.message;
         error = (body.error as string) ?? exception.name;
+        // Surface a machine-readable discriminator when the thrower provides one
+        // (e.g. ACCOUNT_SUSPENDED, REAUTH_REQUIRED) so clients can branch on it.
+        if (typeof body.code === 'string') {
+          code = body.code;
+        }
       }
     }
 
@@ -61,6 +69,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: status,
       error,
       message,
+      ...(code ? { code } : {}),
       path: request.url,
       timestamp: new Date().toISOString(),
     };

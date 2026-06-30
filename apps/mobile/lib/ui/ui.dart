@@ -20,6 +20,9 @@ export 'components/buttons/j_button.dart';
 // Components — inputs
 export 'components/inputs/j_text_field.dart';
 
+// Components — keyboard
+export 'components/keyboard/dismiss_keyboard.dart';
+
 // Components — containers
 export 'components/containers/j_card.dart';
 export 'components/containers/j_bottom_sheet.dart';
