@@ -23,6 +23,7 @@ import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../../auth/models/auth_models.dart';
 import '../../auth/providers/auth_controller.dart';
+import '../../auth/providers/biometric_providers.dart';
 
 class MyProfileScreen extends ConsumerWidget {
   const MyProfileScreen({super.key});
@@ -79,6 +80,13 @@ class _Body extends ConsumerWidget {
               else
                 _BecomeTaskerCard(onTap: () => context.go('/become-tasker')),
               const SizedBox(height: JSpacing.xl),
+              // Biometric unlock — only when the device actually supports it
+              // (hidden on web / unenrolled devices).
+              if (ref.watch(biometricAvailableProvider).valueOrNull ??
+                  false) ...[
+                const _BiometricToggleTile(),
+                const SizedBox(height: JSpacing.xl),
+              ],
               JButton.danger(
                 label: 'Log out',
                 icon: LucideIcons.logOut,
@@ -225,6 +233,106 @@ class _SwitchToClientTileState extends ConsumerState<_SwitchToClientTile> {
                     color: scheme.onSurfaceVariant,
                   ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Toggles biometric unlock (Face ID / Touch ID / fingerprint). Turning it ON
+/// first verifies with a biometric prompt so we never enable a lock the user
+/// can't open; the flag persists on-device (see [biometricEnabledProvider]).
+class _BiometricToggleTile extends ConsumerStatefulWidget {
+  const _BiometricToggleTile();
+
+  @override
+  ConsumerState<_BiometricToggleTile> createState() =>
+      _BiometricToggleTileState();
+}
+
+class _BiometricToggleTileState extends ConsumerState<_BiometricToggleTile> {
+  bool _busy = false;
+
+  Future<void> _set({required bool enabled}) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      if (enabled) {
+        final ok = await ref
+            .read(biometricAuthServiceProvider)
+            .authenticate(reason: 'Confirm to turn on biometric unlock');
+        if (!ok) {
+          if (mounted) {
+            JHaptics.error();
+            JSnackbar.showError(context, 'Could not verify your biometrics.');
+          }
+          return; // leave the switch off
+        }
+      }
+      await ref.read(biometricEnabledProvider.notifier).set(enabled: enabled);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final enabled = ref.watch(biometricEnabledProvider);
+    return JCard(
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer,
+              borderRadius: JRadius.buttonMdAll,
+            ),
+            child: Icon(
+              LucideIcons.fingerprint,
+              size: 22,
+              color: scheme.primary,
+            ),
+          ),
+          const SizedBox(width: JSpacing.base),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Biometric unlock',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: JSpacing.xs),
+                Text(
+                  'Use Face ID or your fingerprint to unlock the app.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: JSpacing.sm),
+          if (_busy)
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: Padding(
+                padding: EdgeInsets.all(2),
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            Switch(
+              value: enabled,
+              onChanged: (value) => _set(enabled: value),
+            ),
         ],
       ),
     );

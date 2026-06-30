@@ -8,14 +8,18 @@
 /// clears the busy state; a real failure is reported up via [onError] so the
 /// host screen renders it in its banner.
 ///
-/// Branding: both providers use their official mark — the multi-colour Google
-/// "G" (assets/social/google.png) and the black Apple logo
-/// (assets/social/apple.png) — on the neutral outline [JButton.secondary] so
+/// Branding: Google uses the multi-colour "G" (assets/social/google.png) on the
+/// neutral outline [JButton.secondary]. Apple uses its **native**
+/// [SignInWithAppleButton] — App Store review requires Apple's own mark, label
+/// and proportions, so a redrawn logo on a custom button risks rejection under
+/// the Sign in with Apple HIG. The native button is sized to match the Google
+/// one (56px tall, brand corner radius) so the pair still reads as a set, while
 /// the primary CTA stays dominant.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../core/network/error_mapper.dart';
 import '../../../core/platform/platform_info.dart';
@@ -96,18 +100,22 @@ class _SocialAuthButtonsState extends ConsumerState<SocialAuthButtons> {
       ),
       if (_showApple) ...[
         const SizedBox(height: JSpacing.md),
-        JButton.secondary(
-          label: 'Continue with Apple',
-          leading: Image.asset(
-            'assets/social/apple.png',
-            width: 20,
-            height: 20,
-            filterQuality: FilterQuality.medium,
+        // Apple's native button (App Store compliant — its own mark + label +
+        // proportions). It has no inline loading state, and overlaying a spinner
+        // would modify the button, so we dim + freeze it while any provider is
+        // in flight; Apple presents its own system sheet for feedback. Re-entry
+        // is also guarded inside [_run].
+        Opacity(
+          opacity: anyBusy ? 0.6 : 1,
+          child: IgnorePointer(
+            ignoring: anyBusy,
+            child: SignInWithAppleButton(
+              text: 'Continue with Apple',
+              height: 56,
+              borderRadius: JRadius.buttonLgAll,
+              onPressed: () => _run(_Provider.apple),
+            ),
           ),
-          onPressed: anyBusy ? null : () => _run(_Provider.apple),
-          loading: _busy == _Provider.apple,
-          expanded: true,
-          size: JButtonSize.lg,
         ),
       ],
     ];

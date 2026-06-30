@@ -46,6 +46,12 @@ class TokenPair {
   final String refreshToken;
 }
 
+/// Account standing as the client cares about it. The API only blocks a
+/// [suspended] account at login (it never ships suspension in `/me`), so mobile
+/// carries it as session state and the router routes to the account-suspended
+/// screen (CLAUDE.md rule 5).
+enum AccountStatus { active, suspended }
+
 @immutable
 class UserProfile {
   const UserProfile({
@@ -56,6 +62,7 @@ class UserProfile {
     required this.role,
     required this.emailVerified,
     required this.phoneVerified,
+    this.status = AccountStatus.active,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
@@ -68,6 +75,21 @@ class UserProfile {
     phoneVerified: json['phoneVerified'] as bool? ?? false,
   );
 
+  /// A minimal sentinel for a suspended session. Built from the login error
+  /// (not `/me`, which is never reached when login is blocked): only [email]
+  /// and [status] are meaningful — the rest are placeholders so the router can
+  /// treat it as a non-null, suspended session.
+  factory UserProfile.suspended({String email = ''}) => UserProfile(
+    id: '',
+    email: email,
+    firstName: '',
+    lastName: '',
+    role: UserRole.unknown,
+    emailVerified: false,
+    phoneVerified: false,
+    status: AccountStatus.suspended,
+  );
+
   final String id;
   final String email;
   final String firstName;
@@ -75,6 +97,9 @@ class UserProfile {
   final UserRole role;
   final bool emailVerified;
   final bool phoneVerified;
+  final AccountStatus status;
+
+  bool get isSuspended => status == AccountStatus.suspended;
 
   String get fullName => '$firstName $lastName'.trim();
 }

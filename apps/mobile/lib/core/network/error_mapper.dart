@@ -13,7 +13,7 @@ import 'package:dio/dio.dart';
 
 /// A user-presentable error. Screens show `.message` in their error state.
 class AppError implements Exception {
-  const AppError(this.message, {this.retryable = false});
+  const AppError(this.message, {this.retryable = false, this.code});
 
   final String message;
 
@@ -22,6 +22,11 @@ class AppError implements Exception {
   /// Validation / auth errors (4xx) are NOT retryable — retrying just fails
   /// again — so a "Retry" affordance should only show when this is true.
   final bool retryable;
+
+  /// Machine-readable discriminator from the API error body (e.g.
+  /// `ACCOUNT_SUSPENDED`), when present. Lets callers branch on the specific
+  /// error instead of string-matching [message].
+  final String? code;
 
   @override
   String toString() => message;
@@ -45,6 +50,7 @@ class ErrorMapper {
         // Server-side faults (5xx) are worth retrying; 4xx are the caller's
         // problem and won't fix themselves on a retry.
         retryable: status != null && status >= 500,
+        code: _serverCode(response.data),
       );
     }
 
@@ -73,6 +79,16 @@ class ErrorMapper {
       if (message is List && message.isNotEmpty) {
         return message.first.toString();
       }
+    }
+    return null;
+  }
+
+  /// The optional `code` discriminator from a NestJS error body (set by the
+  /// API's exception filter for branchable errors like `ACCOUNT_SUSPENDED`).
+  static String? _serverCode(dynamic data) {
+    if (data is Map && data['code'] is String) {
+      final code = data['code'] as String;
+      if (code.isNotEmpty) return code;
     }
     return null;
   }

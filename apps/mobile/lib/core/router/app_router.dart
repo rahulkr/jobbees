@@ -16,10 +16,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/providers/auth_controller.dart';
+import '../../features/auth/providers/biometric_providers.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/screens/account_suspended_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/signup_screen.dart';
+import '../../features/auth/screens/unlock_screen.dart';
 import '../../features/auth/screens/verify_email_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/onboarding/providers/onboarding_providers.dart';
@@ -61,7 +64,8 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref
     ..listen(splashCompleteProvider, (_, _) => refresh.value++)
     ..listen(welcomeSeenProvider, (_, _) => refresh.value++)
-    ..listen(authControllerProvider, (_, _) => refresh.value++);
+    ..listen(authControllerProvider, (_, _) => refresh.value++)
+    ..listen(appLockProvider, (_, _) => refresh.value++);
 
   return GoRouter(
     initialLocation: '/splash',
@@ -73,6 +77,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final auth = ref.read(authControllerProvider);
       final restoring = auth.isLoading;
       final authed = auth.valueOrNull != null;
+      final suspended = auth.valueOrNull?.isSuspended ?? false;
+      final appLocked = ref.read(appLockProvider);
 
       // Splash gates only the cold-launch entry, and holds until BOTH the
       // branding moment and the session-restore probe finish — so we route
@@ -86,6 +92,18 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Hold routing decisions until the session-restore probe settles.
       if (restoring) return null;
+
+      // A suspended session is terminal: pin to the suspended screen until the
+      // user logs out (which flips state to signed-out and frees the gate).
+      // Non-suspended users never belong on it, so bounce them off.
+      if (suspended) return loc == '/suspended' ? null : '/suspended';
+      if (loc == '/suspended') return authed ? '/' : kSignInRoute;
+
+      // Biometric app-lock: a returning, authenticated session stays locked
+      // until the user passes the biometric prompt (or falls back to password
+      // on the unlock screen). Only an authed session can be locked.
+      if (authed && appLocked) return loc == '/unlock' ? null : '/unlock';
+      if (loc == '/unlock') return authed ? '/' : kSignInRoute;
 
       // First-run: the welcome carousel comes before everything (including the
       // auth gate). Pin to /welcome until it's seen — but don't fight once we're
@@ -137,6 +155,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/auth/verify-email',
         builder: (context, state) =>
             VerifyEmailScreen(token: state.uri.queryParameters['token']),
+      ),
+      GoRoute(
+        path: '/suspended',
+        builder: (context, state) => const AccountSuspendedScreen(),
+      ),
+      GoRoute(
+        path: '/unlock',
+        builder: (context, state) => const UnlockScreen(),
       ),
       GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
       GoRoute(

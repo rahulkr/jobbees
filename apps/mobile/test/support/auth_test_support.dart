@@ -3,6 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jobbees_mobile/core/auth/token_storage.dart';
 import 'package:jobbees_mobile/features/auth/data/auth_repository.dart';
+import 'package:jobbees_mobile/features/auth/data/biometric_auth_service.dart';
 import 'package:jobbees_mobile/features/auth/data/social_auth_service.dart';
 import 'package:jobbees_mobile/features/auth/models/auth_models.dart';
 import 'package:jobbees_mobile/features/auth/providers/auth_controller.dart';
@@ -16,6 +17,9 @@ const testUser = UserProfile(
   emailVerified: true,
   phoneVerified: false,
 );
+
+/// A suspended session sentinel (router routes it to the suspended screen).
+final suspendedUser = UserProfile.suspended(email: 'blocked@example.com');
 
 /// An [AuthController] whose session state is fixed and whose [signUp] is
 /// recorded — no network, no keychain.
@@ -132,6 +136,7 @@ class FakeAuthRepository implements AuthRepository {
     this.refreshTokens,
     this.oauthTokens,
     this.meUser,
+    this.loginError,
   });
 
   final TokenPair? signupTokens;
@@ -139,6 +144,10 @@ class FakeAuthRepository implements AuthRepository {
   final TokenPair? refreshTokens;
   final TokenPair? oauthTokens;
   final UserProfile? meUser;
+
+  /// When set, [login] throws this instead of returning tokens — lets a test
+  /// drive a server rejection (e.g. a suspended-account 403).
+  final Object? loginError;
   int logoutCount = 0;
   int becomeTaskerCount = 0;
   int switchToClientCount = 0;
@@ -167,7 +176,10 @@ class FakeAuthRepository implements AuthRepository {
   Future<TokenPair?> login({
     required String email,
     required String password,
-  }) async => loginTokens;
+  }) async {
+    if (loginError != null) throw loginError!;
+    return loginTokens;
+  }
 
   @override
   Future<TokenPair?> refresh(String? refreshToken) async {
@@ -241,6 +253,27 @@ class FakeSocialAuthService implements SocialAuthService {
   Future<SocialCredential?> signInWithApple() async {
     if (error != null) throw error!;
     return apple;
+  }
+}
+
+/// A scriptable [BiometricAuthService] — no native plugin.
+class FakeBiometricAuthService implements BiometricAuthService {
+  FakeBiometricAuthService({
+    this.available = true,
+    this.authenticateResult = true,
+  });
+
+  final bool available;
+  final bool authenticateResult;
+  int authenticateCount = 0;
+
+  @override
+  Future<bool> isAvailable() async => available;
+
+  @override
+  Future<bool> authenticate({required String reason}) async {
+    authenticateCount++;
+    return authenticateResult;
   }
 }
 
