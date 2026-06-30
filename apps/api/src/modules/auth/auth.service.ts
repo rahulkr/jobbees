@@ -98,7 +98,12 @@ export class AuthService {
     }
 
     if (user.suspendedAt) {
-      throw new ForbiddenException('Account is suspended');
+      // Object payload carries a machine-readable code so clients can route to
+      // the account-suspended screen instead of string-matching the message.
+      throw new ForbiddenException({
+        message: 'Account is suspended',
+        code: 'ACCOUNT_SUSPENDED',
+      });
     }
 
     await this.lockout.clearLogin(email);
