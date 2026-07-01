@@ -69,7 +69,10 @@ void main() {
     await _pumpApp(tester, welcomeSeen: true, signedIn: true);
 
     expect(find.text('Page Not Found'), findsNothing);
-    expect(find.text('Post a job'), findsOneWidget); // home shell
+    expect(
+      find.text('Welcome to JOBBees'),
+      findsOneWidget,
+    ); // home tab in shell
   });
 
   testWidgets('a suspended session lands on the account-suspended screen', (

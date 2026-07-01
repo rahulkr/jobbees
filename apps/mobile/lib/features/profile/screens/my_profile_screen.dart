@@ -78,7 +78,7 @@ class _Body extends ConsumerWidget {
               if (_isTasker)
                 ..._taskerEntries(context)
               else
-                _BecomeTaskerCard(onTap: () => context.go('/become-tasker')),
+                _BecomeTaskerCard(onTap: () => context.push('/become-tasker')),
               const SizedBox(height: JSpacing.xl),
               // Biometric unlock — only when the device actually supports it
               // (hidden on web / unenrolled devices).
@@ -105,14 +105,14 @@ class _Body extends ConsumerWidget {
       icon: LucideIcons.badgeCheck,
       title: 'Verification',
       subtitle: 'ABN, payouts and phone.',
-      onTap: () => context.go('/verify'),
+      onTap: () => context.push('/verify'),
     ),
     const SizedBox(height: JSpacing.base),
     _NavRow(
       icon: LucideIcons.user,
       title: 'My tasker profile',
       subtitle: 'Bio, hourly rate and skills.',
-      onTap: () => context.go('/profile/tasker'),
+      onTap: () => context.push('/profile/tasker'),
     ),
     const SizedBox(height: JSpacing.base),
     const _SwitchToClientTile(),
