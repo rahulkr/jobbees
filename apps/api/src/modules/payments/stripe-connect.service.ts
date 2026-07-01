@@ -81,6 +81,19 @@ export class StripeConnectService {
           email: user.email,
           capabilities: { transfers: { requested: true } },
           business_type: 'individual',
+          // Prefill what we already hold so the hosted onboarding form is
+          // shorter. Stripe does not re-ask for prefilled data (the tasker only
+          // confirms it). We hold name/email/phone but NOT DOB or address, so
+          // those remain the tasker's to enter (the regulatory KYC floor).
+          // Transfers-only accounts collect no business/website profile (the
+          // tasker isn't the merchant), so there's nothing to prefill there —
+          // their only outstanding requirement is an ID verification document.
+          individual: {
+            first_name: user.firstName,
+            last_name: user.lastName,
+            email: user.email,
+            ...(user.phone ? { phone: user.phone } : {}),
+          },
           metadata: { userId },
         },
         { idempotencyKey: `connect-create-${userId}` },

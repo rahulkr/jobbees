@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jobbees_mobile/core/network/error_mapper.dart';
 import 'package:jobbees_mobile/features/verification/models/abn_status.dart';
+import 'package:jobbees_mobile/features/verification/models/connect_status.dart';
+import 'package:jobbees_mobile/features/verification/providers/connect_providers.dart';
 import 'package:jobbees_mobile/features/verification/providers/verification_providers.dart';
 import 'package:jobbees_mobile/features/verification/screens/abn_entry_screen.dart';
 import 'package:jobbees_mobile/features/verification/screens/verification_status_screen.dart';
@@ -25,11 +27,29 @@ class _FakeController extends AbnStatusController {
   }
 }
 
+/// The verification hub also reads Connect status; stub it so the screen reaches
+/// its data state (the ABN tests here don't exercise the payout card).
+class _FakeConnectController extends ConnectStatusController {
+  _FakeConnectController(this.initial);
+
+  final ConnectStatus initial;
+
+  @override
+  Future<ConnectStatus> build() async => initial;
+}
+
+const _connectNotStarted = ConnectStatus(
+  state: ConnectState.notStarted,
+  payoutsEnabled: false,
+  detailsSubmitted: false,
+);
+
 Future<_FakeController> _pump(
   WidgetTester tester,
   Widget screen, {
   AbnStatus initial = const AbnStatus(),
   Object? submitError,
+  ConnectStatus connect = _connectNotStarted,
 }) async {
   tester.view.physicalSize = const Size(800, 1600);
   tester.view.devicePixelRatio = 1.0;
@@ -42,7 +62,12 @@ Future<_FakeController> _pump(
   );
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [abnStatusProvider.overrideWith(() => controller)],
+      overrides: [
+        abnStatusProvider.overrideWith(() => controller),
+        connectStatusProvider.overrideWith(
+          () => _FakeConnectController(connect),
+        ),
+      ],
       child: MaterialApp(home: screen),
     ),
   );
@@ -118,6 +143,33 @@ void main() {
       expect(find.text('Verified'), findsOneWidget);
       expect(find.text('Test Business Pty Ltd'), findsOneWidget);
       expect(find.text('Update ABN'), findsOneWidget);
+    });
+
+    testWidgets('shows the payout setup prompt when Connect is not started', (
+      tester,
+    ) async {
+      await _pump(tester, const VerificationStatusScreen());
+
+      expect(find.text('Payouts'), findsOneWidget);
+      expect(find.text('Set up payouts'), findsOneWidget);
+    });
+
+    testWidgets('reflects a completed Connect account (no setup action)', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        const VerificationStatusScreen(),
+        connect: const ConnectStatus(
+          state: ConnectState.complete,
+          payoutsEnabled: true,
+          detailsSubmitted: true,
+        ),
+      );
+
+      expect(find.text('Active'), findsOneWidget);
+      expect(find.text('Set up payouts'), findsNothing);
+      expect(find.text('Continue setup'), findsNothing);
     });
   });
 }
