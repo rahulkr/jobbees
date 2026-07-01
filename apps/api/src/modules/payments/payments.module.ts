@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Stripe from 'stripe';
+import * as Stripe from 'stripe';
 import { ConnectController } from './connect.controller';
 import { STRIPE_CLIENT } from './stripe.constants';
 import { StripeConnectService } from './stripe-connect.service';

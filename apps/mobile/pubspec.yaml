@@ -61,6 +61,7 @@ dependencies:
   sentry_flutter: ^9.22.0
   posthog_flutter: ^5.27.0
   local_auth: ^3.0.1
+  url_launcher: ^6.3.1 # opens the Stripe Connect hosted onboarding link (SFSafariViewController / Chrome Custom Tabs)
 
 dev_dependencies:
   flutter_test:
