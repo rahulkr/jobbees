@@ -1,44 +1,29 @@
 // ignore_for_file: public_member_api_docs
 
-/// The foundation landing screen.
+/// Home tab — the authenticated landing surface inside the bottom-nav shell.
 ///
-/// Demonstrates the FW-01 responsive primitives ([ResponsiveLayout]) and FW-03
-/// routing (each button is a [GoRouter] navigation that changes the browser
-/// URL). Real client/tasker home screens replace this in Sprint 2+.
+/// Navigation now lives in the shell's [NavigationBar] + Post FAB (see
+/// ScaffoldWithNavBar), so this is just the Home tab's content. The real
+/// client/tasker feed (job discovery, activity) arrives in Sprint 3+; for now a
+/// branded welcome so the tab has a home.
 library;
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/responsive/responsive_layout.dart';
-
-typedef _Destination = ({String label, String path});
-
-/// Shell entries shown to everyone (kept here so home + router stay in sync).
-/// Role-specific actions (becoming a tasker, verification, tasker profile) live
-/// on the profile screen now (`/me`), not on home.
-const List<({String label, String path})> kShellDestinations = [
-  (label: 'Post a job', path: '/post'),
-  (label: 'Browse a job', path: '/jobs/demo'),
-];
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const destinations = <_Destination>[
-      ...kShellDestinations,
-      (label: 'My profile', path: '/me'),
-    ];
     return Scaffold(
+      appBar: AppBar(title: const Text('JOBBees')),
       body: SafeArea(
         child: ResponsiveLayout(
-          compact: (context) =>
-              _HomeBody(maxWidth: double.infinity, destinations: destinations),
-          expanded: (context) => Center(
-            child: _HomeBody(maxWidth: 480, destinations: destinations),
-          ),
+          compact: (context) => const _HomeBody(maxWidth: double.infinity),
+          expanded: (context) => const Center(child: _HomeBody(maxWidth: 480)),
         ),
       ),
     );
@@ -46,10 +31,9 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _HomeBody extends StatelessWidget {
-  const _HomeBody({required this.maxWidth, required this.destinations});
+  const _HomeBody({required this.maxWidth});
 
   final double maxWidth;
-  final List<_Destination> destinations;
 
   @override
   Widget build(BuildContext context) {
@@ -60,32 +44,24 @@ class _HomeBody extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Icon(LucideIcons.house, size: 48, color: theme.colorScheme.primary),
+            const SizedBox(height: 16),
             Text(
-              'JOBBees',
+              'Welcome to JOBBees',
               textAlign: TextAlign.center,
-              style: theme.textTheme.displaySmall?.copyWith(
-                color: theme.colorScheme.primary,
+              style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Foundation shell. Mobile and web from one codebase.',
+              'Your jobs and activity will appear here.\nTap + to post a job.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 32),
-            for (final destination in destinations) ...[
-              OutlinedButton(
-                onPressed: () => context.go(destination.path),
-                child: Text(destination.label),
-              ),
-              const SizedBox(height: 12),
-            ],
           ],
         ),
       ),

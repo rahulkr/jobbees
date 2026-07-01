@@ -36,20 +36,42 @@ Future<void> _pumpHome(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('home screen renders and routes to a placeholder', (
+  testWidgets('lands on the Home tab inside the bottom-nav shell', (
     tester,
   ) async {
     await _pumpHome(tester);
 
-    expect(find.text('JOBBees'), findsOneWidget);
-    expect(find.text('Post a job'), findsOneWidget);
+    expect(find.text('JOBBees'), findsOneWidget); // Home tab app bar
+    expect(find.text('Welcome to JOBBees'), findsOneWidget);
+    // The Material 3 bottom nav + centre Post FAB.
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.text('Home'), findsWidgets);
+    expect(find.text('Profile'), findsWidgets);
+  });
 
-    await tester.tap(find.text('Post a job'));
+  testWidgets('the Post FAB opens the full-screen post-a-job flow', (
+    tester,
+  ) async {
+    await _pumpHome(tester);
+
+    await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    // go_router navigated to the placeholder route.
     expect(find.text('/post'), findsOneWidget);
     expect(find.text('Back to home'), findsOneWidget);
+  });
+
+  testWidgets('the bottom nav switches to the Profile tab', (tester) async {
+    await _pumpHome(tester);
+    expect(find.text('Welcome to JOBBees'), findsOneWidget);
+
+    await tester.tap(find.text('Profile'));
+    await tester.pumpAndSettle();
+
+    // Profile branch is shown; the Home tab is now offstage.
+    expect(find.text('Log out'), findsOneWidget);
+    expect(find.text('Welcome to JOBBees'), findsNothing);
   });
 
   testWidgets('compact layout drives a phone-shaped home body', (tester) async {

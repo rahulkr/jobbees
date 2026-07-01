@@ -32,6 +32,7 @@ import '../../features/profile/screens/tasker_profile_screen.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/welcome_carousel_screen.dart';
 import '../../features/shell/screens/placeholder_screen.dart';
+import '../../features/shell/widgets/scaffold_with_nav_bar.dart';
 import '../../features/verification/screens/abn_entry_screen.dart';
 import '../../features/verification/screens/become_tasker_screen.dart';
 import '../../features/verification/screens/phone_verification_screen.dart';
@@ -164,26 +165,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/unlock',
         builder: (context, state) => const UnlockScreen(),
       ),
-      GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+      // Full-screen flows on the root navigator (cover the bottom nav): the
+      // create-a-job flow (launched from the centre FAB) and the public tasker
+      // profile preview.
       GoRoute(
-        path: '/verify',
-        builder: (context, state) => const VerificationStatusScreen(),
-      ),
-      GoRoute(
-        path: '/verify/abn',
-        builder: (context, state) => const AbnEntryScreen(),
-      ),
-      GoRoute(
-        path: '/verify/phone',
-        builder: (context, state) => const PhoneVerificationScreen(),
-      ),
-      GoRoute(
-        path: '/become-tasker',
-        builder: (context, state) => const BecomeTaskerScreen(),
-      ),
-      GoRoute(
-        path: '/profile/tasker',
-        builder: (context, state) => const TaskerProfileScreen(),
+        path: '/post',
+        builder: (context, state) =>
+            const PlaceholderScreen(title: 'Post a job', route: '/post'),
       ),
       GoRoute(
         path: '/taskers/:id',
@@ -191,21 +179,88 @@ final routerProvider = Provider<GoRouter>((ref) {
           taskerId: state.pathParameters['id'] ?? '',
         ),
       ),
-      GoRoute(
-        path: '/post',
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'Post a job', route: '/post'),
-      ),
-      GoRoute(
-        path: '/me',
-        builder: (context, state) => const MyProfileScreen(),
-      ),
-      GoRoute(
-        path: '/jobs/:id',
-        builder: (context, state) {
-          final id = state.pathParameters['id'] ?? '';
-          return PlaceholderScreen(title: 'Job $id', route: '/jobs/$id');
-        },
+
+      // The authenticated app: a bottom-nav shell (Home / Offers / Post FAB /
+      // Messages / Profile). Each tab is a branch with its own back stack, so
+      // drilling into a tab keeps the nav bar and the other tabs' state.
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            ScaffoldWithNavBar(navigationShell: navigationShell),
+        branches: [
+          // Home
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const HomeScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'jobs/:id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id'] ?? '';
+                      return PlaceholderScreen(
+                        title: 'Job $id',
+                        route: '/jobs/$id',
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // Offers — bidding lands in Sprint 4.
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/offers',
+                builder: (context, state) =>
+                    const PlaceholderScreen(title: 'Offers', route: '/offers'),
+              ),
+            ],
+          ),
+          // Messages — messaging lands in Sprint 5.
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/messages',
+                builder: (context, state) => const PlaceholderScreen(
+                  title: 'Messages',
+                  route: '/messages',
+                ),
+              ),
+            ],
+          ),
+          // Profile + its tasker-verification drill-downs (pushed within the
+          // tab, so they keep the nav bar and get a back button).
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/me',
+                builder: (context, state) => const MyProfileScreen(),
+              ),
+              GoRoute(
+                path: '/verify',
+                builder: (context, state) => const VerificationStatusScreen(),
+              ),
+              GoRoute(
+                path: '/verify/abn',
+                builder: (context, state) => const AbnEntryScreen(),
+              ),
+              GoRoute(
+                path: '/verify/phone',
+                builder: (context, state) => const PhoneVerificationScreen(),
+              ),
+              GoRoute(
+                path: '/become-tasker',
+                builder: (context, state) => const BecomeTaskerScreen(),
+              ),
+              GoRoute(
+                path: '/profile/tasker',
+                builder: (context, state) => const TaskerProfileScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );
