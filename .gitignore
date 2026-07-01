@@ -153,3 +153,6 @@ coverage.xml
 # Python virtual environments (anywhere in tree)
 **/venv/
 **/.venv/
+
+# Local AI scratch / vendor design kits (e.g. Apple's Sign in with Apple assets)
+_ai_workspace/

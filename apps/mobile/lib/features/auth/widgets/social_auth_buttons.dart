@@ -9,17 +9,16 @@
 /// host screen renders it in its banner.
 ///
 /// Branding: Google uses the multi-colour "G" (assets/social/google.png) on the
-/// neutral outline [JButton.secondary]. Apple uses its **native**
-/// [SignInWithAppleButton] — App Store review requires Apple's own mark, label
-/// and proportions, so a redrawn logo on a custom button risks rejection under
-/// the Sign in with Apple HIG. The native button is sized to match the Google
-/// one (56px tall, brand corner radius) so the pair still reads as a set, while
-/// the primary CTA stays dominant.
+/// neutral outline [JButton.secondary]. Apple uses [JButton.apple] — a custom
+/// Sign in with Apple button built per Apple's HIG (black fill, white label,
+/// Apple's official mark in assets/social/apple_logo.png). Going custom (vs the
+/// native SignInWithAppleButton, whose font is locked to 0.43 × height) lets the
+/// two buttons match pixel-for-pixel: both are JButtonSize.md (52px), same
+/// radius, same Inter label. The primary CTA stays dominant.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../core/network/error_mapper.dart';
 import '../../../core/platform/platform_info.dart';
@@ -96,26 +95,29 @@ class _SocialAuthButtonsState extends ConsumerState<SocialAuthButtons> {
         onPressed: anyBusy ? null : () => _run(_Provider.google),
         loading: _busy == _Provider.google,
         expanded: true,
-        size: JButtonSize.lg,
+        // md (52px) — matches the Apple button below; the primary CTA
+        // (Log in, lg/56px) stays dominant.
+        size: JButtonSize.md,
       ),
       if (_showApple) ...[
         const SizedBox(height: JSpacing.md),
-        // Apple's native button (App Store compliant — its own mark + label +
-        // proportions). It has no inline loading state, and overlaying a spinner
-        // would modify the button, so we dim + freeze it while any provider is
-        // in flight; Apple presents its own system sheet for feedback. Re-entry
-        // is also guarded inside [_run].
-        Opacity(
-          opacity: anyBusy ? 0.6 : 1,
-          child: IgnorePointer(
-            ignoring: anyBusy,
-            child: SignInWithAppleButton(
-              text: 'Continue with Apple',
-              height: 56,
-              borderRadius: JRadius.buttonLgAll,
-              onPressed: () => _run(_Provider.apple),
-            ),
+        // Custom Sign in with Apple button built per Apple's HIG (Creating a
+        // custom Sign in with Apple button): black fill, white label, and
+        // Apple's official logo mark. Rendered through JButton.apple so it's
+        // pixel-identical to the Google button above — same height, radius,
+        // font and logo gap — which the native SignInWithAppleButton couldn't
+        // be (its font is locked to 0.43 × height).
+        JButton.apple(
+          label: 'Continue with Apple',
+          leading: Image.asset(
+            'assets/social/apple_logo.png',
+            height: 20,
+            filterQuality: FilterQuality.medium,
           ),
+          onPressed: anyBusy ? null : () => _run(_Provider.apple),
+          loading: _busy == _Provider.apple,
+          expanded: true,
+          size: JButtonSize.md,
         ),
       ],
     ];

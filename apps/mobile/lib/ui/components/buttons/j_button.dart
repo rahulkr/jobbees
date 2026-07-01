@@ -1,6 +1,6 @@
 /// JButton — the only button in the app.
 ///
-/// Variants: primary / secondary / danger / ghost
+/// Variants: primary / secondary / danger / ghost / apple
 /// Sizes: sm / md / lg
 /// States: idle / pressed / disabled / loading
 ///
@@ -23,7 +23,7 @@ import '../../../theme/colors.dart';
 import '../../platform/j_pressable.dart';
 import '../../tokens/tokens.dart';
 
-enum JButtonVariant { primary, secondary, danger, ghost }
+enum JButtonVariant { primary, secondary, danger, ghost, apple }
 
 enum JButtonSize { sm, md, lg }
 
@@ -144,6 +144,29 @@ class JButton extends StatelessWidget {
     key: key,
   );
 
+  /// Apple — the App Store-compliant "Sign in with Apple" button: black fill with
+  /// a white label and Apple's official mark (pass it as [leading]). Follows
+  /// Apple's HIG for building a custom Sign in with Apple button, and reuses all
+  /// of JButton's chrome so it matches the Google button pixel-for-pixel.
+  factory JButton.apple({
+    required String label,
+    required VoidCallback? onPressed,
+    JButtonSize size = JButtonSize.md,
+    Widget? leading,
+    bool loading = false,
+    bool expanded = false,
+    Key? key,
+  }) => JButton._(
+    label: label,
+    onPressed: onPressed,
+    variant: JButtonVariant.apple,
+    size: size,
+    leading: leading,
+    loading: loading,
+    expanded: expanded,
+    key: key,
+  );
+
   final String label;
   final VoidCallback? onPressed;
   final JButtonVariant variant;
@@ -191,6 +214,10 @@ class JButton extends StatelessWidget {
         scheme.primary,
         Colors.transparent,
       ),
+      // Apple's HIG mandates the exact black button + white mark/label for Sign
+      // in with Apple — a fixed brand requirement, so raw black/white (not a
+      // theme token).
+      JButtonVariant.apple => (Colors.black, Colors.white, Colors.transparent),
     };
 
     final (height, hPadding, fontSize) = switch (size) {
