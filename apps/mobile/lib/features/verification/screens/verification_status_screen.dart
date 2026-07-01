@@ -273,7 +273,7 @@ class _PhoneCard extends StatelessWidget {
             const SizedBox(height: JSpacing.base),
             JButton.secondary(
               label: 'Verify phone',
-              onPressed: () => context.go('/verify/phone'),
+              onPressed: () => context.push('/verify/phone'),
               expanded: true,
             ),
           ],
@@ -358,7 +358,7 @@ class _AbnCard extends StatelessWidget {
           const SizedBox(height: JSpacing.base),
           JButton.secondary(
             label: status.isEmpty ? 'Add ABN' : 'Update ABN',
-            onPressed: () => context.go('/verify/abn'),
+            onPressed: () => context.push('/verify/abn'),
             expanded: true,
           ),
         ],

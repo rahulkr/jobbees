@@ -36,7 +36,10 @@ class _BecomeTaskerScreenState extends ConsumerState<BecomeTaskerScreen> {
     setState(() => _submitting = true);
     try {
       await ref.read(authControllerProvider.notifier).becomeTasker();
-      if (mounted) context.go('/verify');
+      // Replace this intro screen with the verification hub — the user has
+      // upgraded, so "back" should return to where they started (profile), not
+      // to the become-a-tasker prompt.
+      if (mounted) context.pushReplacement('/verify');
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
