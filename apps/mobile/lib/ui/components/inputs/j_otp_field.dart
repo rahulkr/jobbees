@@ -227,11 +227,13 @@ class _OtpBoxState extends State<_OtpBox> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final borderColor = widget.hasError
-        ? scheme.error
-        : _focused
-        ? scheme.primary
-        : Colors.transparent;
+    final accent = widget.hasError ? scheme.error : scheme.primary;
+    // Unfocused cells get a subtle hairline for definition; focused/error cells
+    // get the accent. (Previously unfocused was transparent, so the only edge
+    // was the fill.)
+    final borderColor = _focused || widget.hasError
+        ? accent
+        : scheme.outlineVariant;
 
     return SizedBox(
       width: 48,
@@ -247,14 +249,15 @@ class _OtpBoxState extends State<_OtpBox> {
                 ? scheme.surfaceContainerHighest
                 : scheme.surfaceContainer,
             borderRadius: JRadius.buttonMdAll,
-            border: Border.all(color: borderColor, width: 2),
+            border: Border.all(color: borderColor, width: _focused ? 2 : 1.5),
+            // Soft focus glow — a diffuse halo. The old blurRadius:0/spread:3
+            // painted a hard second outline, reading as a doubled/nested box.
             boxShadow: _focused
                 ? [
                     BoxShadow(
-                      color: (widget.hasError ? scheme.error : scheme.primary)
-                          .withValues(alpha: 0.16),
-                      blurRadius: 0,
-                      spreadRadius: 3,
+                      color: accent.withValues(alpha: 0.20),
+                      blurRadius: 10,
+                      spreadRadius: 1,
                     ),
                   ]
                 : null,
