@@ -9,6 +9,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../support/auth_test_support.dart';
 
+void _reduceMotion(WidgetTester tester) {
+  tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(
+    tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+  );
+}
+
 Future<ProviderContainer> _pump(
   WidgetTester tester, {
   required bool biometricPasses,
@@ -45,6 +53,7 @@ void main() {
   testWidgets('a successful biometric prompt clears the app lock', (
     tester,
   ) async {
+    _reduceMotion(tester);
     final container = await _pump(tester, biometricPasses: true);
     expect(container.read(appLockProvider), isFalse);
   });
@@ -52,6 +61,7 @@ void main() {
   testWidgets('a failed prompt keeps the lock and offers the fallback', (
     tester,
   ) async {
+    _reduceMotion(tester);
     final container = await _pump(tester, biometricPasses: false);
     expect(container.read(appLockProvider), isTrue);
     expect(find.text('Use password instead'), findsOneWidget);
@@ -60,6 +70,7 @@ void main() {
   testWidgets('the password fallback logs out and clears the lock', (
     tester,
   ) async {
+    _reduceMotion(tester);
     final controller = FakeAuthController(initialUser: testUser);
     final container = await _pump(
       tester,

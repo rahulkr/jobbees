@@ -77,10 +77,35 @@ Future<void> _tap(WidgetTester tester, String label) async {
   await tester.pumpAndSettle();
 }
 
+/// Runs the screen with reduced motion so JEntrance renders its destination
+/// state immediately (no pending entrance timers to hang `pumpAndSettle`).
+void _reduceMotion(WidgetTester tester) {
+  tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(
+    tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+  );
+}
+
+/// Types [code] into the redesigned OTP entry (JOtpField), one digit per box.
+///
+/// The field renders six separate `TextField`s (each `maxLength: 1`), so the
+/// old single-field `enterText` no longer works. We drive each box in turn;
+/// entering the final digit fires `onCompleted`, which auto-submits the code
+/// after a short delay — callers pump past that to let the verify run.
+Future<void> _enterOtp(WidgetTester tester, String code) async {
+  final boxes = find.byType(TextField);
+  for (var i = 0; i < code.length; i++) {
+    await tester.enterText(boxes.at(i), code[i]);
+    await tester.pump();
+  }
+}
+
 void main() {
   testWidgets('blocks sending until a valid phone number is entered', (
     tester,
   ) async {
+    _reduceMotion(tester);
     final repo = _FakeVerifyRepo();
     await _open(tester, repo: repo, controller: FakeAuthController());
 
@@ -96,6 +121,7 @@ void main() {
   testWidgets('sends the code, verifies, reloads the profile, and returns', (
     tester,
   ) async {
+    _reduceMotion(tester);
     final repo = _FakeVerifyRepo();
     final controller = FakeAuthController(initialUser: testUser);
     await _open(tester, repo: repo, controller: controller);
@@ -104,9 +130,12 @@ void main() {
     await _tap(tester, 'Send code');
     expect(repo.sendCount, 1);
 
-    // Now on the code step.
-    await tester.enterText(find.byType(TextField), '000000');
-    await _tap(tester, 'Verify');
+    // Now on the code step: fill the six OTP boxes. Entering the last digit
+    // auto-submits (JOtpField.onCompleted), so we pump past that ~120ms delay
+    // and let the verify + reload + pop settle.
+    await _enterOtp(tester, '000000');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
 
     expect(repo.verifyCount, 1);
     expect(controller.reloadProfileCount, 1);
@@ -116,6 +145,7 @@ void main() {
   testWidgets('a verify failure shows the error and stays on the code step', (
     tester,
   ) async {
+    _reduceMotion(tester);
     final repo = _FakeVerifyRepo(
       verifyError: const AppError('That code is wrong'),
     );
@@ -127,8 +157,10 @@ void main() {
 
     await tester.enterText(find.byType(TextField), '+61400000000');
     await _tap(tester, 'Send code');
-    await tester.enterText(find.byType(TextField), '111111');
-    await _tap(tester, 'Verify');
+    // Entering the sixth digit auto-submits; the verify fails on the wrong code.
+    await _enterOtp(tester, '111111');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
 
     expect(find.text('That code is wrong'), findsOneWidget);
     expect(find.text('open-phone'), findsNothing); // did not pop
