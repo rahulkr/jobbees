@@ -167,9 +167,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/unlock',
         builder: (context, state) => const UnlockScreen(),
       ),
-      // Full-screen flows on the root navigator (cover the bottom nav): the
-      // create-a-job flow (launched from the centre FAB) and the public tasker
-      // profile preview.
+      // Full-screen flows on the root navigator (cover the bottom nav + Post
+      // FAB): the create-a-job flow (from the centre FAB), the public tasker
+      // profile preview, and the focused verification steps (ABN + phone OTP) —
+      // kept chrome-free so nothing competes with the input, per the charter's
+      // OTP reference bar.
       GoRoute(
         path: '/post',
         builder: (context, state) =>
@@ -180,6 +182,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => PublicTaskerProfileScreen(
           taskerId: state.pathParameters['id'] ?? '',
         ),
+      ),
+      GoRoute(
+        path: '/verify/abn',
+        builder: (context, state) => const AbnEntryScreen(),
+      ),
+      GoRoute(
+        path: '/verify/phone',
+        builder: (context, state) => const PhoneVerificationScreen(),
       ),
 
       // The authenticated app: a bottom-nav shell (Home / Offers / Post FAB /
@@ -251,14 +261,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/verify',
                 builder: (context, state) => const VerificationStatusScreen(),
-              ),
-              GoRoute(
-                path: '/verify/abn',
-                builder: (context, state) => const AbnEntryScreen(),
-              ),
-              GoRoute(
-                path: '/verify/phone',
-                builder: (context, state) => const PhoneVerificationScreen(),
               ),
               GoRoute(
                 path: '/become-tasker',
