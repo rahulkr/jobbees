@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../../../ui/platform/j_haptics.dart';
+import '../../../ui/ui.dart';
 
 class ScaffoldWithNavBar extends StatelessWidget {
   const ScaffoldWithNavBar({required this.navigationShell, super.key});
@@ -25,30 +25,23 @@ class ScaffoldWithNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      floatingActionButton: FloatingActionButton(
-        // Full-screen create flow on the root navigator (covers the nav bar).
+      // Round Post action cradled in the nav bar's notch. Full-screen create
+      // flow pushed on the root navigator (covers the nav bar).
+      floatingActionButton: JPostButton(
         onPressed: () {
           JHaptics.navigation();
           context.push('/post');
         },
-        tooltip: 'Post a job',
-        child: const Icon(LucideIcons.plus),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: JBottomNav(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onTap,
+        onSelect: _onTap,
         destinations: const [
-          NavigationDestination(icon: Icon(LucideIcons.house), label: 'Home'),
-          NavigationDestination(
-            icon: Icon(LucideIcons.handshake),
-            label: 'Offers',
-          ),
-          NavigationDestination(
-            icon: Icon(LucideIcons.messageCircle),
-            label: 'Messages',
-          ),
-          NavigationDestination(icon: Icon(LucideIcons.user), label: 'Profile'),
+          JNavDestination(icon: LucideIcons.house, label: 'Home'),
+          JNavDestination(icon: LucideIcons.handshake, label: 'Offers'),
+          JNavDestination(icon: LucideIcons.messageCircle, label: 'Messages'),
+          JNavDestination(icon: LucideIcons.user, label: 'Profile'),
         ],
       ),
     );
