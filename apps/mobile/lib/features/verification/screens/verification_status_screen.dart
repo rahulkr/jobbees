@@ -199,7 +199,7 @@ class _ConnectCardState extends ConsumerState<_ConnectCard> {
         children: [
           Row(
             children: [
-              Icon(icon, color: tint),
+              _StatusIcon(icon: icon, tint: tint),
               const SizedBox(width: JSpacing.sm),
               Expanded(
                 child: Text(
@@ -254,7 +254,7 @@ class _PhoneCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: tint),
+              _StatusIcon(icon: icon, tint: tint),
               const SizedBox(width: JSpacing.sm),
               Expanded(
                 child: Text(
@@ -320,7 +320,7 @@ class _AbnCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: tint),
+              _StatusIcon(icon: icon, tint: tint),
               const SizedBox(width: JSpacing.sm),
               Expanded(
                 child: Text(
@@ -443,6 +443,30 @@ class _GhostCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The per-card status glyph in a soft state-tinted badge, so completed
+/// (success), action-needed (error) and pending cards read as distinct surfaces
+/// rather than identical white rectangles.
+class _StatusIcon extends StatelessWidget {
+  const _StatusIcon({required this.icon, required this.tint});
+
+  final IconData icon;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.12),
+        borderRadius: JRadius.buttonMdAll,
+      ),
+      child: Icon(icon, color: tint, size: 22),
     );
   }
 }
