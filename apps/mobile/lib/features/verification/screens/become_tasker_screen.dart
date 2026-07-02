@@ -86,21 +86,8 @@ class _BecomeTaskerScreenState extends ConsumerState<BecomeTaskerScreen> {
             children: [
               const SizedBox(height: JSpacing.sm),
               JEntrance(
-                child: Center(
-                  child: Container(
-                    width: 84,
-                    height: 84,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer,
-                      borderRadius: JRadius.heroAll,
-                    ),
-                    child: Icon(
-                      LucideIcons.briefcase,
-                      size: 38,
-                      color: scheme.primary,
-                    ),
-                  ),
+                child: const Center(
+                  child: JHeroMark(icon: LucideIcons.briefcase),
                 ),
               ),
               const SizedBox(height: JSpacing.lg),

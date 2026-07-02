@@ -83,20 +83,11 @@ class AccountSuspendedScreen extends ConsumerWidget {
               // shouting-red. A shield icon signals "protective pause", not
               // punishment.
               JEntrance(
-                child: Center(
-                  child: Container(
-                    width: 88,
-                    height: 88,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: scheme.errorContainer,
-                      borderRadius: JRadius.heroAll,
-                    ),
-                    child: Icon(
-                      LucideIcons.shieldAlert,
-                      size: 40,
-                      color: scheme.onErrorContainer,
-                    ),
+                child: const Center(
+                  child: JHeroMark(
+                    icon: LucideIcons.shieldAlert,
+                    tone: JHeroTone.error,
+                    size: 88,
                   ),
                 ),
               ),

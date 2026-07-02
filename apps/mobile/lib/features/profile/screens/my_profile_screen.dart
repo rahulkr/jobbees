@@ -378,22 +378,7 @@ class _Header extends StatelessWidget {
     final scheme = theme.colorScheme;
     return Row(
       children: [
-        Container(
-          width: 64,
-          height: 64,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: scheme.primaryContainer,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            _initials,
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: scheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        JAvatar(initials: _initials, size: 64),
         const SizedBox(width: JSpacing.base),
         Expanded(
           child: Column(

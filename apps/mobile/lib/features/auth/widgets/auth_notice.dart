@@ -35,22 +35,15 @@ class AuthNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isError = tone == AuthNoticeTone.error;
-    final heroBg = isError ? scheme.errorContainer : scheme.primaryContainer;
-    final heroFg = isError ? scheme.error : scheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: JSpacing.xxl),
-        Container(
-          width: 72,
-          height: 72,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: heroBg,
-            borderRadius: JRadius.heroAll,
-          ),
-          child: Icon(icon, size: 36, color: heroFg),
+        JHeroMark(
+          icon: icon,
+          tone: tone == AuthNoticeTone.error
+              ? JHeroTone.error
+              : JHeroTone.brand,
         ),
         const SizedBox(height: JSpacing.lg),
         Text(

@@ -201,21 +201,10 @@ class _PhoneVerificationScreenState
               const SizedBox(height: JSpacing.sm),
               JEntrance(
                 child: Center(
-                  child: Container(
-                    width: 72,
-                    height: 72,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer,
-                      borderRadius: JRadius.heroAll,
-                    ),
-                    child: Icon(
-                      _codeSent
-                          ? LucideIcons.messageSquare
-                          : LucideIcons.smartphone,
-                      size: 32,
-                      color: scheme.primary,
-                    ),
+                  child: JHeroMark(
+                    icon: _codeSent
+                        ? LucideIcons.messageSquare
+                        : LucideIcons.smartphone,
                   ),
                 ),
               ),
