@@ -7,6 +7,14 @@
 /// reacts to by redirecting home — this screen never navigates itself
 /// (CLAUDE.md rule 5).
 ///
+/// Design (per Design Quality Charter § Onboarding):
+///   * Each slide has a *personality* — an icon container that gently breathes
+///     while the slide is active, plus staggered entrance on icon/title/body
+///     so revealing a new slide feels intentional rather than a flat swap.
+///   * Skip is present but fades out on the last slide (can't skip to the end
+///     when you're already there).
+///   * Elongating page indicator (already good — kept).
+///
 /// Content-only by nature: the slides are static local copy, so the four-state
 /// pattern (CLAUDE.md rule 3) collapses to the content state — there's no
 /// async load, error, or empty case to render.
@@ -83,6 +91,7 @@ class _WelcomeCarouselScreenState extends ConsumerState<WelcomeCarouselScreen> {
       _finish();
       return;
     }
+    JHaptics.navigation();
     final target = _index + 1;
     if (MediaQuery.of(context).disableAnimations) {
       _controller.jumpToPage(target);
@@ -136,8 +145,16 @@ class _WelcomeCarouselScreenState extends ConsumerState<WelcomeCarouselScreen> {
             child: PageView.builder(
               controller: _controller,
               itemCount: _slides.length,
-              onPageChanged: (i) => setState(() => _index = i),
-              itemBuilder: (context, i) => _SlideView(slide: _slides[i]),
+              onPageChanged: (i) {
+                setState(() => _index = i);
+                JHaptics.navigation();
+              },
+              itemBuilder: (context, i) => _SlideView(
+                // Keyed so title/body remount + JEntrance re-plays on slide switch.
+                key: ValueKey('slide-$i'),
+                slide: _slides[i],
+                isActive: i == _index,
+              ),
             ),
           ),
           Padding(
@@ -161,10 +178,43 @@ class _WelcomeCarouselScreenState extends ConsumerState<WelcomeCarouselScreen> {
   }
 }
 
-class _SlideView extends StatelessWidget {
-  const _SlideView({required this.slide});
+class _SlideView extends StatefulWidget {
+  const _SlideView({required this.slide, required this.isActive, super.key});
 
   final _Slide slide;
+
+  /// True when this slide is the currently-visible one. Used to keep the
+  /// breathing icon animation only on the visible slide (nothing off-screen
+  /// should burn frames).
+  final bool isActive;
+
+  @override
+  State<_SlideView> createState() => _SlideViewState();
+}
+
+class _SlideViewState extends State<_SlideView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _breath = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  )..repeat(reverse: true);
+
+  @override
+  void didUpdateWidget(covariant _SlideView old) {
+    super.didUpdateWidget(old);
+    if (widget.isActive && !_breath.isAnimating) {
+      _breath.repeat(reverse: true);
+    } else if (!widget.isActive && _breath.isAnimating) {
+      _breath.stop();
+      _breath.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _breath.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,29 +225,49 @@ class _SlideView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 128,
-            height: 128,
-            decoration: BoxDecoration(
-              color: scheme.primaryContainer,
-              borderRadius: JRadius.heroAll,
+          JEntrance(
+            child: AnimatedBuilder(
+              animation: _breath,
+              builder: (context, child) {
+                final t = CurvedAnimation(
+                  parent: _breath,
+                  curve: Curves.easeInOut,
+                ).value;
+                // 1.0 → 1.04 → 1.0 — a subtle breath, not a bounce.
+                final scale = 1.0 + (widget.isActive ? 0.04 * t : 0);
+                return Transform.scale(scale: scale, child: child);
+              },
+              child: Container(
+                width: 128,
+                height: 128,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer,
+                  borderRadius: JRadius.heroAll,
+                ),
+                child: Icon(widget.slide.icon, size: 56, color: scheme.primary),
+              ),
             ),
-            child: Icon(slide.icon, size: 56, color: scheme.primary),
           ),
           const SizedBox(height: JSpacing.xl),
-          Text(
-            slide.title,
-            textAlign: TextAlign.center,
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+          JEntrance(
+            delay: const Duration(milliseconds: 90),
+            child: Text(
+              widget.slide.title,
+              textAlign: TextAlign.center,
+              style: textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(height: JSpacing.md),
-          Text(
-            slide.body,
-            textAlign: TextAlign.center,
-            style: textTheme.bodyLarge?.copyWith(
-              color: scheme.onSurfaceVariant,
+          JEntrance(
+            delay: const Duration(milliseconds: 180),
+            child: Text(
+              widget.slide.body,
+              textAlign: TextAlign.center,
+              style: textTheme.bodyLarge?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],

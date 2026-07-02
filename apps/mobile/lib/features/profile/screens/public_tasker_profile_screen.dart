@@ -1,9 +1,16 @@
 // ignore_for_file: public_member_api_docs
 
 /// Public tasker profile (inventory row 47) — what a client sees: name, trust
-/// badges, bio, hourly rate, skills. Reviews show an empty state until S7.
+/// badges, bio, hourly rate, skills. Reviews show a designed empty state until
+/// S7 ships them.
 ///
 /// Read-only; loads via [publicTaskerProfileProvider]. Four-state aware.
+///
+/// Design (per Design Quality Charter § Profile (other user) — Airbnb host bar):
+///   * Avatar + name as hero, badges as secondary, hourly rate as anchor,
+///     bio + skills as sections, reviews as designed empty state.
+///   * Staggered entrance across sections so the data-loaded state unfolds.
+///   * Error state uses JEmptyState so it feels like a screen, not a snackbar.
 library;
 
 import 'package:flutter/material.dart';
@@ -63,71 +70,102 @@ class PublicTaskerProfileScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(JSpacing.lg),
           children: [
-            Row(
-              children: [
-                _Avatar(name: p.firstName),
-                const SizedBox(width: JSpacing.base),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        p.firstName,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (p.businessName != null) ...[
-                        const SizedBox(height: JSpacing.xs),
+            JEntrance(
+              child: Row(
+                children: [
+                  _Avatar(name: p.firstName),
+                  const SizedBox(width: JSpacing.base),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          p.businessName!,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                          p.firstName,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
+                        if (p.businessName != null) ...[
+                          const SizedBox(height: JSpacing.xs),
+                          Text(
+                            p.businessName!,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: JSpacing.base),
-            _Badges(badges: p.badges),
+            JEntrance(
+              delay: const Duration(milliseconds: 90),
+              child: _Badges(badges: p.badges),
+            ),
             if (p.hourlyRateCents != null) ...[
               const SizedBox(height: JSpacing.lg),
-              Text(
-                '\$${(p.hourlyRateCents! / 100).toStringAsFixed(p.hourlyRateCents! % 100 == 0 ? 0 : 2)}/hr',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: scheme.primary,
-                  fontWeight: FontWeight.bold,
+              JEntrance(
+                delay: const Duration(milliseconds: 160),
+                child: Text(
+                  '\$${(p.hourlyRateCents! / 100).toStringAsFixed(p.hourlyRateCents! % 100 == 0 ? 0 : 2)}/hr',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: scheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
             if (p.bio != null && p.bio!.isNotEmpty) ...[
               const SizedBox(height: JSpacing.lg),
-              _SectionTitle('About'),
+              JEntrance(
+                delay: const Duration(milliseconds: 220),
+                child: const _SectionTitle('About'),
+              ),
               const SizedBox(height: JSpacing.sm),
-              Text(p.bio!, style: theme.textTheme.bodyLarge),
+              JEntrance(
+                delay: const Duration(milliseconds: 260),
+                child: Text(p.bio!, style: theme.textTheme.bodyLarge),
+              ),
             ],
             if (p.skills.isNotEmpty) ...[
               const SizedBox(height: JSpacing.lg),
-              _SectionTitle('Skills'),
+              JEntrance(
+                delay: const Duration(milliseconds: 300),
+                child: const _SectionTitle('Skills'),
+              ),
               const SizedBox(height: JSpacing.sm),
-              Wrap(
-                spacing: JSpacing.sm,
-                runSpacing: JSpacing.sm,
-                children: [for (final s in p.skills) _SkillChip(label: s)],
+              JEntrance(
+                delay: const Duration(milliseconds: 340),
+                child: Wrap(
+                  spacing: JSpacing.sm,
+                  runSpacing: JSpacing.sm,
+                  children: [for (final s in p.skills) _SkillChip(label: s)],
+                ),
               ),
             ],
-            const SizedBox(height: JSpacing.lg),
-            _SectionTitle('Reviews'),
-            const SizedBox(height: JSpacing.sm),
-            Text(
-              'No reviews yet.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
+            const SizedBox(height: JSpacing.xl),
+            JEntrance(
+              delay: const Duration(milliseconds: 400),
+              child: const _SectionTitle('Reviews'),
+            ),
+            const SizedBox(height: JSpacing.md),
+            // Designed empty state — S7 will replace it with a review list.
+            JEntrance(
+              delay: const Duration(milliseconds: 460),
+              child: JCard(
+                child: JEmptyState(
+                  icon: LucideIcons.star,
+                  title: 'No reviews yet',
+                  body:
+                      "This tasker hasn't finished a job on JOBBees yet. Once "
+                      "clients leave feedback, it'll appear here.",
+                ),
               ),
             ),
+            const SizedBox(height: JSpacing.lg),
           ],
         ),
       ),
@@ -321,21 +359,16 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    // Full-screen error state — Charter § 7 (designed error state, not red text).
     return Padding(
       padding: const EdgeInsets.all(JSpacing.lg),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(LucideIcons.cloudOff, size: 36, color: scheme.onSurfaceVariant),
-          const SizedBox(height: JSpacing.base),
-          Text(
-            "Couldn't load this profile.",
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: JSpacing.lg),
-          JButton.secondary(label: 'Try again', onPressed: onRetry),
-        ],
+      child: JEmptyState(
+        icon: LucideIcons.cloudOff,
+        title: "We couldn't load this profile",
+        body:
+            'Check your connection and give it another go. If it keeps '
+            "happening, tap Support in Settings and we'll take a look.",
+        primaryAction: JButton.primary(label: 'Try again', onPressed: onRetry),
       ),
     );
   }
