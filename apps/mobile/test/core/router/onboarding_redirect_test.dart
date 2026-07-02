@@ -10,6 +10,8 @@ import 'package:jobbees_mobile/features/onboarding/providers/onboarding_provider
 import 'package:jobbees_mobile/features/auth/models/auth_models.dart';
 import 'package:jobbees_mobile/features/auth/providers/auth_controller.dart';
 import 'package:jobbees_mobile/features/auth/providers/biometric_providers.dart';
+import 'package:jobbees_mobile/features/auth/screens/account_suspended_screen.dart';
+import 'package:jobbees_mobile/features/home/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../support/auth_test_support.dart';
@@ -48,10 +50,19 @@ Future<void> _pumpApp(
   await tester.pumpAndSettle();
 }
 
+void _reduceMotion(WidgetTester tester) {
+  tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(
+    tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+  );
+}
+
 void main() {
   testWidgets('fresh signed-out launch lands on the welcome carousel', (
     tester,
   ) async {
+    _reduceMotion(tester);
     await _pumpApp(tester, welcomeSeen: false, signedIn: false);
 
     expect(find.text('Page Not Found'), findsNothing);
@@ -59,6 +70,7 @@ void main() {
   });
 
   testWidgets('returning signed-out user lands on login', (tester) async {
+    _reduceMotion(tester);
     await _pumpApp(tester, welcomeSeen: true, signedIn: false);
 
     expect(find.text('Page Not Found'), findsNothing);
@@ -66,27 +78,28 @@ void main() {
   });
 
   testWidgets('signed-in user lands on home', (tester) async {
+    _reduceMotion(tester);
     await _pumpApp(tester, welcomeSeen: true, signedIn: true);
 
     expect(find.text('Page Not Found'), findsNothing);
-    expect(
-      find.text('Welcome to JOBBees'),
-      findsOneWidget,
-    ); // home tab in shell
+    expect(find.byType(HomeScreen), findsOneWidget); // home tab in shell
   });
 
   testWidgets('a suspended session lands on the account-suspended screen', (
     tester,
   ) async {
+    _reduceMotion(tester);
     await _pumpApp(tester, welcomeSeen: true, user: suspendedUser);
 
     expect(find.text('Page Not Found'), findsNothing);
-    expect(find.text('Account suspended'), findsOneWidget);
+    expect(find.byType(AccountSuspendedScreen), findsOneWidget);
+    expect(find.text('Your account is paused'), findsOneWidget);
   });
 
   testWidgets('a signed-in user with biometrics enabled lands on unlock', (
     tester,
   ) async {
+    _reduceMotion(tester);
     await _pumpApp(
       tester,
       welcomeSeen: true,

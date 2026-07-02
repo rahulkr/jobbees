@@ -8,6 +8,11 @@
 /// fallback is to sign out and log in with a password. The screen never
 /// navigates itself — it flips lock / session state and the router redirect
 /// reacts (CLAUDE.md rule 5). No AppBar: there is nowhere to go back to.
+///
+/// Design (per Design Quality Charter): hero entrance on the fingerprint mark,
+/// with a subtle continuous pulse while the biometric prompt is on-screen so
+/// the user perceives the app as *listening*. Failure gets a distinct icon +
+/// warmer copy — this is a security screen so it must feel humane, not scary.
 library;
 
 import 'package:flutter/material.dart';
@@ -26,15 +31,31 @@ class UnlockScreen extends ConsumerStatefulWidget {
   ConsumerState<UnlockScreen> createState() => _UnlockScreenState();
 }
 
-class _UnlockScreenState extends ConsumerState<UnlockScreen> {
+class _UnlockScreenState extends ConsumerState<UnlockScreen>
+    with SingleTickerProviderStateMixin {
   bool _busy = false;
   bool _failed = false;
+
+  /// Slow breathing on the fingerprint container while the prompt is up. The
+  /// controller keeps ticking even when the animation isn't visible; toggling
+  /// it costs less than allocating on every state change.
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  );
 
   @override
   void initState() {
     super.initState();
-    // Auto-prompt on mount so unlocking is a single Face ID tap, not two.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _unlock());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Reduced motion — hold the mark still (CLAUDE.md motion rule).
+      if (!MediaQuery.of(context).disableAnimations) {
+        _pulse.repeat(reverse: true);
+      }
+      // Auto-prompt on mount so unlocking is a single Face ID tap, not two.
+      _unlock();
+    });
   }
 
   Future<void> _unlock() async {
@@ -52,6 +73,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
       ref.read(appLockProvider.notifier).unlock();
       return;
     }
+    JHaptics.error();
     setState(() {
       _busy = false;
       _failed = true;
@@ -63,6 +85,12 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
     // then sign out — the router returns to login.
     ref.read(appLockProvider.notifier).unlock();
     await ref.read(authControllerProvider.notifier).logout();
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
   }
 
   @override
@@ -80,6 +108,8 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
   Widget _body(BuildContext context, {required double maxWidth}) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final accent = _failed ? scheme.error : scheme.primary;
+    final accentBg = _failed ? scheme.errorContainer : scheme.primaryContainer;
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
@@ -90,53 +120,84 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: JSpacing.xxl),
-              Container(
-                width: 72,
-                height: 72,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer,
-                  borderRadius: JRadius.heroAll,
-                ),
-                child: Icon(
-                  LucideIcons.fingerprint,
-                  size: 36,
-                  color: scheme.primary,
-                ),
-              ),
-              const SizedBox(height: JSpacing.lg),
-              Text(
-                'Welcome back',
-                textAlign: TextAlign.center,
-                style: textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: JSpacing.sm),
-              Text(
-                _failed
-                    ? 'We could not verify it was you. Try again, or sign in '
-                          'with your password.'
-                    : 'Unlock JOBBees to continue.',
-                textAlign: TextAlign.center,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
+              // Hero mark — enters, then pulses while the prompt is up.
+              JEntrance(
+                child: Center(
+                  child: AnimatedBuilder(
+                    animation: _pulse,
+                    builder: (context, child) {
+                      // Only pulse while the OS prompt is up. When idle after
+                      // a failed attempt, hold still.
+                      final active = _busy;
+                      final t = CurvedAnimation(
+                        parent: _pulse,
+                        curve: Curves.easeInOut,
+                      ).value;
+                      final scale = active ? 1.0 + 0.06 * t : 1.0;
+                      return Transform.scale(scale: scale, child: child);
+                    },
+                    child: Container(
+                      width: 96,
+                      height: 96,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: accentBg,
+                        borderRadius: JRadius.heroAll,
+                      ),
+                      child: Icon(
+                        _failed ? LucideIcons.lock : LucideIcons.fingerprint,
+                        size: 44,
+                        color: accent,
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              JButton.primary(
-                label: 'Unlock',
-                onPressed: _busy ? null : _unlock,
-                loading: _busy,
-                expanded: true,
-                size: JButtonSize.lg,
+              JEntrance(
+                delay: const Duration(milliseconds: 80),
+                child: Text(
+                  _failed ? "Let's try that again" : 'Welcome back',
+                  textAlign: TextAlign.center,
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               const SizedBox(height: JSpacing.sm),
-              JButton.ghost(
-                label: 'Use password instead',
-                onPressed: _busy ? null : _usePassword,
-                expanded: true,
-                size: JButtonSize.lg,
+              JEntrance(
+                delay: const Duration(milliseconds: 160),
+                child: Text(
+                  _failed
+                      ? 'We could not verify it was you. Have another go, or '
+                            'sign in with your password.'
+                      : 'Unlock JOBBees to continue.',
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(height: JSpacing.xl),
+              JEntrance(
+                delay: const Duration(milliseconds: 240),
+                child: JButton.primary(
+                  label: 'Unlock',
+                  onPressed: _busy ? null : _unlock,
+                  loading: _busy,
+                  expanded: true,
+                  size: JButtonSize.lg,
+                ),
+              ),
+              const SizedBox(height: JSpacing.sm),
+              JEntrance(
+                delay: const Duration(milliseconds: 300),
+                child: JButton.ghost(
+                  label: 'Use password instead',
+                  onPressed: _busy ? null : _usePassword,
+                  expanded: true,
+                  size: JButtonSize.lg,
+                ),
               ),
             ],
           ),

@@ -100,11 +100,17 @@ class _VerificationStatusScreenState
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(JSpacing.lg),
           children: [
-            _ConnectCard(status: connect.requireValue),
+            JEntrance(child: _ConnectCard(status: connect.requireValue)),
             const SizedBox(height: JSpacing.base),
-            _AbnCard(status: abn.requireValue),
+            JEntrance(
+              delay: const Duration(milliseconds: 80),
+              child: _AbnCard(status: abn.requireValue),
+            ),
             const SizedBox(height: JSpacing.base),
-            _PhoneCard(verified: phoneVerified),
+            JEntrance(
+              delay: const Duration(milliseconds: 160),
+              child: _PhoneCard(verified: phoneVerified),
+            ),
           ],
         ),
       );
@@ -470,23 +476,17 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    // Full-screen designed error state per Design Quality Charter § criterion 7
+    // (no red-text-only errors).
     return Padding(
       padding: const EdgeInsets.all(JSpacing.lg),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(height: JSpacing.xxl),
-          Icon(LucideIcons.cloudOff, size: 36, color: scheme.onSurfaceVariant),
-          const SizedBox(height: JSpacing.base),
-          Text(
-            "Couldn't load your verification status.",
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: JSpacing.lg),
-          JButton.secondary(label: 'Try again', onPressed: onRetry),
-        ],
+      child: JEmptyState(
+        icon: LucideIcons.cloudOff,
+        title: "We couldn't load your verification status",
+        body:
+            "Give it another go — if it keeps happening, tap Support and "
+            "we'll take a look.",
+        primaryAction: JButton.primary(label: 'Try again', onPressed: onRetry),
       ),
     );
   }

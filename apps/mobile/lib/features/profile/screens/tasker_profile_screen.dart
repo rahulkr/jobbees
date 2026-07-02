@@ -106,9 +106,9 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
             skills: _skills,
           );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Profile saved')));
+        // Use JSnackbar for consistent brand-styled feedback (charter forbids
+        // default Material SnackBar).
+        JSnackbar.showSuccess(context, 'Profile saved');
       }
     } on AppError catch (error) {
       if (mounted) {
@@ -177,57 +177,74 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: JSpacing.sm),
-              Text(
-                'Tell clients what you do. This shows on your public profile.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+              JEntrance(
+                child: Text(
+                  'Tell clients what you do. This shows on your public profile.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              JTextField(
-                label: 'About you',
-                controller: _bio,
-                enabled: !_saving,
-                hintText: 'A short intro about your work and experience',
-                maxLines: 5,
-                minLines: 3,
-                maxLength: 1000,
-              ),
-              const SizedBox(height: JSpacing.lg),
-              JTextField(
-                label: 'Hourly rate (AUD)',
-                controller: _rate,
-                focusNode: _rateFocus,
-                enabled: !_saving,
-                errorText: _rateError,
-                hintText: 'e.g. 85',
-                helperText: 'Optional. You can set this per job too.',
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+              JEntrance(
+                delay: const Duration(milliseconds: 80),
+                child: JTextField(
+                  label: 'About you',
+                  controller: _bio,
+                  enabled: !_saving,
+                  hintText: 'A short intro about your work and experience',
+                  maxLines: 5,
+                  minLines: 3,
+                  maxLength: 1000,
                 ),
               ),
               const SizedBox(height: JSpacing.lg),
-              Text(
-                'Skills',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+              JEntrance(
+                delay: const Duration(milliseconds: 140),
+                child: JTextField(
+                  label: 'Hourly rate (AUD)',
+                  controller: _rate,
+                  focusNode: _rateFocus,
+                  enabled: !_saving,
+                  errorText: _rateError,
+                  hintText: 'e.g. 85',
+                  helperText: 'Optional. You can set this per job too.',
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+              ),
+              const SizedBox(height: JSpacing.lg),
+              JEntrance(
+                delay: const Duration(milliseconds: 200),
+                child: Text(
+                  'Skills',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const SizedBox(height: JSpacing.sm),
-              _SkillsEditor(
-                skills: _skills,
-                input: _skillInput,
-                enabled: !_saving,
-                onAdd: _addSkill,
-                onRemove: (s) => setState(() => _skills.remove(s)),
+              JEntrance(
+                delay: const Duration(milliseconds: 260),
+                child: _SkillsEditor(
+                  skills: _skills,
+                  input: _skillInput,
+                  enabled: !_saving,
+                  onAdd: _addSkill,
+                  onRemove: (s) => setState(() => _skills.remove(s)),
+                ),
               ),
               const SizedBox(height: JSpacing.xl),
-              JButton.primary(
-                label: 'Save profile',
-                onPressed: _saving ? null : _save,
-                loading: _saving,
-                expanded: true,
-                size: JButtonSize.lg,
+              JEntrance(
+                delay: const Duration(milliseconds: 340),
+                child: JButton.primary(
+                  label: 'Save profile',
+                  onPressed: _saving ? null : _save,
+                  loading: _saving,
+                  expanded: true,
+                  size: JButtonSize.lg,
+                ),
               ),
             ],
           ),
@@ -391,21 +408,16 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    // Full-screen designed error state — Charter § criterion 7.
     return Padding(
       padding: const EdgeInsets.all(JSpacing.lg),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(LucideIcons.cloudOff, size: 36, color: scheme.onSurfaceVariant),
-          const SizedBox(height: JSpacing.base),
-          Text(
-            "Couldn't load your profile.",
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: JSpacing.lg),
-          JButton.secondary(label: 'Try again', onPressed: onRetry),
-        ],
+      child: JEmptyState(
+        icon: LucideIcons.cloudOff,
+        title: "We couldn't load your profile",
+        body:
+            'Check your connection and give it another go. Your changes are '
+            'saved on the server, so nothing is lost.',
+        primaryAction: JButton.primary(label: 'Try again', onPressed: onRetry),
       ),
     );
   }

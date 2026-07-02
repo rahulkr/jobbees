@@ -35,14 +35,28 @@ Future<void> _pumpHome(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// Runs with reduced motion so the redesigned splash/home entrance and
+/// "breathing" animations collapse to their destination state — otherwise the
+/// infinite animations leave `pumpAndSettle` spinning and the splash never hands
+/// off within the pumped window.
+void _reduceMotion(WidgetTester tester) {
+  tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(
+    tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+  );
+}
+
 void main() {
   testWidgets('lands on the Home tab inside the bottom-nav shell', (
     tester,
   ) async {
+    _reduceMotion(tester);
     await _pumpHome(tester);
 
-    expect(find.text('JOBBees'), findsOneWidget); // Home tab app bar
-    expect(find.text('Welcome to JOBBees'), findsOneWidget);
+    // The Home tab is a designed greeting header + empty state, not an app bar.
+    expect(find.text('What needs doing?'), findsOneWidget); // Home header
+    expect(find.text('Your feed is warming up'), findsOneWidget); // empty state
     // The Material 3 bottom nav + centre Post FAB.
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
@@ -53,6 +67,7 @@ void main() {
   testWidgets('the Post FAB opens the full-screen post-a-job flow', (
     tester,
   ) async {
+    _reduceMotion(tester);
     await _pumpHome(tester);
 
     await tester.tap(find.byType(FloatingActionButton));
@@ -63,25 +78,35 @@ void main() {
   });
 
   testWidgets('the bottom nav switches to the Profile tab', (tester) async {
+    _reduceMotion(tester);
     await _pumpHome(tester);
-    expect(find.text('Welcome to JOBBees'), findsOneWidget);
+    expect(find.text('What needs doing?'), findsOneWidget); // on the Home tab
 
-    await tester.tap(find.text('Profile'));
+    // Target the nav destination specifically — the Profile branch's own
+    // "Profile" app-bar title also matches once that tab is built.
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Profile'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Profile branch is shown; the Home tab is now offstage.
     expect(find.text('Log out'), findsOneWidget);
-    expect(find.text('Welcome to JOBBees'), findsNothing);
+    expect(find.text('What needs doing?'), findsNothing);
   });
 
   testWidgets('compact layout drives a phone-shaped home body', (tester) async {
+    _reduceMotion(tester);
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
     await _pumpHome(tester);
 
-    expect(find.text('JOBBees'), findsOneWidget);
+    // Compact width renders the phone-shaped Home body (its greeting header).
+    expect(find.text('What needs doing?'), findsOneWidget);
   });
 
   group('Breakpoints', () {

@@ -9,6 +9,11 @@
 ///
 /// Navigation stays state-driven (CLAUDE.md rule 5) for the auth gate, but this
 /// is a deliberate in-flow step, so we `go('/verify')` once the role flips.
+///
+/// Design (per Design Quality Charter § Role select / persona pick):
+///   * Hero mark, then staggered entrance on headline / body / each step.
+///   * "Switch anytime" reminder sits below the steps as a soft assurance, not
+///     a legal disclaimer.
 library;
 
 import 'package:flutter/material.dart';
@@ -80,84 +85,114 @@ class _BecomeTaskerScreenState extends ConsumerState<BecomeTaskerScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: JSpacing.sm),
-              Container(
-                width: 72,
-                height: 72,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer,
-                  borderRadius: JRadius.heroAll,
-                ),
-                child: Icon(
-                  LucideIcons.briefcase,
-                  size: 34,
-                  color: scheme.primary,
+              JEntrance(
+                child: Center(
+                  child: Container(
+                    width: 84,
+                    height: 84,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: scheme.primaryContainer,
+                      borderRadius: JRadius.heroAll,
+                    ),
+                    child: Icon(
+                      LucideIcons.briefcase,
+                      size: 38,
+                      color: scheme.primary,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: JSpacing.lg),
-              Text(
-                'Find work and get paid',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+              JEntrance(
+                delay: const Duration(milliseconds: 90),
+                child: Text(
+                  'Find work and get paid',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: JSpacing.sm),
-              Text(
-                'Taskers do jobs and get paid for their skills. You keep your '
-                'account and can still post jobs as a client whenever you like.',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: scheme.onSurfaceVariant,
+              JEntrance(
+                delay: const Duration(milliseconds: 160),
+                child: Text(
+                  'Taskers do jobs and get paid for their skills. You keep '
+                  'your account and can still post jobs as a client whenever '
+                  'you like.',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              Text(
-                "A quick verification first, then you're set:",
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+              JEntrance(
+                delay: const Duration(milliseconds: 240),
+                child: Text(
+                  "A quick verification first, then you're set:",
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const SizedBox(height: JSpacing.base),
-              const _Step(
-                icon: LucideIcons.badgeCheck,
-                title: 'Verify your ABN',
-                blurb: "We check it against the Australian Business Register.",
+              JEntrance(
+                delay: const Duration(milliseconds: 320),
+                child: const _Step(
+                  icon: LucideIcons.badgeCheck,
+                  title: 'Verify your ABN',
+                  blurb:
+                      "We check it against the Australian Business Register.",
+                ),
               ),
-              const _Step(
-                icon: LucideIcons.wallet,
-                title: 'Set up payouts',
-                blurb: 'So you can get paid securely once a job is done.',
+              JEntrance(
+                delay: const Duration(milliseconds: 380),
+                child: const _Step(
+                  icon: LucideIcons.wallet,
+                  title: 'Set up payouts',
+                  blurb: 'So you can get paid securely once a job is done.',
+                ),
               ),
-              const _Step(
-                icon: LucideIcons.smartphone,
-                title: 'Verify your phone',
-                blurb: 'A quick code keeps your account secure.',
+              JEntrance(
+                delay: const Duration(milliseconds: 440),
+                child: const _Step(
+                  icon: LucideIcons.smartphone,
+                  title: 'Verify your phone',
+                  blurb: 'A quick code keeps your account secure.',
+                ),
               ),
               const SizedBox(height: JSpacing.sm),
-              Row(
-                children: [
-                  Icon(
-                    LucideIcons.arrowLeftRight,
-                    size: 18,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: JSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      'Switch between hiring and working anytime.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
+              JEntrance(
+                delay: const Duration(milliseconds: 520),
+                child: Row(
+                  children: [
+                    Icon(
+                      LucideIcons.arrowLeftRight,
+                      size: 18,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: JSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        'Switch between hiring and working anytime.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: JSpacing.xl),
-              JButton.primary(
-                label: 'Get started',
-                onPressed: _submitting ? null : _start,
-                loading: _submitting,
-                expanded: true,
-                size: JButtonSize.lg,
+              JEntrance(
+                delay: const Duration(milliseconds: 600),
+                child: JButton.primary(
+                  label: 'Get started',
+                  onPressed: _submitting ? null : _start,
+                  loading: _submitting,
+                  expanded: true,
+                  size: JButtonSize.lg,
+                ),
               ),
             ],
           ),

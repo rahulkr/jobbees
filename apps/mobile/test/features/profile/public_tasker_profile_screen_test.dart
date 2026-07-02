@@ -5,10 +5,19 @@ import 'package:jobbees_mobile/features/profile/models/public_tasker_profile.dar
 import 'package:jobbees_mobile/features/profile/providers/profile_providers.dart';
 import 'package:jobbees_mobile/features/profile/screens/public_tasker_profile_screen.dart';
 
+void _reduceMotion(WidgetTester tester) {
+  tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(
+    tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+  );
+}
+
 void main() {
   testWidgets('renders the public profile: name, badges, rate, skills', (
     tester,
   ) async {
+    _reduceMotion(tester);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -37,10 +46,11 @@ void main() {
     expect(find.text('plumbing'), findsOneWidget);
     expect(find.text('Email verified'), findsOneWidget);
     expect(find.text('Payments ready'), findsOneWidget);
-    expect(find.text('No reviews yet.'), findsOneWidget);
+    expect(find.text('No reviews yet'), findsOneWidget);
   });
 
   testWidgets('hides badges that are not earned', (tester) async {
+    _reduceMotion(tester);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [

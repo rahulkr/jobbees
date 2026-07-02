@@ -102,7 +102,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(JSpacing.lg),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: _sent ? _confirmation(context) : _form(context),
+          // Key on state so the entrance re-plays as we transition form → confirmation.
+          child: KeyedSubtree(
+            key: ValueKey(_sent),
+            child: _sent ? _confirmation(context) : _form(context),
+          ),
         ),
       ),
     );
@@ -114,36 +118,47 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: JSpacing.lg),
-          const AuthHeader(
-            title: 'Reset your password',
-            subtitle: "Enter your email and we'll send you a reset link.",
+          const JEntrance(
+            child: AuthHeader(
+              title: 'Reset your password',
+              subtitle: "Enter your email and we'll send you a reset link.",
+            ),
           ),
           const SizedBox(height: JSpacing.xl),
-          JTextField(
-            label: 'Email',
-            controller: _email,
-            focusNode: _emailFocus,
-            enabled: !_submitting,
-            errorText: _emailError,
-            hintText: 'you@example.com',
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.done,
-            autofillHints: const [AutofillHints.email],
-            onSubmitted: (_) => _submit(),
+          JEntrance(
+            delay: const Duration(milliseconds: 90),
+            child: JTextField(
+              label: 'Email',
+              controller: _email,
+              focusNode: _emailFocus,
+              enabled: !_submitting,
+              errorText: _emailError,
+              hintText: 'you@example.com',
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.email],
+              onSubmitted: (_) => _submit(),
+            ),
           ),
           const SizedBox(height: JSpacing.xl),
-          JButton.primary(
-            label: 'Send reset link',
-            onPressed: _submitting ? null : _submit,
-            loading: _submitting,
-            expanded: true,
-            size: JButtonSize.lg,
+          JEntrance(
+            delay: const Duration(milliseconds: 160),
+            child: JButton.primary(
+              label: 'Send reset link',
+              onPressed: _submitting ? null : _submit,
+              loading: _submitting,
+              expanded: true,
+              size: JButtonSize.lg,
+            ),
           ),
           const SizedBox(height: JSpacing.sm),
-          JButton.ghost(
-            label: 'Back to login',
-            onPressed: _submitting ? null : () => context.go('/auth/login'),
-            expanded: true,
+          JEntrance(
+            delay: const Duration(milliseconds: 220),
+            child: JButton.ghost(
+              label: 'Back to login',
+              onPressed: _submitting ? null : () => context.go('/auth/login'),
+              expanded: true,
+            ),
           ),
         ],
       ),
@@ -157,37 +172,56 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: JSpacing.xxl),
-        Container(
-          width: 72,
-          height: 72,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: scheme.primaryContainer,
-            borderRadius: JRadius.heroAll,
+        JEntrance(
+          child: Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer,
+                borderRadius: JRadius.heroAll,
+              ),
+              child: Icon(
+                LucideIcons.mailCheck,
+                size: 36,
+                color: scheme.primary,
+              ),
+            ),
           ),
-          child: Icon(LucideIcons.mailCheck, size: 36, color: scheme.primary),
         ),
         const SizedBox(height: JSpacing.lg),
-        Text(
-          'Check your email',
-          textAlign: TextAlign.center,
-          style: textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+        JEntrance(
+          delay: const Duration(milliseconds: 80),
+          child: Text(
+            'Check your email',
+            textAlign: TextAlign.center,
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: JSpacing.sm),
-        Text(
-          "If an account exists for ${_email.text.trim()}, we've sent a link to "
-          'reset your password.',
-          textAlign: TextAlign.center,
-          style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        JEntrance(
+          delay: const Duration(milliseconds: 160),
+          child: Text(
+            "If an account exists for ${_email.text.trim()}, we've sent a link to "
+            'reset your password.',
+            textAlign: TextAlign.center,
+            style: textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
         ),
         const SizedBox(height: JSpacing.xl),
-        JButton.primary(
-          label: 'Back to login',
-          onPressed: () => context.go('/auth/login'),
-          expanded: true,
-          size: JButtonSize.lg,
+        JEntrance(
+          delay: const Duration(milliseconds: 240),
+          child: JButton.primary(
+            label: 'Back to login',
+            onPressed: () => context.go('/auth/login'),
+            expanded: true,
+            size: JButtonSize.lg,
+          ),
         ),
       ],
     );

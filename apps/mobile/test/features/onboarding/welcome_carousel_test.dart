@@ -22,8 +22,17 @@ Future<ProviderContainer> _pumpCarousel(WidgetTester tester) async {
   return container;
 }
 
+void _reduceMotion(WidgetTester tester) {
+  tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(
+    tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+  );
+}
+
 void main() {
   testWidgets('renders the first slide with Skip and Next', (tester) async {
+    _reduceMotion(tester);
     await _pumpCarousel(tester);
 
     expect(find.text('Post a job in minutes'), findsOneWidget);
@@ -33,6 +42,7 @@ void main() {
   });
 
   testWidgets('Next advances through slides to Get started', (tester) async {
+    _reduceMotion(tester);
     await _pumpCarousel(tester);
 
     await tester.tap(find.text('Next'));
@@ -47,6 +57,7 @@ void main() {
   });
 
   testWidgets('Skip marks the carousel as seen', (tester) async {
+    _reduceMotion(tester);
     final container = await _pumpCarousel(tester);
     expect(container.read(welcomeSeenProvider), isFalse);
 
@@ -57,6 +68,7 @@ void main() {
   });
 
   testWidgets('Get started marks the carousel as seen', (tester) async {
+    _reduceMotion(tester);
     final container = await _pumpCarousel(tester);
 
     await tester.tap(find.text('Next'));

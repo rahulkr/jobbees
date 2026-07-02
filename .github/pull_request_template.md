@@ -82,6 +82,28 @@ Per **ADR 005**: no identity-vendor KYC. Verification = Stripe Connect (Stripe h
 - [ ] Admin license review queue cross-checks against AU state register URL (recorded in reviewer notes)
 - [ ] No license number persisted from a state register other than the one the tasker claimed (i.e., don't accidentally cross-check VIC registers for a NSW-issued license without recording it)
 
+### Touches `apps/mobile/lib/features/**/screens/**` (any Flutter screen — creating OR editing)?
+
+Per `docs/brand/DESIGN-QUALITY-CHARTER.md`. Every screen must pass the 12 rejection criteria AND the design gate below. No exceptions without a one-line written justification per unchecked box.
+
+**This applies to editing existing screens too.** If the touched screen is listed as **Tier B** in `docs/brand/design-debt.md`, the retrofit must happen in this same PR before merge. Update the tracker status in the same PR.
+
+- [ ] N/A
+- [ ] Screen category identified + reference bar named (from the charter's screen-personality table)
+- [ ] No default Material widgets on screen (only `J*` components or composed custom layouts)
+- [ ] Coral appears ≤ 2 times on screen; one dominant CTA
+- [ ] Featured / regular / state variants are visually distinct (not just labelled)
+- [ ] Entrance animation defined (not default page-push)
+- [ ] Interactive elements have press response (haptic + scale/opacity)
+- [ ] Skeleton state built (or spinner justified — button/inline/streaming context only)
+- [ ] Empty state built with Lucide icon + microcopy voice
+- [ ] Error state built with named-problem title + retry
+- [ ] Long-text overflow tested (40+ char titles, 300+ char bodies)
+- [ ] Keyboard-up state tested (all inputs)
+- [ ] Light + dark mode both feel intentional (not one design × 2 palettes)
+- [ ] Widgetbook composed page exists at `widgetbook/screens/<category>/<name>_page.dart` (Widgetbook lock — built _before_ screen implementation)
+- [ ] Screenshots in both modes attached to PR
+
 ### Touches `apps/api/src/modules/ai/**` or any external LLM call?
 
 - [ ] N/A

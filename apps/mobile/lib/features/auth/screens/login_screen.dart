@@ -133,92 +133,112 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: JSpacing.lg),
-                const AuthHeader(
-                  title: 'Welcome back',
-                  subtitle: 'Log in to continue.',
+                const JEntrance(
+                  child: AuthHeader(
+                    title: 'Welcome back',
+                    subtitle: 'Log in to continue.',
+                  ),
                 ),
                 const SizedBox(height: JSpacing.xl),
-                JTextField(
-                  label: 'Email',
-                  controller: _email,
-                  focusNode: _emailFocus,
-                  enabled: !_submitting,
-                  errorText: _emailError,
-                  hintText: 'you@example.com',
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  autofillHints: const [AutofillHints.email],
+                JEntrance(
+                  delay: const Duration(milliseconds: 80),
+                  child: JTextField(
+                    label: 'Email',
+                    controller: _email,
+                    focusNode: _emailFocus,
+                    enabled: !_submitting,
+                    errorText: _emailError,
+                    hintText: 'you@example.com',
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
+                  ),
                 ),
                 const SizedBox(height: JSpacing.base),
-                JTextField(
-                  label: 'Password',
-                  controller: _password,
-                  focusNode: _passwordFocus,
-                  enabled: !_submitting,
-                  errorText: _passwordError,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.done,
-                  autofillHints: const [AutofillHints.password],
-                  onSubmitted: (_) => _submit(),
-                  suffixIcon: IconButton(
-                    onPressed: _submitting
-                        ? null
-                        : () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                    icon: Icon(
-                      _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
+                JEntrance(
+                  delay: const Duration(milliseconds: 140),
+                  child: JTextField(
+                    label: 'Password',
+                    controller: _password,
+                    focusNode: _passwordFocus,
+                    enabled: !_submitting,
+                    errorText: _passwordError,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.password],
+                    onSubmitted: (_) => _submit(),
+                    suffixIcon: IconButton(
+                      onPressed: _submitting
+                          ? null
+                          : () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                      icon: Icon(
+                        _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
+                      ),
+                      tooltip: _obscurePassword
+                          ? 'Show password'
+                          : 'Hide password',
                     ),
-                    tooltip: _obscurePassword
-                        ? 'Show password'
-                        : 'Hide password',
                   ),
                 ),
                 const SizedBox(height: JSpacing.sm),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: JButton.ghost(
-                    label: 'Forgot password?',
-                    onPressed: _submitting
-                        ? null
-                        : () => context.go('/auth/forgot'),
-                    size: JButtonSize.sm,
+                JEntrance(
+                  delay: const Duration(milliseconds: 200),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: JButton.ghost(
+                      label: 'Forgot password?',
+                      onPressed: _submitting
+                          ? null
+                          : () => context.go('/auth/forgot'),
+                      size: JButtonSize.sm,
+                    ),
                   ),
                 ),
                 const SizedBox(height: JSpacing.base),
-                JButton.primary(
-                  label: 'Log in',
-                  onPressed: _submitting ? null : _submit,
-                  loading: _submitting,
-                  expanded: true,
-                  size: JButtonSize.lg,
+                JEntrance(
+                  delay: const Duration(milliseconds: 260),
+                  child: JButton.primary(
+                    label: 'Log in',
+                    onPressed: _submitting ? null : _submit,
+                    loading: _submitting,
+                    expanded: true,
+                    size: JButtonSize.lg,
+                  ),
                 ),
                 const SizedBox(height: JSpacing.lg),
-                SocialAuthButtons(
-                  onError: (message) {
-                    if (message.isNotEmpty && mounted) {
-                      JSnackbar.showError(context, message);
-                    }
-                  },
+                JEntrance(
+                  delay: const Duration(milliseconds: 320),
+                  child: SocialAuthButtons(
+                    onError: (message) {
+                      if (message.isNotEmpty && mounted) {
+                        JSnackbar.showError(context, message);
+                      }
+                    },
+                  ),
                 ),
                 const SizedBox(height: JSpacing.base),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account?",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                JEntrance(
+                  delay: const Duration(milliseconds: 380),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account?",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    JButton.ghost(
-                      label: 'Sign up',
-                      onPressed: _submitting
-                          ? null
-                          : () => context.go('/auth/signup'),
-                      size: JButtonSize.sm,
-                    ),
-                  ],
+                      JButton.ghost(
+                        label: 'Sign up',
+                        onPressed: _submitting
+                            ? null
+                            : () => context.go('/auth/signup'),
+                        size: JButtonSize.sm,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

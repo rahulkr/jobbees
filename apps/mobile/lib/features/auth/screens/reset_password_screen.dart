@@ -125,12 +125,16 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   Widget _body(BuildContext context, {required double maxWidth}) {
     final Widget content;
+    final String stateKey;
     if (!_hasToken) {
       content = _invalidLink(context);
+      stateKey = 'invalid';
     } else if (_done) {
       content = _success(context);
+      stateKey = 'success';
     } else {
       content = _form(context);
+      stateKey = 'form';
     }
     return Align(
       alignment: Alignment.topCenter,
@@ -139,7 +143,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(JSpacing.lg),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: content,
+          // Key so JEntrance inside the child re-plays across form → success.
+          child: KeyedSubtree(key: ValueKey(stateKey), child: content),
         ),
       ),
     );
@@ -150,49 +155,60 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: JSpacing.lg),
-        const AuthHeader(
-          title: 'Choose a new password',
-          subtitle: 'Pick a password you have not used before.',
+        const JEntrance(
+          child: AuthHeader(
+            title: 'Choose a new password',
+            subtitle: 'Pick a password you have not used before.',
+          ),
         ),
         const SizedBox(height: JSpacing.xl),
-        JTextField(
-          label: 'New password',
-          controller: _password,
-          focusNode: _passwordFocus,
-          enabled: !_submitting,
-          errorText: _passwordError,
-          helperText: 'At least $_kMinPasswordLength characters',
-          obscureText: _obscure,
-          textInputAction: TextInputAction.next,
-          autofillHints: const [AutofillHints.newPassword],
-          suffixIcon: IconButton(
-            onPressed: _submitting
-                ? null
-                : () => setState(() => _obscure = !_obscure),
-            icon: Icon(_obscure ? LucideIcons.eye : LucideIcons.eyeOff),
-            tooltip: _obscure ? 'Show password' : 'Hide password',
+        JEntrance(
+          delay: const Duration(milliseconds: 90),
+          child: JTextField(
+            label: 'New password',
+            controller: _password,
+            focusNode: _passwordFocus,
+            enabled: !_submitting,
+            errorText: _passwordError,
+            helperText: 'At least $_kMinPasswordLength characters',
+            obscureText: _obscure,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.newPassword],
+            suffixIcon: IconButton(
+              onPressed: _submitting
+                  ? null
+                  : () => setState(() => _obscure = !_obscure),
+              icon: Icon(_obscure ? LucideIcons.eye : LucideIcons.eyeOff),
+              tooltip: _obscure ? 'Show password' : 'Hide password',
+            ),
           ),
         ),
         const SizedBox(height: JSpacing.base),
-        JTextField(
-          label: 'Confirm password',
-          controller: _confirm,
-          focusNode: _confirmFocus,
-          enabled: !_submitting,
-          errorText: _confirmError,
-          helperText: 'Type it again',
-          obscureText: _obscure,
-          textInputAction: TextInputAction.done,
-          autofillHints: const [AutofillHints.newPassword],
-          onSubmitted: (_) => _submit(),
+        JEntrance(
+          delay: const Duration(milliseconds: 160),
+          child: JTextField(
+            label: 'Confirm password',
+            controller: _confirm,
+            focusNode: _confirmFocus,
+            enabled: !_submitting,
+            errorText: _confirmError,
+            helperText: 'Type it again',
+            obscureText: _obscure,
+            textInputAction: TextInputAction.done,
+            autofillHints: const [AutofillHints.newPassword],
+            onSubmitted: (_) => _submit(),
+          ),
         ),
         const SizedBox(height: JSpacing.xl),
-        JButton.primary(
-          label: 'Update password',
-          onPressed: _submitting ? null : _submit,
-          loading: _submitting,
-          expanded: true,
-          size: JButtonSize.lg,
+        JEntrance(
+          delay: const Duration(milliseconds: 230),
+          child: JButton.primary(
+            label: 'Update password',
+            onPressed: _submitting ? null : _submit,
+            loading: _submitting,
+            expanded: true,
+            size: JButtonSize.lg,
+          ),
         ),
       ],
     );
@@ -238,36 +254,51 @@ class _Notice extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: JSpacing.xxl),
-        Container(
-          width: 72,
-          height: 72,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: scheme.primaryContainer,
-            borderRadius: JRadius.heroAll,
+        JEntrance(
+          child: Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer,
+                borderRadius: JRadius.heroAll,
+              ),
+              child: Icon(icon, size: 36, color: scheme.primary),
+            ),
           ),
-          child: Icon(icon, size: 36, color: scheme.primary),
         ),
         const SizedBox(height: JSpacing.lg),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+        JEntrance(
+          delay: const Duration(milliseconds: 80),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         const SizedBox(height: JSpacing.sm),
-        Text(
-          body,
-          textAlign: TextAlign.center,
-          style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        JEntrance(
+          delay: const Duration(milliseconds: 160),
+          child: Text(
+            body,
+            textAlign: TextAlign.center,
+            style: textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
         ),
         const SizedBox(height: JSpacing.xl),
-        JButton.primary(
-          label: cta,
-          onPressed: onCta,
-          expanded: true,
-          size: JButtonSize.lg,
+        JEntrance(
+          delay: const Duration(milliseconds: 240),
+          child: JButton.primary(
+            label: cta,
+            onPressed: onCta,
+            expanded: true,
+            size: JButtonSize.lg,
+          ),
         ),
       ],
     );
