@@ -27,24 +27,6 @@ enum JButtonVariant { primary, secondary, danger, ghost, apple }
 
 enum JButtonSize { sm, md, lg }
 
-/// Soft, warm elevation under the primary CTA — a brand-tinted lift (not a grey
-/// drop shadow) plus a faint ambient layer, so the button reads as a raised,
-/// premium surface that floats above the screen.
-const List<BoxShadow> _kCtaShadow = [
-  BoxShadow(
-    color: Color(0x33D4541F), // ~20% of the deep terracotta — a tight warm lift
-    blurRadius: 18,
-    offset: Offset(0, 10),
-    spreadRadius:
-        -8, // pulled in so it reads as a lift under the pill, not a halo
-  ),
-  BoxShadow(
-    color: Color(0x14000000), // faint neutral ambient for grounding
-    blurRadius: 6,
-    offset: Offset(0, 2),
-  ),
-];
-
 class JButton extends StatelessWidget {
   const JButton._({
     required this.label,
@@ -306,7 +288,7 @@ class JButton extends StatelessWidget {
           ? DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: radius,
-                boxShadow: _kCtaShadow,
+                boxShadow: JShadows.coralCta,
               ),
               child: material,
             )

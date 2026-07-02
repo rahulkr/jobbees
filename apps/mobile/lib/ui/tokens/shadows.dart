@@ -50,4 +50,17 @@ class JShadows {
       offset: const Offset(0, 12),
     ),
   ];
+
+  /// Warm lift under a primary CTA — a brand terracotta tint (not a grey drop
+  /// shadow) pulled in tight so it reads as a raised pill, plus a faint neutral
+  /// ambient for grounding.
+  static const List<BoxShadow> coralCta = [
+    BoxShadow(
+      color: Color(0x33D4541F),
+      blurRadius: 18,
+      offset: Offset(0, 10),
+      spreadRadius: -8,
+    ),
+    BoxShadow(color: Color(0x14000000), blurRadius: 6, offset: Offset(0, 2)),
+  ];
 }

@@ -113,6 +113,7 @@ class _JTextFieldState extends State<JTextField> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final hasError = widget.errorText != null;
 
     final borderColor = hasError
@@ -127,11 +128,7 @@ class _JTextFieldState extends State<JTextField> {
         // Label
         Text(
           widget.label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: scheme.onSurface,
-          ),
+          style: textTheme.titleSmall?.copyWith(color: scheme.onSurface),
         ),
         const SizedBox(height: JSpacing.xs),
 
@@ -176,10 +173,12 @@ class _JTextFieldState extends State<JTextField> {
                   minLines: widget.minLines,
                   onChanged: widget.onChanged,
                   onSubmitted: widget.onSubmitted,
-                  style: TextStyle(fontSize: 16, color: scheme.onSurface),
+                  style: textTheme.bodyLarge?.copyWith(color: scheme.onSurface),
                   decoration: InputDecoration(
                     hintText: widget.hintText,
-                    hintStyle: TextStyle(color: scheme.onSurfaceVariant),
+                    hintStyle: textTheme.bodyLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                     // Null EVERY border slot: the global inputDecorationTheme
                     // defines focused/enabled/error borders, and leaving them
                     // unset lets the theme draw a second ring on top of this
@@ -211,8 +210,7 @@ class _JTextFieldState extends State<JTextField> {
           const SizedBox(height: JSpacing.xs),
           Text(
             widget.errorText ?? widget.helperText!,
-            style: TextStyle(
-              fontSize: 12,
+            style: textTheme.bodySmall?.copyWith(
               color: hasError ? scheme.error : scheme.onSurfaceVariant,
             ),
           ),

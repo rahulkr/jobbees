@@ -41,6 +41,7 @@ class JEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Padding(
       padding: const EdgeInsets.all(JSpacing.xl),
@@ -65,11 +66,7 @@ class JEmptyState extends StatelessWidget {
           // Title
           Text(
             title,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: scheme.onSurface,
-            ),
+            style: textTheme.headlineSmall?.copyWith(color: scheme.onSurface),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: JSpacing.sm),
@@ -77,10 +74,8 @@ class JEmptyState extends StatelessWidget {
           // Body
           Text(
             body,
-            style: TextStyle(
-              fontSize: 14,
+            style: textTheme.bodyMedium?.copyWith(
               color: scheme.onSurfaceVariant,
-              height: 1.5,
             ),
             textAlign: TextAlign.center,
           ),

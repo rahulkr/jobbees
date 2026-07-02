@@ -174,7 +174,9 @@ class _JOtpFieldState extends State<JOtpField> {
           const SizedBox(height: JSpacing.sm),
           Text(
             widget.errorText!,
-            style: TextStyle(fontSize: 12, color: scheme.error),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: scheme.error),
           ),
         ],
       ],
@@ -271,11 +273,9 @@ class _OtpBoxState extends State<_OtpBox> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             autofillHints: widget.autofillHints,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: scheme.onSurface,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: scheme.onSurface),
             decoration: const InputDecoration(
               counterText: '',
               border: InputBorder.none,
