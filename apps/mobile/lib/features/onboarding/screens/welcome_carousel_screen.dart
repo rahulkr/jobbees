@@ -137,6 +137,7 @@ class _WelcomeCarouselScreenState extends ConsumerState<WelcomeCarouselScreen> {
                 child: JButton.ghost(
                   label: 'Skip',
                   onPressed: _isLastSlide ? null : _finish,
+                  neutral: true,
                 ),
               ),
             ),
@@ -312,7 +313,7 @@ class _PageIndicator extends StatelessWidget {
             width: i == index ? 24 : 8,
             height: 8,
             decoration: BoxDecoration(
-              color: i == index ? scheme.primary : scheme.outlineVariant,
+              color: i == index ? scheme.onSurface : scheme.outlineVariant,
               borderRadius: JRadius.chipAll,
             ),
           ),

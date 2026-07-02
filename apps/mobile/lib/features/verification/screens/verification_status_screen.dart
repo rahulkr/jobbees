@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jobbees_mobile/theme/colors.dart';
 
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
@@ -160,7 +161,7 @@ class _ConnectCardState extends ConsumerState<_ConnectCard> {
     final (IconData icon, Color tint, String label) = switch (status) {
       final s when s.isComplete => (
         LucideIcons.badgeCheck,
-        scheme.primary,
+        JobbeesColors.success,
         'Active',
       ),
       final s when s.isPending => (
@@ -244,7 +245,7 @@ class _PhoneCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final (IconData icon, Color tint, String label) = verified
-        ? (LucideIcons.badgeCheck, scheme.primary, 'Verified')
+        ? (LucideIcons.badgeCheck, JobbeesColors.success, 'Verified')
         : (LucideIcons.smartphone, scheme.onSurfaceVariant, 'Not verified');
 
     return JCard(
@@ -302,7 +303,7 @@ class _AbnCard extends StatelessWidget {
     final (IconData icon, Color tint, String label) = switch (status) {
       final s when s.isVerified => (
         LucideIcons.badgeCheck,
-        scheme.primary,
+        JobbeesColors.success,
         'Verified',
       ),
       final s when s.isPending => (

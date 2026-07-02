@@ -223,10 +223,10 @@ class _Step extends StatelessWidget {
             height: 44,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: scheme.primaryContainer,
+              color: scheme.surfaceContainerHighest,
               borderRadius: JRadius.buttonMdAll,
             ),
-            child: Icon(icon, size: 22, color: scheme.primary),
+            child: Icon(icon, size: 22, color: scheme.onSurfaceVariant),
           ),
           const SizedBox(width: JSpacing.base),
           Expanded(

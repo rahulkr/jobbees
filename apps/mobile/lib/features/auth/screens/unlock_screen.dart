@@ -197,6 +197,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen>
                   onPressed: _busy ? null : _usePassword,
                   expanded: true,
                   size: JButtonSize.lg,
+                  neutral: true,
                 ),
               ),
             ],

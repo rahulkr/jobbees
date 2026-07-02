@@ -304,13 +304,13 @@ class _BiometricToggleTileState extends ConsumerState<_BiometricToggleTile> {
             height: 44,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: scheme.primaryContainer,
+              color: scheme.surfaceContainerHighest,
               borderRadius: JRadius.buttonMdAll,
             ),
             child: Icon(
               LucideIcons.fingerprint,
               size: 22,
-              color: scheme.primary,
+              color: scheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: JSpacing.base),
@@ -500,10 +500,10 @@ class _NavRow extends StatelessWidget {
             height: 44,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: scheme.primaryContainer,
+              color: scheme.surfaceContainerHighest,
               borderRadius: JRadius.buttonMdAll,
             ),
-            child: Icon(icon, size: 22, color: scheme.primary),
+            child: Icon(icon, size: 22, color: scheme.onSurfaceVariant),
           ),
           const SizedBox(width: JSpacing.base),
           Expanded(

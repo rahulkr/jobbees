@@ -380,7 +380,7 @@ class _SkillChip extends StatelessWidget {
         bottom: JSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+        color: scheme.surfaceContainerHighest,
         borderRadius: JRadius.chipAll,
       ),
       child: Row(
@@ -388,12 +388,18 @@ class _SkillChip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary),
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(width: JSpacing.xs),
           GestureDetector(
             onTap: onRemove,
-            child: Icon(LucideIcons.x, size: 16, color: scheme.primary),
+            child: Icon(
+              LucideIcons.x,
+              size: 16,
+              color: scheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),

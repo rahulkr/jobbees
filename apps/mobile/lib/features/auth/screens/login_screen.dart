@@ -193,6 +193,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? null
                           : () => context.go('/auth/forgot'),
                       size: JButtonSize.sm,
+                      neutral: true,
                     ),
                   ),
                 ),

@@ -325,12 +325,14 @@ class _SkillChip extends StatelessWidget {
         vertical: JSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+        color: scheme.surfaceContainerHighest,
         borderRadius: JRadius.chipAll,
       ),
       child: Text(
         label,
-        style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary),
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: scheme.onSurfaceVariant,
+        ),
       ),
     );
   }
