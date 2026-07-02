@@ -120,6 +120,10 @@ flutter:
     - assets/branding/wordmark.png
     - assets/social/google.png
     - assets/social/apple_logo.png
+    # Bundled Inter fonts (google_fonts loads these from the bundle instead of
+    # fetching at runtime → faster cold start, works offline, and lets golden
+    # tests render real text). Files named per google_fonts' expected format.
+    - assets/google_fonts/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

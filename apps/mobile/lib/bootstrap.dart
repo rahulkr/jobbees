@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
@@ -17,6 +18,11 @@ import 'features/onboarding/providers/onboarding_providers.dart';
 
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inter is bundled in assets/google_fonts/, so never fetch it over the network
+  // — faster cold start, works offline, and a missing weight fails loudly in dev
+  // instead of silently degrading. See pubspec.yaml assets.
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Web: serve clean `/jobs/123` URLs instead of `/#/jobs/123`, so deep links
   // and browser history match the API + Next.js surfaces (FW-03). No-op on
