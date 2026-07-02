@@ -37,6 +37,10 @@ class JBottomNav extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelect;
 
+  /// JPostButton radius (28) + notch breathing room (8). Keep in sync with the
+  /// FAB and the reserved centre gap below.
+  static const double _notchRadius = 36;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -48,27 +52,88 @@ class JBottomNav extends StatelessWidget {
       onTap: () => onSelect(i),
     );
 
-    return BottomAppBar(
-      color: scheme.surface,
-      surfaceTintColor: Colors.transparent,
-      // Soft navy-tinted shadow follows the notched shape → the separation the
-      // flat NavigationBar lacked, without reading as a hard dark contour.
-      shadowColor: JobbeesColors.dark900.withValues(alpha: 0.45),
-      elevation: 4,
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8,
-      padding: EdgeInsets.zero,
-      child: Row(
-        children: [
-          for (var i = 0; i < mid; i++) Expanded(child: item(i)),
-          // Reserved gap the notch + cradled Post button sit in.
-          const SizedBox(width: 72),
-          for (var i = mid; i < destinations.length; i++)
-            Expanded(child: item(i)),
-        ],
+    // Custom-painted (not BottomAppBar) so a crisp top hairline can follow the
+    // notch — the real separator on a light layout, where a soft shadow alone is
+    // invisible white-on-white and content never scrolls under the bar.
+    return CustomPaint(
+      painter: _NotchedBarPainter(
+        surface: scheme.surface,
+        border: scheme.outlineVariant,
+        shadow: JobbeesColors.dark900.withValues(alpha: 0.12),
+        notchRadius: _notchRadius,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 64,
+            child: Row(
+              children: [
+                for (var i = 0; i < mid; i++) Expanded(child: item(i)),
+                // Reserved gap the notch + cradled Post button sit in.
+                const SizedBox(width: 72),
+                for (var i = mid; i < destinations.length; i++)
+                  Expanded(child: item(i)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
+}
+
+/// Paints the bar surface, a soft upward shadow, and a 1px hairline — all
+/// following a top-centre circular notch that cradles the Post button.
+class _NotchedBarPainter extends CustomPainter {
+  const _NotchedBarPainter({
+    required this.surface,
+    required this.border,
+    required this.shadow,
+    required this.notchRadius,
+  });
+
+  final Color surface;
+  final Color border;
+  final Color shadow;
+  final double notchRadius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final host = Offset.zero & size;
+    final guest = Rect.fromCircle(
+      center: Offset(size.width / 2, 0),
+      radius: notchRadius,
+    );
+    final path = const CircularNotchedRectangle().getOuterPath(host, guest);
+
+    // Soft upward lift: a blurred copy of the silhouette nudged up so only the
+    // top edge + notch curve cast onto the content above the bar.
+    canvas.drawPath(
+      path.shift(const Offset(0, -3)),
+      Paint()
+        ..color = shadow
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7),
+    );
+    // Surface.
+    canvas.drawPath(path, Paint()..color = surface);
+    // Crisp hairline along the notched top edge — the primary separator.
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = border
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_NotchedBarPainter old) =>
+      surface != old.surface ||
+      border != old.border ||
+      shadow != old.shadow ||
+      notchRadius != old.notchRadius;
 }
 
 class _NavItem extends StatelessWidget {
