@@ -24,6 +24,14 @@ import 'components/feedback/j_empty_state_page.dart';
 import 'components/feedback/j_loading_skeleton_page.dart';
 import 'components/showcase/home_feed_page.dart';
 
+// Screen pages — one per Design-Quality-Charter screen category.
+// The Widgetbook lock: build the screen page here BEFORE the lib/features
+// implementation. See docs/brand/DESIGN-QUALITY-CHARTER.md § Widgetbook lock.
+import 'screens/onboarding/splash_page.dart';
+import 'screens/onboarding/welcome_carousel_page.dart';
+import 'screens/home/home_page.dart';
+import 'screens/verification/become_tasker_page.dart';
+
 void main() {
   runApp(const _WidgetbookApp());
 }
@@ -67,6 +75,20 @@ class _WidgetbookApp extends StatelessWidget {
       ],
       directories: [
         WidgetbookCategory(name: 'Showcase', children: [homeFeedShowcase()]),
+        WidgetbookCategory(
+          name: 'Screens',
+          children: [
+            WidgetbookFolder(
+              name: 'Onboarding',
+              children: [splashPage(), welcomeCarouselPage()],
+            ),
+            WidgetbookFolder(
+              name: 'Verification',
+              children: [becomeTaskerPage()],
+            ),
+            WidgetbookFolder(name: 'Home', children: [homePage()]),
+          ],
+        ),
         WidgetbookCategory(
           name: 'Components',
           children: [
