@@ -397,10 +397,14 @@ class _SkillChip extends StatelessWidget {
           const SizedBox(width: JSpacing.xs),
           GestureDetector(
             onTap: onRemove,
-            child: Icon(
-              LucideIcons.x,
-              size: 16,
-              color: scheme.onSurfaceVariant,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.all(JSpacing.xs),
+              child: Icon(
+                LucideIcons.x,
+                size: 16,
+                color: scheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],

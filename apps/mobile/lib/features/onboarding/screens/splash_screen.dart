@@ -54,6 +54,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     duration: _kMarkEnter,
   );
 
+  // Built once, not per frame inside the AnimatedBuilder.
+  late final CurvedAnimation _markCurve = CurvedAnimation(
+    parent: _markController,
+    curve: JMotion.easeOut,
+  );
+
   bool _showTagline = false;
 
   @override
@@ -90,6 +96,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _handoffTimer?.cancel();
     _hapticTimer?.cancel();
     _taglineTimer?.cancel();
+    _markCurve.dispose();
     _markController.dispose();
     super.dispose();
   }
@@ -133,10 +140,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   AnimatedBuilder(
                     animation: _markController,
                     builder: (context, child) {
-                      final curved = CurvedAnimation(
-                        parent: _markController,
-                        curve: JMotion.easeOut,
-                      ).value;
+                      final curved = _markCurve.value;
                       final scale = 0.86 + (0.14 * curved);
                       return Opacity(
                         opacity: curved,
