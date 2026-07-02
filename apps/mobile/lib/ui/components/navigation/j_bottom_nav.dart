@@ -57,10 +57,11 @@ class JBottomNav extends StatelessWidget {
     // invisible white-on-white and content never scrolls under the bar.
     return CustomPaint(
       painter: _NotchedBarPainter(
-        surface: scheme.surface,
-        // A clear ~14% navy hairline is the real separator on a white layout —
-        // outlineVariant washed out at device resolution.
-        border: JobbeesColors.dark900.withValues(alpha: 0.14),
+        // The bar is a DISTINCT surface (subtle grey), not the pure-white
+        // content colour — a hairline alone on white-on-white never reads at
+        // device resolution. Grey plane + a clear divider + a soft lift.
+        surface: scheme.surfaceContainerHigh,
+        border: scheme.outline,
         shadow: JobbeesColors.dark900.withValues(alpha: 0.10),
         notchRadius: _notchRadius,
       ),
