@@ -63,7 +63,7 @@ class _VerificationStatusScreenState
     final phoneVerified =
         ref.watch(authControllerProvider).valueOrNull?.phoneVerified ?? false;
     return Scaffold(
-      appBar: AppBar(title: const Text('Verification')),
+      appBar: const JAppBar(title: 'Verification'),
       body: SafeArea(
         child: ResponsiveLayout(
           compact: (context) =>

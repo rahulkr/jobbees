@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jobbees_mobile/features/verification/models/abn_status.dart';
 import 'package:jobbees_mobile/features/verification/providers/verification_providers.dart';
 import 'package:jobbees_mobile/features/verification/screens/abn_entry_screen.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class _FakeAbn extends AbnStatusController {
   @override
@@ -51,12 +52,13 @@ void main() {
       await tester.tap(find.text('Add ABN'));
       await tester.pumpAndSettle();
 
-      // Pushed route → the form is shown WITH an auto back button.
+      // Pushed route → the form is shown WITH a back affordance (JAppBar's
+      // JPressable chevron, not Material's default BackButton).
       expect(find.text('Add your ABN'), findsOneWidget);
-      expect(find.byType(BackButton), findsOneWidget);
+      expect(find.byIcon(LucideIcons.chevronLeft), findsOneWidget);
 
       // Back returns to the hub (proves it stacked, not replaced).
-      await tester.tap(find.byType(BackButton));
+      await tester.tap(find.byIcon(LucideIcons.chevronLeft));
       await tester.pumpAndSettle();
       expect(find.text('Add ABN'), findsOneWidget);
       expect(find.text('Add your ABN'), findsNothing);

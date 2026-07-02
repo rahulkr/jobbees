@@ -13,6 +13,7 @@ export 'tokens/tokens.dart';
 
 // Platform helpers
 export 'platform/j_haptics.dart';
+export 'platform/j_pressable.dart';
 
 // Components — buttons
 export 'components/buttons/j_button.dart';
@@ -32,6 +33,7 @@ export 'components/containers/j_card.dart';
 export 'components/containers/j_bottom_sheet.dart';
 
 // Components — navigation
+export 'components/navigation/j_app_bar.dart';
 export 'components/navigation/j_bottom_nav.dart';
 
 // Components — feedback

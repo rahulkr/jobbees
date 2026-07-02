@@ -144,8 +144,8 @@ class _PhoneVerificationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_codeSent ? 'Enter the code' : 'Verify your phone'),
+      appBar: JAppBar(
+        title: _codeSent ? 'Enter the code' : 'Verify your phone',
       ),
       body: SafeArea(
         child: ResponsiveLayout(

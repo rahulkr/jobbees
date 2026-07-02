@@ -31,7 +31,7 @@ class PublicTaskerProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(publicTaskerProfileProvider(taskerId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Tasker profile')),
+      appBar: const JAppBar(title: 'Tasker profile'),
       body: SafeArea(
         child: profile.when(
           loading: () => Align(

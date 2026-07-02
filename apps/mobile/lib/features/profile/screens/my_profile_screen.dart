@@ -32,7 +32,7 @@ class MyProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(authControllerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: const JAppBar(title: 'Profile'),
       body: SafeArea(
         child: session.when(
           loading: () => const Center(child: CircularProgressIndicator()),

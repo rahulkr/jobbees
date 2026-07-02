@@ -27,7 +27,7 @@ class PlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: JAppBar(title: title),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

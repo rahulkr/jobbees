@@ -129,14 +129,16 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
     final profile = ref.watch(taskerProfileControllerProvider);
     final myId = ref.watch(authControllerProvider).valueOrNull?.id;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your tasker profile'),
+      appBar: JAppBar(
+        title: 'Your tasker profile',
         actions: [
           if (myId != null)
-            IconButton(
-              tooltip: 'Preview public profile',
-              icon: const Icon(LucideIcons.eye),
-              onPressed: () => context.push('/taskers/$myId'),
+            JPressable(
+              onTap: () => context.push('/taskers/$myId'),
+              child: const Padding(
+                padding: EdgeInsets.all(JSpacing.sm),
+                child: Icon(LucideIcons.eye),
+              ),
             ),
         ],
       ),

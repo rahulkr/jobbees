@@ -62,7 +62,7 @@ class _BecomeTaskerScreenState extends ConsumerState<BecomeTaskerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Work as a tasker')),
+      appBar: const JAppBar(title: 'Work as a tasker'),
       body: SafeArea(
         child: ResponsiveLayout(
           compact: (context) => _body(context, maxWidth: double.infinity),

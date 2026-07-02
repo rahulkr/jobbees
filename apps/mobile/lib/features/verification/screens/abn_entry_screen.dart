@@ -80,7 +80,7 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Add your ABN')),
+      appBar: const JAppBar(title: 'Add your ABN'),
       body: SafeArea(
         child: ResponsiveLayout(
           compact: (context) =>
