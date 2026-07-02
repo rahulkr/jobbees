@@ -197,13 +197,29 @@ class _SlideViewState extends State<_SlideView>
   late final AnimationController _breath = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2400),
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    // Start breathing only after first frame, once reduced-motion is readable
+    // (CLAUDE.md motion rule). A repeating animation started here also never
+    // blocks pumpAndSettle in tests, which run with reduced motion.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.isActive) _maybeBreathe();
+    });
+  }
+
+  void _maybeBreathe() {
+    if (!mounted || MediaQuery.of(context).disableAnimations) return;
+    if (!_breath.isAnimating) _breath.repeat(reverse: true);
+  }
 
   @override
   void didUpdateWidget(covariant _SlideView old) {
     super.didUpdateWidget(old);
-    if (widget.isActive && !_breath.isAnimating) {
-      _breath.repeat(reverse: true);
+    if (widget.isActive) {
+      _maybeBreathe();
     } else if (!widget.isActive && _breath.isAnimating) {
       _breath.stop();
       _breath.value = 0;

@@ -129,7 +129,19 @@ class _VerifyingState extends State<_Verifying>
   late final AnimationController _pulse = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1200),
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Reduced motion — hold the mark still (CLAUDE.md motion rule).
+      if (!MediaQuery.of(context).disableAnimations) {
+        _pulse.repeat(reverse: true);
+      }
+    });
+  }
 
   @override
   void dispose() {

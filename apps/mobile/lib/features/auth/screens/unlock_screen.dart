@@ -42,13 +42,20 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen>
   late final AnimationController _pulse = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1400),
-  )..repeat(reverse: true);
+  );
 
   @override
   void initState() {
     super.initState();
-    // Auto-prompt on mount so unlocking is a single Face ID tap, not two.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _unlock());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Reduced motion — hold the mark still (CLAUDE.md motion rule).
+      if (!MediaQuery.of(context).disableAnimations) {
+        _pulse.repeat(reverse: true);
+      }
+      // Auto-prompt on mount so unlocking is a single Face ID tap, not two.
+      _unlock();
+    });
   }
 
   Future<void> _unlock() async {
