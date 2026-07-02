@@ -155,18 +155,20 @@ class _SwitchToClientTileState extends ConsumerState<_SwitchToClientTile> {
       context: context,
       title: 'Switch to client?',
       child: const Text(
-        'You will go back to hiring only. We keep your tasker details — '
-        'ABN, payments and profile — so you can switch back anytime.',
+        'You will go back to hiring only. We keep your tasker details '
+        '(ABN, payments and profile), so you can switch back anytime.',
         style: TextStyle(fontSize: 14),
       ),
+      // The sheet is shown on the root navigator (so it covers the nav bar), so
+      // pop the root navigator to close it.
       primaryAction: JButton.primary(
         label: 'Yes, switch to client',
-        onPressed: () => Navigator.pop(context, true),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(true),
         expanded: true,
       ),
       secondaryAction: JButton.secondary(
         label: 'Keep both',
-        onPressed: () => Navigator.pop(context, false),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
         expanded: true,
       ),
     );

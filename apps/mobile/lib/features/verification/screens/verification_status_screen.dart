@@ -484,7 +484,7 @@ class _ErrorState extends StatelessWidget {
         icon: LucideIcons.cloudOff,
         title: "We couldn't load your verification status",
         body:
-            "Give it another go — if it keeps happening, tap Support and "
+            "Give it another go. If it keeps happening, tap Support and "
             "we'll take a look.",
         primaryAction: JButton.primary(label: 'Try again', onPressed: onRetry),
       ),
