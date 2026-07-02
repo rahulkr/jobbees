@@ -7,6 +7,7 @@ import 'package:jobbees_mobile/app.dart';
 import 'package:jobbees_mobile/core/responsive/breakpoints.dart';
 import 'package:jobbees_mobile/features/onboarding/data/onboarding_repository.dart';
 import 'package:jobbees_mobile/features/onboarding/providers/onboarding_providers.dart';
+import 'package:jobbees_mobile/ui/ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/auth_test_support.dart';
@@ -57,9 +58,9 @@ void main() {
     // The Home tab is a designed greeting header + empty state, not an app bar.
     expect(find.text('What needs doing?'), findsOneWidget); // Home header
     expect(find.text('Your feed is warming up'), findsOneWidget); // empty state
-    // The Material 3 bottom nav + centre Post FAB.
-    expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    // The composed bottom nav + cradled centre Post button.
+    expect(find.byType(JBottomNav), findsOneWidget);
+    expect(find.byType(JPostButton), findsOneWidget);
     expect(find.text('Home'), findsWidgets);
     expect(find.text('Profile'), findsWidgets);
   });
@@ -70,7 +71,7 @@ void main() {
     _reduceMotion(tester);
     await _pumpHome(tester);
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byType(JPostButton));
     await tester.pumpAndSettle();
 
     expect(find.text('/post'), findsOneWidget);
@@ -86,7 +87,7 @@ void main() {
     // "Profile" app-bar title also matches once that tab is built.
     await tester.tap(
       find.descendant(
-        of: find.byType(NavigationBar),
+        of: find.byType(JBottomNav),
         matching: find.text('Profile'),
       ),
     );

@@ -24,6 +24,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../../theme/colors.dart';
 import '../../tokens/tokens.dart';
 
 class JBottomSheet extends StatelessWidget {
@@ -47,6 +48,10 @@ class JBottomSheet extends StatelessWidget {
     bool isDismissible = true,
   }) => showModalBottomSheet<T>(
     context: context,
+    // Root navigator so the sheet + scrim cover the whole screen, including the
+    // shell's bottom nav + Post button (inside a StatefulShellRoute the branch
+    // navigator would otherwise leave them uncovered and on top of the sheet).
+    useRootNavigator: true,
     isDismissible: isDismissible,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -78,6 +83,15 @@ class JBottomSheet extends StatelessWidget {
           decoration: BoxDecoration(
             color: scheme.surface,
             borderRadius: const BorderRadius.vertical(top: JRadius.card),
+            // Soft upward lift so the sheet's top edge separates from the
+            // dimmed content behind it.
+            boxShadow: [
+              BoxShadow(
+                color: JobbeesColors.dark900.withValues(alpha: 0.10),
+                blurRadius: 24,
+                offset: const Offset(0, -8),
+              ),
+            ],
           ),
           padding: const EdgeInsets.all(JSpacing.base),
           child: Column(
@@ -101,11 +115,9 @@ class JBottomSheet extends StatelessWidget {
               if (title != null) ...[
                 Text(
                   title!,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineSmall?.copyWith(color: scheme.onSurface),
                 ),
                 const SizedBox(height: JSpacing.base),
               ],

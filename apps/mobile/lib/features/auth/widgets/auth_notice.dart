@@ -9,6 +9,10 @@ import 'package:flutter/material.dart';
 
 import '../../../ui/ui.dart';
 
+/// Colour tone for the hero mark. [error] makes a failure state (e.g. an
+/// expired link) read as an error rather than sharing the success chrome.
+enum AuthNoticeTone { brand, error }
+
 class AuthNotice extends StatelessWidget {
   const AuthNotice({
     required this.icon,
@@ -16,6 +20,7 @@ class AuthNotice extends StatelessWidget {
     required this.body,
     required this.ctaLabel,
     required this.onCta,
+    this.tone = AuthNoticeTone.brand,
     super.key,
   });
 
@@ -24,6 +29,7 @@ class AuthNotice extends StatelessWidget {
   final String body;
   final String ctaLabel;
   final VoidCallback onCta;
+  final AuthNoticeTone tone;
 
   @override
   Widget build(BuildContext context) {
@@ -33,15 +39,11 @@ class AuthNotice extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: JSpacing.xxl),
-        Container(
-          width: 72,
-          height: 72,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: scheme.primaryContainer,
-            borderRadius: JRadius.heroAll,
-          ),
-          child: Icon(icon, size: 36, color: scheme.primary),
+        JHeroMark(
+          icon: icon,
+          tone: tone == AuthNoticeTone.error
+              ? JHeroTone.error
+              : JHeroTone.brand,
         ),
         const SizedBox(height: JSpacing.lg),
         Text(

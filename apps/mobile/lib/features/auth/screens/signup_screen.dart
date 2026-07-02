@@ -325,12 +325,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           textInputAction: TextInputAction.done,
           autofillHints: const [AutofillHints.newPassword],
           onSubmitted: (_) => _submit(),
-          suffixIcon: IconButton(
-            onPressed: _submitting
+          suffixIcon: JPressable(
+            onTap: _submitting
                 ? null
                 : () => setState(() => _obscurePassword = !_obscurePassword),
-            icon: Icon(_obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff),
-            tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+            haptic: false,
+            child: Padding(
+              padding: const EdgeInsets.all(JSpacing.sm),
+              child: Icon(
+                _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: JSpacing.xl),

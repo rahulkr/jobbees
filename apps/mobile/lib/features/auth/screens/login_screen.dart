@@ -167,18 +167,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     textInputAction: TextInputAction.done,
                     autofillHints: const [AutofillHints.password],
                     onSubmitted: (_) => _submit(),
-                    suffixIcon: IconButton(
-                      onPressed: _submitting
+                    suffixIcon: JPressable(
+                      onTap: _submitting
                           ? null
                           : () => setState(
                               () => _obscurePassword = !_obscurePassword,
                             ),
-                      icon: Icon(
-                        _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
+                      haptic: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(JSpacing.sm),
+                        child: Icon(
+                          _obscurePassword
+                              ? LucideIcons.eye
+                              : LucideIcons.eyeOff,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                      tooltip: _obscurePassword
-                          ? 'Show password'
-                          : 'Hide password',
                     ),
                   ),
                 ),
@@ -193,6 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? null
                           : () => context.go('/auth/forgot'),
                       size: JButtonSize.sm,
+                      neutral: true,
                     ),
                   ),
                 ),

@@ -27,24 +27,6 @@ enum JButtonVariant { primary, secondary, danger, ghost, apple }
 
 enum JButtonSize { sm, md, lg }
 
-/// Soft, warm elevation under the primary CTA — a brand-tinted lift (not a grey
-/// drop shadow) plus a faint ambient layer, so the button reads as a raised,
-/// premium surface that floats above the screen.
-const List<BoxShadow> _kCtaShadow = [
-  BoxShadow(
-    color: Color(0x33D4541F), // ~20% of the deep terracotta — a tight warm lift
-    blurRadius: 18,
-    offset: Offset(0, 10),
-    spreadRadius:
-        -8, // pulled in so it reads as a lift under the pill, not a halo
-  ),
-  BoxShadow(
-    color: Color(0x14000000), // faint neutral ambient for grounding
-    blurRadius: 6,
-    offset: Offset(0, 2),
-  ),
-];
-
 class JButton extends StatelessWidget {
   const JButton._({
     required this.label,
@@ -56,6 +38,7 @@ class JButton extends StatelessWidget {
     this.loading = false,
     this.expanded = false,
     this.gradient = false,
+    this.neutral = false,
     super.key,
   });
 
@@ -125,6 +108,8 @@ class JButton extends StatelessWidget {
   );
 
   /// Ghost — minimal. Text-only. Use for tertiary actions ("Skip", "Learn more").
+  /// Pass [neutral] to render the label in a muted colour instead of coral, so
+  /// the screen's coral budget stays with its one dominant accent (Charter § 2).
   factory JButton.ghost({
     required String label,
     required VoidCallback? onPressed,
@@ -132,6 +117,7 @@ class JButton extends StatelessWidget {
     IconData? icon,
     bool loading = false,
     bool expanded = false,
+    bool neutral = false,
     Key? key,
   }) => JButton._(
     label: label,
@@ -141,6 +127,7 @@ class JButton extends StatelessWidget {
     icon: icon,
     loading: loading,
     expanded: expanded,
+    neutral: neutral,
     key: key,
   );
 
@@ -186,6 +173,10 @@ class JButton extends StatelessWidget {
   /// flat button. See docs/brand/COLORS.md § Gradients.
   final bool gradient;
 
+  /// If true (ghost only), the label is muted (`onSurfaceVariant`) rather than
+  /// coral — for a secondary link that shouldn't spend the screen's coral.
+  final bool neutral;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -211,7 +202,7 @@ class JButton extends StatelessWidget {
       ),
       JButtonVariant.ghost => (
         Colors.transparent,
-        scheme.primary,
+        neutral ? scheme.onSurfaceVariant : scheme.primary,
         Colors.transparent,
       ),
       // Apple's HIG mandates the exact black button + white mark/label for Sign
@@ -306,7 +297,7 @@ class JButton extends StatelessWidget {
           ? DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: radius,
-                boxShadow: _kCtaShadow,
+                boxShadow: JShadows.coralCta,
               ),
               child: material,
             )

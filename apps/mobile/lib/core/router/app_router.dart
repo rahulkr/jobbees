@@ -14,6 +14,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../features/auth/providers/auth_controller.dart';
 import '../../features/auth/providers/biometric_providers.dart';
@@ -31,6 +32,7 @@ import '../../features/profile/screens/public_tasker_profile_screen.dart';
 import '../../features/profile/screens/tasker_profile_screen.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/welcome_carousel_screen.dart';
+import '../../features/shell/screens/coming_soon_screen.dart';
 import '../../features/shell/screens/placeholder_screen.dart';
 import '../../features/shell/widgets/scaffold_with_nav_bar.dart';
 import '../../features/verification/screens/abn_entry_screen.dart';
@@ -165,9 +167,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/unlock',
         builder: (context, state) => const UnlockScreen(),
       ),
-      // Full-screen flows on the root navigator (cover the bottom nav): the
-      // create-a-job flow (launched from the centre FAB) and the public tasker
-      // profile preview.
+      // Full-screen flows on the root navigator (cover the bottom nav + Post
+      // FAB): the create-a-job flow (from the centre FAB), the public tasker
+      // profile preview, and the focused verification steps (ABN + phone OTP) —
+      // kept chrome-free so nothing competes with the input, per the charter's
+      // OTP reference bar.
       GoRoute(
         path: '/post',
         builder: (context, state) =>
@@ -178,6 +182,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => PublicTaskerProfileScreen(
           taskerId: state.pathParameters['id'] ?? '',
         ),
+      ),
+      GoRoute(
+        path: '/verify/abn',
+        builder: (context, state) => const AbnEntryScreen(),
+      ),
+      GoRoute(
+        path: '/verify/phone',
+        builder: (context, state) => const PhoneVerificationScreen(),
       ),
 
       // The authenticated app: a bottom-nav shell (Home / Offers / Post FAB /
@@ -213,8 +225,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/offers',
-                builder: (context, state) =>
-                    const PlaceholderScreen(title: 'Offers', route: '/offers'),
+                builder: (context, state) => const ComingSoonScreen(
+                  icon: LucideIcons.handshake,
+                  title: 'Offers are coming soon',
+                  body:
+                      'Make and manage your offers on jobs here once bidding '
+                      'lands.',
+                ),
               ),
             ],
           ),
@@ -223,9 +240,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/messages',
-                builder: (context, state) => const PlaceholderScreen(
-                  title: 'Messages',
-                  route: '/messages',
+                builder: (context, state) => const ComingSoonScreen(
+                  icon: LucideIcons.messageCircle,
+                  title: 'Messages are coming soon',
+                  body:
+                      'Chat with clients and taskers here once messaging goes '
+                      'live.',
                 ),
               ),
             ],
@@ -241,14 +261,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/verify',
                 builder: (context, state) => const VerificationStatusScreen(),
-              ),
-              GoRoute(
-                path: '/verify/abn',
-                builder: (context, state) => const AbnEntryScreen(),
-              ),
-              GoRoute(
-                path: '/verify/phone',
-                builder: (context, state) => const PhoneVerificationScreen(),
               ),
               GoRoute(
                 path: '/become-tasker',

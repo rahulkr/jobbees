@@ -31,7 +31,7 @@ class PublicTaskerProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(publicTaskerProfileProvider(taskerId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Tasker profile')),
+      appBar: const JAppBar(title: 'Tasker profile'),
       body: SafeArea(
         child: profile.when(
           loading: () => Align(
@@ -232,24 +232,8 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-    return Container(
-      width: 64,
-      height: 64,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: scheme.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        initial,
-        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-          color: scheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
+    return JAvatar(initials: initial, size: 64);
   }
 }
 
@@ -325,12 +309,14 @@ class _SkillChip extends StatelessWidget {
         vertical: JSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+        color: scheme.surfaceContainerHighest,
         borderRadius: JRadius.chipAll,
       ),
       child: Text(
         label,
-        style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary),
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: scheme.onSurfaceVariant,
+        ),
       ),
     );
   }

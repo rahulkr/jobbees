@@ -80,7 +80,7 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Add your ABN')),
+      appBar: const JAppBar(title: 'Add your ABN'),
       body: SafeArea(
         child: ResponsiveLayout(
           compact: (context) =>
@@ -108,21 +108,8 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
             children: [
               const SizedBox(height: JSpacing.sm),
               JEntrance(
-                child: Center(
-                  child: Container(
-                    width: 72,
-                    height: 72,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: JRadius.heroAll,
-                    ),
-                    child: Icon(
-                      LucideIcons.building2,
-                      size: 32,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
+                child: const Center(
+                  child: JHeroMark(icon: LucideIcons.building2),
                 ),
               ),
               const SizedBox(height: JSpacing.lg),

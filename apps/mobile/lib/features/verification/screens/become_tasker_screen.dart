@@ -62,7 +62,7 @@ class _BecomeTaskerScreenState extends ConsumerState<BecomeTaskerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Work as a tasker')),
+      appBar: const JAppBar(title: 'Work as a tasker'),
       body: SafeArea(
         child: ResponsiveLayout(
           compact: (context) => _body(context, maxWidth: double.infinity),
@@ -86,21 +86,8 @@ class _BecomeTaskerScreenState extends ConsumerState<BecomeTaskerScreen> {
             children: [
               const SizedBox(height: JSpacing.sm),
               JEntrance(
-                child: Center(
-                  child: Container(
-                    width: 84,
-                    height: 84,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer,
-                      borderRadius: JRadius.heroAll,
-                    ),
-                    child: Icon(
-                      LucideIcons.briefcase,
-                      size: 38,
-                      color: scheme.primary,
-                    ),
-                  ),
+                child: const Center(
+                  child: JHeroMark(icon: LucideIcons.briefcase),
                 ),
               ),
               const SizedBox(height: JSpacing.lg),
@@ -223,10 +210,10 @@ class _Step extends StatelessWidget {
             height: 44,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: scheme.primaryContainer,
+              color: scheme.surfaceContainerHighest,
               borderRadius: JRadius.buttonMdAll,
             ),
-            child: Icon(icon, size: 22, color: scheme.primary),
+            child: Icon(icon, size: 22, color: scheme.onSurfaceVariant),
           ),
           const SizedBox(width: JSpacing.base),
           Expanded(

@@ -18,6 +18,8 @@
 ///     primary flow is entering the code, not going back.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -47,12 +49,35 @@ class _PhoneVerificationScreenState
   String? _phoneError;
   String? _codeError;
 
+  /// Resend cooldown — seconds left before "Resend code" re-enables.
+  Timer? _resendTimer;
+  int _resendSeconds = 0;
+
   @override
   void dispose() {
+    _resendTimer?.cancel();
     _phone.dispose();
     _code.dispose();
     _phoneFocus.dispose();
     super.dispose();
+  }
+
+  void _startResendCountdown() {
+    _resendTimer?.cancel();
+    setState(() => _resendSeconds = 30);
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _resendSeconds--;
+        if (_resendSeconds <= 0) {
+          _resendSeconds = 0;
+          timer.cancel();
+        }
+      });
+    });
   }
 
   String get _normalisedPhone => _phone.text.replaceAll(RegExp(r'\s+'), '');
@@ -82,7 +107,10 @@ class _PhoneVerificationScreenState
       await ref
           .read(phoneVerificationControllerProvider)
           .sendCode(_normalisedPhone);
-      if (mounted) setState(() => _codeSent = true);
+      if (mounted) {
+        setState(() => _codeSent = true);
+        _startResendCountdown();
+      }
     } on AppError catch (error) {
       if (mounted) {
         JHaptics.error();
@@ -144,8 +172,8 @@ class _PhoneVerificationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_codeSent ? 'Enter the code' : 'Verify your phone'),
+      appBar: JAppBar(
+        title: _codeSent ? 'Enter the code' : 'Verify your phone',
       ),
       body: SafeArea(
         child: ResponsiveLayout(
@@ -173,21 +201,10 @@ class _PhoneVerificationScreenState
               const SizedBox(height: JSpacing.sm),
               JEntrance(
                 child: Center(
-                  child: Container(
-                    width: 72,
-                    height: 72,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer,
-                      borderRadius: JRadius.heroAll,
-                    ),
-                    child: Icon(
-                      _codeSent
-                          ? LucideIcons.messageSquare
-                          : LucideIcons.smartphone,
-                      size: 32,
-                      color: scheme.primary,
-                    ),
+                  child: JHeroMark(
+                    icon: _codeSent
+                        ? LucideIcons.messageSquare
+                        : LucideIcons.smartphone,
                   ),
                 ),
               ),
@@ -242,43 +259,60 @@ class _PhoneVerificationScreenState
     ),
   ];
 
-  List<Widget> _codeStep() => [
-    JEntrance(
-      delay: const Duration(milliseconds: 160),
-      child: JOtpField(
-        controller: _code,
-        onCompleted: _onCodeCompleted,
-        enabled: !_busy,
-        errorText: _codeError,
+  List<Widget> _codeStep() {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return [
+      JEntrance(
+        delay: const Duration(milliseconds: 160),
+        child: JOtpField(
+          controller: _code,
+          onCompleted: _onCodeCompleted,
+          enabled: !_busy,
+          errorText: _codeError,
+        ),
       ),
-    ),
-    const SizedBox(height: JSpacing.xl),
-    JEntrance(
-      delay: const Duration(milliseconds: 240),
-      child: JButton.primary(
-        label: 'Verify',
-        onPressed: _busy ? null : _verify,
-        loading: _busy,
-        expanded: true,
-        size: JButtonSize.lg,
+      const SizedBox(height: JSpacing.lg),
+      // The 6th digit auto-submits (JOtpField.onCompleted) per the OTP
+      // reference bar — no explicit Verify button. A quiet line confirms work
+      // is happening while it verifies.
+      JEntrance(
+        delay: const Duration(milliseconds: 220),
+        child: SizedBox(
+          height: 20,
+          child: _busy
+              ? Center(
+                  child: Text(
+                    'Verifying…',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
       ),
-    ),
-    const SizedBox(height: JSpacing.sm),
-    JEntrance(
-      delay: const Duration(milliseconds: 300),
-      child: JButton.ghost(
-        label: 'Resend code',
-        onPressed: _busy ? null : _sendCode,
-        expanded: true,
+      const SizedBox(height: JSpacing.sm),
+      JEntrance(
+        delay: const Duration(milliseconds: 280),
+        child: JButton.ghost(
+          label: _resendSeconds > 0
+              ? 'Resend code in ${_resendSeconds}s'
+              : 'Resend code',
+          onPressed: (_busy || _resendSeconds > 0) ? null : _sendCode,
+          expanded: true,
+          neutral: true,
+        ),
       ),
-    ),
-    JEntrance(
-      delay: const Duration(milliseconds: 340),
-      child: JButton.ghost(
-        label: 'Change number',
-        onPressed: _busy ? null : _changeNumber,
-        expanded: true,
+      JEntrance(
+        delay: const Duration(milliseconds: 320),
+        child: JButton.ghost(
+          label: 'Change number',
+          onPressed: _busy ? null : _changeNumber,
+          expanded: true,
+          neutral: true,
+        ),
       ),
-    ),
-  ];
+    ];
+  }
 }

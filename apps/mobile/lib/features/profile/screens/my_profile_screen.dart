@@ -32,11 +32,16 @@ class MyProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(authControllerProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: const JAppBar(title: 'Profile'),
       body: SafeArea(
         child: session.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => const _SignedOut(),
+          // Skeleton, not a spinner, in a profile context (Charter § 5).
+          loading: () => const _ProfileSkeleton(),
+          // A restore/network error isn't "signed out" — name it and offer a
+          // retry (Charter § 7). Genuine sign-out is the data(null) branch.
+          error: (_, _) => _ErrorState(
+            onRetry: () => ref.invalidate(authControllerProvider),
+          ),
           data: (user) => user == null
               ? const _SignedOut()
               : ResponsiveLayout(
@@ -69,7 +74,13 @@ class _Body extends ConsumerWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(JSpacing.lg),
+          // Extra bottom room so the last CTA clears the docked centre FAB.
+          padding: const EdgeInsets.fromLTRB(
+            JSpacing.lg,
+            JSpacing.lg,
+            JSpacing.lg,
+            JSpacing.xxxl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -155,18 +166,20 @@ class _SwitchToClientTileState extends ConsumerState<_SwitchToClientTile> {
       context: context,
       title: 'Switch to client?',
       child: const Text(
-        'You will go back to hiring only. We keep your tasker details — '
-        'ABN, payments and profile — so you can switch back anytime.',
+        'You will go back to hiring only. We keep your tasker details '
+        '(ABN, payments and profile), so you can switch back anytime.',
         style: TextStyle(fontSize: 14),
       ),
+      // The sheet is shown on the root navigator (so it covers the nav bar), so
+      // pop the root navigator to close it.
       primaryAction: JButton.primary(
         label: 'Yes, switch to client',
-        onPressed: () => Navigator.pop(context, true),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(true),
         expanded: true,
       ),
       secondaryAction: JButton.secondary(
         label: 'Keep both',
-        onPressed: () => Navigator.pop(context, false),
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
         expanded: true,
       ),
     );
@@ -302,13 +315,13 @@ class _BiometricToggleTileState extends ConsumerState<_BiometricToggleTile> {
             height: 44,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: scheme.primaryContainer,
+              color: scheme.surfaceContainerHighest,
               borderRadius: JRadius.buttonMdAll,
             ),
             child: Icon(
               LucideIcons.fingerprint,
               size: 22,
-              color: scheme.primary,
+              color: scheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: JSpacing.base),
@@ -371,22 +384,7 @@ class _Header extends StatelessWidget {
     final scheme = theme.colorScheme;
     return Row(
       children: [
-        Container(
-          width: 64,
-          height: 64,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: scheme.primaryContainer,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            _initials,
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: scheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        JAvatar(initials: _initials, size: 64),
         const SizedBox(width: JSpacing.base),
         Expanded(
           child: Column(
@@ -498,10 +496,10 @@ class _NavRow extends StatelessWidget {
             height: 44,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: scheme.primaryContainer,
+              color: scheme.surfaceContainerHighest,
               borderRadius: JRadius.buttonMdAll,
             ),
-            child: Icon(icon, size: 22, color: scheme.primary),
+            child: Icon(icon, size: 22, color: scheme.onSurfaceVariant),
           ),
           const SizedBox(width: JSpacing.base),
           Expanded(
@@ -527,6 +525,65 @@ class _NavRow extends StatelessWidget {
           const SizedBox(width: JSpacing.sm),
           Icon(LucideIcons.chevronRight, color: scheme.onSurfaceVariant),
         ],
+      ),
+    );
+  }
+}
+
+class _ProfileSkeleton extends StatelessWidget {
+  const _ProfileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      padding: EdgeInsets.all(JSpacing.lg),
+      child: JShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                JSkeleton.circle(size: 64),
+                SizedBox(width: JSpacing.base),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    JSkeleton.line(width: 160, height: 20),
+                    SizedBox(height: JSpacing.sm),
+                    JSkeleton.line(width: 200),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: JSpacing.xl),
+            JSkeleton.box(height: 88, radius: JRadius.cardAll),
+            SizedBox(height: JSpacing.lg),
+            JSkeleton.box(height: 88, radius: JRadius.cardAll),
+            SizedBox(height: JSpacing.xl),
+            JSkeleton.box(height: 56, radius: JRadius.buttonLgAll),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  const _ErrorState({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(JSpacing.lg),
+      child: JEmptyState(
+        icon: LucideIcons.cloudOff,
+        title: "We couldn't load your account",
+        body:
+            'Check your connection and give it another go. If it keeps '
+            "happening, tap Support and we'll take a look.",
+        primaryAction: JButton.primary(label: 'Try again', onPressed: onRetry),
       ),
     );
   }

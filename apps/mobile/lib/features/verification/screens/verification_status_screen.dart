@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jobbees_mobile/theme/colors.dart';
 
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
@@ -62,7 +63,7 @@ class _VerificationStatusScreenState
     final phoneVerified =
         ref.watch(authControllerProvider).valueOrNull?.phoneVerified ?? false;
     return Scaffold(
-      appBar: AppBar(title: const Text('Verification')),
+      appBar: const JAppBar(title: 'Verification'),
       body: SafeArea(
         child: ResponsiveLayout(
           compact: (context) =>
@@ -160,7 +161,7 @@ class _ConnectCardState extends ConsumerState<_ConnectCard> {
     final (IconData icon, Color tint, String label) = switch (status) {
       final s when s.isComplete => (
         LucideIcons.badgeCheck,
-        scheme.primary,
+        JobbeesColors.success,
         'Active',
       ),
       final s when s.isPending => (
@@ -198,7 +199,7 @@ class _ConnectCardState extends ConsumerState<_ConnectCard> {
         children: [
           Row(
             children: [
-              Icon(icon, color: tint),
+              _StatusIcon(icon: icon, tint: tint),
               const SizedBox(width: JSpacing.sm),
               Expanded(
                 child: Text(
@@ -244,7 +245,7 @@ class _PhoneCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final (IconData icon, Color tint, String label) = verified
-        ? (LucideIcons.badgeCheck, scheme.primary, 'Verified')
+        ? (LucideIcons.badgeCheck, JobbeesColors.success, 'Verified')
         : (LucideIcons.smartphone, scheme.onSurfaceVariant, 'Not verified');
 
     return JCard(
@@ -253,7 +254,7 @@ class _PhoneCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: tint),
+              _StatusIcon(icon: icon, tint: tint),
               const SizedBox(width: JSpacing.sm),
               Expanded(
                 child: Text(
@@ -302,7 +303,7 @@ class _AbnCard extends StatelessWidget {
     final (IconData icon, Color tint, String label) = switch (status) {
       final s when s.isVerified => (
         LucideIcons.badgeCheck,
-        scheme.primary,
+        JobbeesColors.success,
         'Verified',
       ),
       final s when s.isPending => (
@@ -319,7 +320,7 @@ class _AbnCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: tint),
+              _StatusIcon(icon: icon, tint: tint),
               const SizedBox(width: JSpacing.sm),
               Expanded(
                 child: Text(
@@ -342,7 +343,12 @@ class _AbnCard extends StatelessWidget {
             )
           else ...[
             if (status.businessName != null)
-              Text(status.businessName!, style: textTheme.bodyLarge),
+              Text(
+                status.businessName!,
+                style: textTheme.bodyLarge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             const SizedBox(height: JSpacing.xs),
             Text(
               _formatAbn(status.abn!),
@@ -441,6 +447,30 @@ class _GhostCard extends StatelessWidget {
   }
 }
 
+/// The per-card status glyph in a soft state-tinted badge, so completed
+/// (success), action-needed (error) and pending cards read as distinct surfaces
+/// rather than identical white rectangles.
+class _StatusIcon extends StatelessWidget {
+  const _StatusIcon({required this.icon, required this.tint});
+
+  final IconData icon;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.12),
+        borderRadius: JRadius.buttonMdAll,
+      ),
+      child: Icon(icon, color: tint, size: 22),
+    );
+  }
+}
+
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.label, required this.tint});
 
@@ -484,7 +514,7 @@ class _ErrorState extends StatelessWidget {
         icon: LucideIcons.cloudOff,
         title: "We couldn't load your verification status",
         body:
-            "Give it another go — if it keeps happening, tap Support and "
+            "Give it another go. If it keeps happening, tap Support and "
             "we'll take a look.",
         primaryAction: JButton.primary(label: 'Try again', onPressed: onRetry),
       ),

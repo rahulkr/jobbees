@@ -174,12 +174,19 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             obscureText: _obscure,
             textInputAction: TextInputAction.next,
             autofillHints: const [AutofillHints.newPassword],
-            suffixIcon: IconButton(
-              onPressed: _submitting
+            suffixIcon: JPressable(
+              onTap: _submitting
                   ? null
                   : () => setState(() => _obscure = !_obscure),
-              icon: Icon(_obscure ? LucideIcons.eye : LucideIcons.eyeOff),
-              tooltip: _obscure ? 'Show password' : 'Hide password',
+              haptic: false,
+              child: Padding(
+                padding: const EdgeInsets.all(JSpacing.sm),
+                child: Icon(
+                  _obscure ? LucideIcons.eye : LucideIcons.eyeOff,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
           ),
         ),

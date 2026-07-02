@@ -129,14 +129,16 @@ class _TaskerProfileScreenState extends ConsumerState<TaskerProfileScreen> {
     final profile = ref.watch(taskerProfileControllerProvider);
     final myId = ref.watch(authControllerProvider).valueOrNull?.id;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your tasker profile'),
+      appBar: JAppBar(
+        title: 'Your tasker profile',
         actions: [
           if (myId != null)
-            IconButton(
-              tooltip: 'Preview public profile',
-              icon: const Icon(LucideIcons.eye),
-              onPressed: () => context.push('/taskers/$myId'),
+            JPressable(
+              onTap: () => context.push('/taskers/$myId'),
+              child: const Padding(
+                padding: EdgeInsets.all(JSpacing.sm),
+                child: Icon(LucideIcons.eye),
+              ),
             ),
         ],
       ),
@@ -380,7 +382,7 @@ class _SkillChip extends StatelessWidget {
         bottom: JSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+        color: scheme.surfaceContainerHighest,
         borderRadius: JRadius.chipAll,
       ),
       child: Row(
@@ -388,12 +390,22 @@ class _SkillChip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary),
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(width: JSpacing.xs),
           GestureDetector(
             onTap: onRemove,
-            child: Icon(LucideIcons.x, size: 16, color: scheme.primary),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.all(JSpacing.xs),
+              child: Icon(
+                LucideIcons.x,
+                size: 16,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
           ),
         ],
       ),
