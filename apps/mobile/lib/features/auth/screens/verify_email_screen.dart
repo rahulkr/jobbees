@@ -81,39 +81,106 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Padding(
           padding: const EdgeInsets.all(JSpacing.lg),
-          child: switch (_status) {
-            _Status.verifying => const _Verifying(),
-            _Status.verified => AuthNotice(
-              icon: LucideIcons.badgeCheck,
-              title: 'Email verified',
-              body: 'Your email address is confirmed.',
-              ctaLabel: 'Continue',
-              onCta: _continue,
-            ),
-            _Status.failed => AuthNotice(
-              icon: LucideIcons.unlink,
-              title: 'This link has expired',
-              body:
-                  'Verification links are single-use and time-limited. Sign in '
-                  'and request a new one.',
-              ctaLabel: 'Go to login',
-              onCta: () => context.go('/auth/login'),
-            ),
-          },
+          // Key on status so the entrance re-plays as we transition between
+          // verifying → verified / failed.
+          child: KeyedSubtree(
+            key: ValueKey(_status),
+            child: switch (_status) {
+              _Status.verifying => const _Verifying(),
+              _Status.verified => JEntrance(
+                child: AuthNotice(
+                  icon: LucideIcons.badgeCheck,
+                  title: 'Email verified',
+                  body: 'Your email address is confirmed.',
+                  ctaLabel: 'Continue',
+                  onCta: _continue,
+                ),
+              ),
+              _Status.failed => JEntrance(
+                child: AuthNotice(
+                  icon: LucideIcons.unlink,
+                  title: 'This link has expired',
+                  body:
+                      'Verification links are single-use and time-limited. Sign in '
+                      'and request a new one.',
+                  ctaLabel: 'Go to login',
+                  onCta: () => context.go('/auth/login'),
+                ),
+              ),
+            },
+          ),
         ),
       ),
     );
   }
 }
 
-class _Verifying extends StatelessWidget {
+/// Verifying state — a branded pulsing mark instead of a raw spinner.
+/// The pulse tells the user we're doing work, not just waiting.
+class _Verifying extends StatefulWidget {
   const _Verifying();
 
   @override
+  State<_Verifying> createState() => _VerifyingState();
+}
+
+class _VerifyingState extends State<_Verifying>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.only(top: JSpacing.xxxl),
-      child: Center(child: CircularProgressIndicator()),
+    final scheme = Theme.of(context).colorScheme;
+    return JEntrance(
+      child: Padding(
+        padding: const EdgeInsets.only(top: JSpacing.xxxl),
+        child: Center(
+          child: Column(
+            children: [
+              AnimatedBuilder(
+                animation: _pulse,
+                builder: (context, child) {
+                  final t = CurvedAnimation(
+                    parent: _pulse,
+                    curve: Curves.easeInOut,
+                  ).value;
+                  return Transform.scale(scale: 1.0 + 0.08 * t, child: child);
+                },
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: scheme.primaryContainer,
+                    borderRadius: JRadius.heroAll,
+                  ),
+                  child: Icon(
+                    LucideIcons.mail,
+                    size: 32,
+                    color: scheme.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: JSpacing.lg),
+              Text(
+                'Verifying your email…',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

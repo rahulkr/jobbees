@@ -176,9 +176,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: JSpacing.lg),
-                const AuthHeader(
-                  title: 'Create your account',
-                  subtitle: 'Join JOBBees to post jobs or earn as a tasker.',
+                const JEntrance(
+                  child: AuthHeader(
+                    title: 'Create your account',
+                    subtitle: 'Join JOBBees to post jobs or earn as a tasker.',
+                  ),
                 ),
                 const SizedBox(height: JSpacing.xl),
                 // Progressive disclosure — best practice for a social-dominant
@@ -186,43 +188,54 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 // collapsed behind a "Sign up with email" action so the first paint
                 // is clean and the primary "Create account" CTA is never pushed
                 // below the fold (it appears, with its button, only when chosen).
-                SocialAuthButtons(
-                  dividerAtBottom: true,
-                  dividerLabel: _showEmailForm ? 'or sign up with email' : 'or',
-                  onError: (message) {
-                    if (message.isNotEmpty && mounted) {
-                      JSnackbar.showError(context, message);
-                    }
-                  },
+                JEntrance(
+                  delay: const Duration(milliseconds: 90),
+                  child: SocialAuthButtons(
+                    dividerAtBottom: true,
+                    dividerLabel: _showEmailForm
+                        ? 'or sign up with email'
+                        : 'or',
+                    onError: (message) {
+                      if (message.isNotEmpty && mounted) {
+                        JSnackbar.showError(context, message);
+                      }
+                    },
+                  ),
                 ),
                 const SizedBox(height: JSpacing.lg),
                 // Collapsed shows a "Sign up with email" button; expanded swaps
                 // in the full form (ending in its own CTA). The size change
                 // animates so the reveal reads as intentional, not a jump.
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOutCubic,
-                  alignment: Alignment.topCenter,
-                  child: _showEmailForm ? _emailForm() : _emailTrigger(),
+                JEntrance(
+                  delay: const Duration(milliseconds: 160),
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: _showEmailForm ? _emailForm() : _emailTrigger(),
+                  ),
                 ),
                 const SizedBox(height: JSpacing.lg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account?',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                JEntrance(
+                  delay: const Duration(milliseconds: 230),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Already have an account?',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    JButton.ghost(
-                      label: 'Log in',
-                      onPressed: _submitting
-                          ? null
-                          : () => context.go('/auth/login'),
-                      size: JButtonSize.sm,
-                    ),
-                  ],
+                      JButton.ghost(
+                        label: 'Log in',
+                        onPressed: _submitting
+                            ? null
+                            : () => context.go('/auth/login'),
+                        size: JButtonSize.sm,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

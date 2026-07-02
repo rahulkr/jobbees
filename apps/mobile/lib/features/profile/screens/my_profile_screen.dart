@@ -73,25 +73,38 @@ class _Body extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _Header(user: user),
+              JEntrance(child: _Header(user: user)),
               const SizedBox(height: JSpacing.xl),
-              if (_isTasker)
-                ..._taskerEntries(context)
-              else
-                _BecomeTaskerCard(onTap: () => context.push('/become-tasker')),
+              JEntrance(
+                delay: const Duration(milliseconds: 90),
+                child: _isTasker
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: _taskerEntries(context),
+                      )
+                    : _BecomeTaskerCard(
+                        onTap: () => context.push('/become-tasker'),
+                      ),
+              ),
               const SizedBox(height: JSpacing.xl),
               // Biometric unlock — only when the device actually supports it
               // (hidden on web / unenrolled devices).
               if (ref.watch(biometricAvailableProvider).valueOrNull ??
                   false) ...[
-                const _BiometricToggleTile(),
+                JEntrance(
+                  delay: const Duration(milliseconds: 160),
+                  child: const _BiometricToggleTile(),
+                ),
                 const SizedBox(height: JSpacing.xl),
               ],
-              JButton.danger(
-                label: 'Log out',
-                icon: LucideIcons.logOut,
-                onPressed: () => _logout(ref),
-                expanded: true,
+              JEntrance(
+                delay: const Duration(milliseconds: 240),
+                child: JButton.danger(
+                  label: 'Log out',
+                  icon: LucideIcons.logOut,
+                  onPressed: () => _logout(ref),
+                  expanded: true,
+                ),
               ),
             ],
           ),
@@ -136,24 +149,25 @@ class _SwitchToClientTileState extends ConsumerState<_SwitchToClientTile> {
 
   Future<void> _confirmAndSwitch() async {
     if (_submitting) return;
-    final confirmed = await showDialog<bool>(
+    // Bottom sheet instead of AlertDialog — Charter § Bottom-sheet-first, and
+    // VOICE § Conversational confirmations (button restates the action).
+    final confirmed = await JBottomSheet.show<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Switch to client?'),
-        content: const Text(
-          'You will go back to hiring only. We keep your tasker details - '
-          'ABN, payments and profile - so you can switch back anytime.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Switch to client'),
-          ),
-        ],
+      title: 'Switch to client?',
+      child: const Text(
+        'You will go back to hiring only. We keep your tasker details — '
+        'ABN, payments and profile — so you can switch back anytime.',
+        style: TextStyle(fontSize: 14),
+      ),
+      primaryAction: JButton.primary(
+        label: 'Yes, switch to client',
+        onPressed: () => Navigator.pop(context, true),
+        expanded: true,
+      ),
+      secondaryAction: JButton.secondary(
+        label: 'Keep both',
+        onPressed: () => Navigator.pop(context, false),
+        expanded: true,
       ),
     );
     if (confirmed != true || !mounted) return;
@@ -523,10 +537,12 @@ class _SignedOut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(JSpacing.lg),
-        child: Text('Sign in to view your profile.'),
+    return const Padding(
+      padding: EdgeInsets.all(JSpacing.lg),
+      child: JEmptyState(
+        icon: LucideIcons.userRoundX,
+        title: "You're signed out",
+        body: 'Sign in to see your account details, verification and settings.',
       ),
     );
   }

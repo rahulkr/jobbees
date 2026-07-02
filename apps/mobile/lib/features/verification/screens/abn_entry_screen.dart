@@ -10,6 +10,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/network/error_mapper.dart';
 import '../../../core/responsive/responsive_layout.dart';
@@ -106,34 +107,63 @@ class _AbnEntryScreenState extends ConsumerState<AbnEntryScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: JSpacing.sm),
-              Text(
-                "We'll check your ABN against the Australian Business Register "
-                'and show your business name.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+              JEntrance(
+                child: Center(
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: JRadius.heroAll,
+                    ),
+                    child: Icon(
+                      LucideIcons.building2,
+                      size: 32,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: JSpacing.lg),
+              JEntrance(
+                delay: const Duration(milliseconds: 80),
+                child: Text(
+                  "We'll check your ABN against the Australian Business "
+                  'Register and show your business name.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               const SizedBox(height: JSpacing.xl),
-              JTextField(
-                label: 'ABN',
-                controller: _abn,
-                focusNode: _abnFocus,
-                enabled: !_submitting,
-                errorText: _abnError,
-                hintText: '11 digits',
-                helperText: 'Your 11-digit Australian Business Number',
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.done,
-                maxLength: 14, // 11 digits + up to 3 spaces
-                onSubmitted: (_) => _submit(),
+              JEntrance(
+                delay: const Duration(milliseconds: 160),
+                child: JTextField(
+                  label: 'ABN',
+                  controller: _abn,
+                  focusNode: _abnFocus,
+                  enabled: !_submitting,
+                  errorText: _abnError,
+                  hintText: '11 digits',
+                  helperText: 'Your 11-digit Australian Business Number',
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.done,
+                  maxLength: 14, // 11 digits + up to 3 spaces
+                  onSubmitted: (_) => _submit(),
+                ),
               ),
               const SizedBox(height: JSpacing.xl),
-              JButton.primary(
-                label: 'Verify ABN',
-                onPressed: _submitting ? null : _submit,
-                loading: _submitting,
-                expanded: true,
-                size: JButtonSize.lg,
+              JEntrance(
+                delay: const Duration(milliseconds: 240),
+                child: JButton.primary(
+                  label: 'Verify ABN',
+                  onPressed: _submitting ? null : _submit,
+                  loading: _submitting,
+                  expanded: true,
+                  size: JButtonSize.lg,
+                ),
               ),
             ],
           ),
