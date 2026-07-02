@@ -35,4 +35,8 @@ class JHaptics {
   /// Tab switch, chip select, segmented control change.
   /// Subtle click — UI navigation.
   static Future<void> navigation() => HapticFeedback.selectionClick();
+
+  /// OTP digit entered, list item selected, picker value ticked.
+  /// Subtle click — user picked a discrete value.
+  static Future<void> selection() => HapticFeedback.selectionClick();
 }

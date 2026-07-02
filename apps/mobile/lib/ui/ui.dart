@@ -19,6 +19,10 @@ export 'components/buttons/j_button.dart';
 
 // Components — inputs
 export 'components/inputs/j_text_field.dart';
+export 'components/inputs/j_otp_field.dart';
+
+// Motion
+export 'motion/j_entrance.dart';
 
 // Components — keyboard
 export 'components/keyboard/dismiss_keyboard.dart';

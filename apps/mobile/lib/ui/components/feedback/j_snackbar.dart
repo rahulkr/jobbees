@@ -38,4 +38,14 @@ class JSnackbar {
       ),
     );
   }
+
+  /// Surfaces [message] as a success confirmation snackbar.
+  /// Shorter than an error (~3s) — the user already knows what they did.
+  static void showSuccess(BuildContext context, String message) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 3)),
+    );
+  }
 }
