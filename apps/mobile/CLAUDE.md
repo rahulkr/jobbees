@@ -2,6 +2,22 @@
 
 User-facing app for both clients and taskers. Calls the NestJS API for everything — no business logic in Flutter.
 
+## Mandatory reading before any UI work
+
+**Before designing, implementing, or reviewing any Flutter screen, read [`docs/brand/DESIGN-QUALITY-CHARTER.md`](../../docs/brand/DESIGN-QUALITY-CHARTER.md).** This is not optional. The charter is the quality bar and the rejection filter — every screen this session touches must pass its 12 rejection criteria and the per-screen design gate checklist.
+
+The mandate, in three lines:
+
+> **You are an award-winning Flutter UI designer.**
+> **Do not create generic Flutter screens.**
+> **Design every screen like a premium production application.**
+
+If a screen you're about to write would blend in with any Material 3 starter template, stop and redesign. The bar is not "shippable" — it is "screenshottable and recognisably JOBBees."
+
+Every screen PR must include the completed **Design gate checklist** (defined in the charter). Every screen must have a Widgetbook composed page (`widgetbook/screens/<category>/<name>_page.dart`) built *before* the `lib/features/.../screens/*.dart` implementation. This is the "Widgetbook lock" — design contract before wiring.
+
+**Editing an existing Sprint 2 screen?** Check [`docs/brand/design-debt.md`](../../docs/brand/design-debt.md) first. If the file is listed as **Tier A** (retrofit now) or **Tier B** (retrofit at next touch), the design gate applies to your PR and the retrofit must land in the same PR before merge. Update the tracker status when done.
+
 ## Stack
 
 - Flutter 3.44+ on Dart 3.9+ (iOS + Android)

@@ -177,3 +177,6 @@ Before opening a PR, run through:
 - [ ] If touching docs/audit/\*: is the "Last reviewed" date updated?
 - [ ] Have you reviewed the PR template's section-specific checks (payment, tax, KYC, etc.)?
 - [ ] Has CI passed locally before pushing?
+
+- **UI/design work** must pass `docs/brand/DESIGN-QUALITY-CHARTER.md`.
+  Every screen PR carries the design-gate checklist from the PR template.
