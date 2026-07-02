@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../theme/colors.dart';
 import '../../platform/j_pressable.dart';
 
 class JAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -29,10 +30,17 @@ class JAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final canPop = ModalRoute.of(context)?.canPop ?? false;
     return AppBar(
       automaticallyImplyLeading: false,
       centerTitle: true,
+      // A flat white bar on white content reads as floating text — give it a
+      // bottom divider + a soft downward shadow so it's a distinct top bar.
+      surfaceTintColor: Colors.transparent,
+      shadowColor: JobbeesColors.dark900.withValues(alpha: 0.55),
+      elevation: 3,
+      shape: Border(bottom: BorderSide(color: scheme.outline, width: 1)),
       title: title == null ? null : Text(title!),
       leading: (showBack && canPop)
           ? JPressable(
