@@ -98,6 +98,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
               ),
               _Status.failed => JEntrance(
                 child: AuthNotice(
+                  tone: AuthNoticeTone.error,
                   icon: LucideIcons.unlink,
                   title: 'This link has expired',
                   body:

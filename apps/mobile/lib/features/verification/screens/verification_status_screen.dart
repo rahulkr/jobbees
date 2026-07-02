@@ -343,7 +343,12 @@ class _AbnCard extends StatelessWidget {
             )
           else ...[
             if (status.businessName != null)
-              Text(status.businessName!, style: textTheme.bodyLarge),
+              Text(
+                status.businessName!,
+                style: textTheme.bodyLarge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             const SizedBox(height: JSpacing.xs),
             Text(
               _formatAbn(status.abn!),

@@ -91,7 +91,8 @@ class _WelcomeCarouselScreenState extends ConsumerState<WelcomeCarouselScreen> {
       _finish();
       return;
     }
-    JHaptics.navigation();
+    // No explicit haptic here: the JButton's press already fires one, and
+    // onPageChanged fires one when the page settles. A third would over-buzz.
     final target = _index + 1;
     if (MediaQuery.of(context).disableAnimations) {
       _controller.jumpToPage(target);
