@@ -14,6 +14,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../features/auth/providers/auth_controller.dart';
 import '../../features/auth/providers/biometric_providers.dart';
@@ -31,6 +32,7 @@ import '../../features/profile/screens/public_tasker_profile_screen.dart';
 import '../../features/profile/screens/tasker_profile_screen.dart';
 import '../../features/onboarding/screens/splash_screen.dart';
 import '../../features/onboarding/screens/welcome_carousel_screen.dart';
+import '../../features/shell/screens/coming_soon_screen.dart';
 import '../../features/shell/screens/placeholder_screen.dart';
 import '../../features/shell/widgets/scaffold_with_nav_bar.dart';
 import '../../features/verification/screens/abn_entry_screen.dart';
@@ -213,8 +215,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/offers',
-                builder: (context, state) =>
-                    const PlaceholderScreen(title: 'Offers', route: '/offers'),
+                builder: (context, state) => const ComingSoonScreen(
+                  icon: LucideIcons.handshake,
+                  title: 'Offers are coming soon',
+                  body:
+                      'Make and manage your offers on jobs here once bidding '
+                      'lands.',
+                ),
               ),
             ],
           ),
@@ -223,9 +230,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/messages',
-                builder: (context, state) => const PlaceholderScreen(
-                  title: 'Messages',
-                  route: '/messages',
+                builder: (context, state) => const ComingSoonScreen(
+                  icon: LucideIcons.messageCircle,
+                  title: 'Messages are coming soon',
+                  body:
+                      'Chat with clients and taskers here once messaging goes '
+                      'live.',
                 ),
               ),
             ],

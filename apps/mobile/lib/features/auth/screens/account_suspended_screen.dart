@@ -19,14 +19,32 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/responsive/responsive_layout.dart';
 import '../../../ui/ui.dart';
 import '../providers/auth_controller.dart';
 
 const String _kSupportEmail = 'support@jobbees.com.au';
+
+/// Opens the user's mail app to contact support. If no mail app can be launched
+/// (or it throws), fall back to copying the address so the path is never dead.
+Future<void> _contactSupport(BuildContext context) async {
+  final uri = Uri(scheme: 'mailto', path: _kSupportEmail);
+  try {
+    if (await launchUrl(uri)) return;
+  } catch (_) {
+    // No mail handler — fall through to the clipboard fallback below.
+  }
+  if (!context.mounted) return;
+  await Clipboard.setData(const ClipboardData(text: _kSupportEmail));
+  if (context.mounted) {
+    JSnackbar.showSuccess(context, 'Support email copied to your clipboard');
+  }
+}
 
 class AccountSuspendedScreen extends ConsumerWidget {
   const AccountSuspendedScreen({super.key});
@@ -112,7 +130,8 @@ class AccountSuspendedScreen extends ConsumerWidget {
               // weight rather than being buried in the body copy.
               JEntrance(
                 delay: const Duration(milliseconds: 240),
-                child: JCard(
+                child: JCard.tappable(
+                  onTap: () => _contactSupport(context),
                   child: Row(
                     children: [
                       Container(
@@ -149,6 +168,11 @@ class AccountSuspendedScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
+                      ),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 20,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ],
                   ),

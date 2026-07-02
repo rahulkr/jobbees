@@ -1,16 +1,17 @@
 // ignore_for_file: public_member_api_docs
 
-/// Foundation placeholder for routes whose real screens land in Sprint 2+.
+/// Foundation placeholder for internal routes whose real screens land in a later
+/// sprint (the create-a-job flow, job detail). It gives [GoRouter] something to
+/// render so deep links + browser back/forward work end to end (FW-03).
 ///
-/// It exists so [GoRouter] has something to render at each web URL today,
-/// proving deep links + browser back/forward work end to end (FW-03). It also
-/// surfaces the live [WindowSizeClass] so responsiveness is visible in Chrome.
+/// NOT used on live bottom-nav tabs — Offers/Messages get a designed
+/// [ComingSoonScreen] instead, so users never see this dev scaffold.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/responsive/breakpoints.dart';
+import '../../../ui/ui.dart';
 
 class PlaceholderScreen extends StatelessWidget {
   const PlaceholderScreen({
@@ -32,15 +33,10 @@ class PlaceholderScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(route, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(
-              'Window: ${Breakpoints.of(context).name}',
-              style: theme.textTheme.bodySmall,
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
+            const SizedBox(height: JSpacing.lg),
+            JButton.primary(
+              label: 'Back to home',
               onPressed: () => context.go('/'),
-              child: const Text('Back to home'),
             ),
           ],
         ),
