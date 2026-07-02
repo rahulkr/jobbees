@@ -35,8 +35,13 @@ class MyProfileScreen extends ConsumerWidget {
       appBar: const JAppBar(title: 'Profile'),
       body: SafeArea(
         child: session.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => const _SignedOut(),
+          // Skeleton, not a spinner, in a profile context (Charter § 5).
+          loading: () => const _ProfileSkeleton(),
+          // A restore/network error isn't "signed out" — name it and offer a
+          // retry (Charter § 7). Genuine sign-out is the data(null) branch.
+          error: (_, _) => _ErrorState(
+            onRetry: () => ref.invalidate(authControllerProvider),
+          ),
           data: (user) => user == null
               ? const _SignedOut()
               : ResponsiveLayout(
@@ -529,6 +534,65 @@ class _NavRow extends StatelessWidget {
           const SizedBox(width: JSpacing.sm),
           Icon(LucideIcons.chevronRight, color: scheme.onSurfaceVariant),
         ],
+      ),
+    );
+  }
+}
+
+class _ProfileSkeleton extends StatelessWidget {
+  const _ProfileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      padding: EdgeInsets.all(JSpacing.lg),
+      child: JShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                JSkeleton.circle(size: 64),
+                SizedBox(width: JSpacing.base),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    JSkeleton.line(width: 160, height: 20),
+                    SizedBox(height: JSpacing.sm),
+                    JSkeleton.line(width: 200),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: JSpacing.xl),
+            JSkeleton.box(height: 88, radius: JRadius.cardAll),
+            SizedBox(height: JSpacing.lg),
+            JSkeleton.box(height: 88, radius: JRadius.cardAll),
+            SizedBox(height: JSpacing.xl),
+            JSkeleton.box(height: 56, radius: JRadius.buttonLgAll),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  const _ErrorState({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(JSpacing.lg),
+      child: JEmptyState(
+        icon: LucideIcons.cloudOff,
+        title: "We couldn't load your account",
+        body:
+            'Check your connection and give it another go. If it keeps '
+            "happening, tap Support and we'll take a look.",
+        primaryAction: JButton.primary(label: 'Try again', onPressed: onRetry),
       ),
     );
   }
