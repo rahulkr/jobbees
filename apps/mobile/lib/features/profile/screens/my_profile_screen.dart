@@ -74,7 +74,13 @@ class _Body extends ConsumerWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(JSpacing.lg),
+          // Extra bottom room so the last CTA clears the docked centre FAB.
+          padding: const EdgeInsets.fromLTRB(
+            JSpacing.lg,
+            JSpacing.lg,
+            JSpacing.lg,
+            JSpacing.xxxl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

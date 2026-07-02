@@ -58,8 +58,10 @@ class JBottomNav extends StatelessWidget {
     return CustomPaint(
       painter: _NotchedBarPainter(
         surface: scheme.surface,
-        border: scheme.outlineVariant,
-        shadow: JobbeesColors.dark900.withValues(alpha: 0.12),
+        // A clear ~14% navy hairline is the real separator on a white layout —
+        // outlineVariant washed out at device resolution.
+        border: JobbeesColors.dark900.withValues(alpha: 0.14),
+        shadow: JobbeesColors.dark900.withValues(alpha: 0.10),
         notchRadius: _notchRadius,
       ),
       child: Material(
@@ -111,10 +113,10 @@ class _NotchedBarPainter extends CustomPainter {
     // Soft upward lift: a blurred copy of the silhouette nudged up so only the
     // top edge + notch curve cast onto the content above the bar.
     canvas.drawPath(
-      path.shift(const Offset(0, -3)),
+      path.shift(const Offset(0, -5)),
       Paint()
         ..color = shadow
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7),
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
     );
     // Surface.
     canvas.drawPath(path, Paint()..color = surface);
@@ -124,7 +126,7 @@ class _NotchedBarPainter extends CustomPainter {
       Paint()
         ..color = border
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
+        ..strokeWidth = 1.5,
     );
   }
 
